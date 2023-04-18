@@ -1,0 +1,6 @@
+[submodule "subprojects/apclientpp"]
+	path = subprojects/apclientpp
+	url = https://github.com/black-sliver/apclientpp.git
+[submodule "subprojects/wswrap"]
+	path = subprojects/wswrap
+	url = https://github.com/black-sliver/wswrap.git

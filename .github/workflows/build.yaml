@@ -1,0 +1,81 @@
+name: Build
+
+on: workflow_dispatch
+
+jobs:
+
+  build-ucrt:
+
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Install MSYS UCRT
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          # update: true
+          install: mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-lua53 mingw-w64-ucrt-x86_64-openssl
+
+      - name: Build
+        run: |
+          INCLUDE_DIRS="-I subprojects/json/include -I subprojects/valijson/include -I subprojects/wswrap/include -I subprojects/apclientpp -Isubprojects/asio/include -Isubprojects/websocketpp -I/ucrt64/include/lua5.3"
+          DEFINES="-DASIO_STANDALONE -DWSWRAP_SEND_EXCEPTIONS" # not using boost
+          LIBS="-pthread -lssl -lcrypto -lcrypt32 -lws2_32 -llua -Wno-deprecated-declarations"
+          g++ $DEFINES $INCLUDE_DIRS -shared -o lua-apclientpp.dll -fPIC src/lua-apclientpp.cpp $LIBS -static-libstdc++
+
+      - name: Run
+        run: |
+          lua5.3 sample.lua
+
+      - name: Store
+        uses: actions/upload-artifact@v3
+        with:
+          name: lua-apclientpp-53-ucrt
+          path: lua-apclientpp.dll
+
+
+  build-clang:
+
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Install MSYS CLANG64
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: CLANG64
+          # update: true
+          install: mingw-w64-clang-x86_64-gcc-compat mingw-w64-clang-x86_64-lua53 mingw-w64-clang-x86_64-openssl
+
+      - name: Build
+        run: |
+          INCLUDE_DIRS="-I subprojects/json/include -I subprojects/valijson/include -I subprojects/wswrap/include -I subprojects/apclientpp -Isubprojects/asio/include -Isubprojects/websocketpp -I/clang64/include/lua5.3"
+          DEFINES="-DASIO_STANDALONE -DWSWRAP_SEND_EXCEPTIONS" # not using boost
+          LIBS="-pthread -lssl -lcrypto -lcrypt32 -lws2_32 -llua -Wno-deprecated-declarations"
+          g++ $DEFINES $INCLUDE_DIRS -shared -o lua-apclientpp.dll -fPIC src/lua-apclientpp.cpp $LIBS -Wl,-Bstatic -lc++ -Wl,-Bdynamic
+
+      - name: Run
+        run: |
+          lua5.3 sample.lua
+
+      - name: Store
+        uses: actions/upload-artifact@v3
+        with:
+          name: lua-apclientpp-53-clang64
+          path: lua-apclientpp.dll
+
