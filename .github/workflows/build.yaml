@@ -57,10 +57,10 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Install MSYS CLANG64
+      - name: Install MSYS CLANG32
         uses: msys2/setup-msys2@v2
         with:
-          msystem: CLANG64
+          msystem: CLANG32
           # update: true
           install: mingw-w64-clang-i686-gcc-compat mingw-w64-clang-i686-lua53 mingw-w64-clang-i686-openssl
 
