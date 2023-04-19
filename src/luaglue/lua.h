@@ -46,6 +46,13 @@ public:
     {
         lua_pushnumber(L, n);
     }
+    void Push(int64_t n)
+    {
+        if (n < std::numeric_limits<int64_t>::min() || n > std::numeric_limits<int64_t>::max())
+            Push((lua_Number)n);
+        else
+            Push((lua_Integer)n);
+    }
     void Push(bool b)
     {
         lua_pushboolean(L, b);

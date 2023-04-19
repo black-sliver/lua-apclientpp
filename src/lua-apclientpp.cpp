@@ -382,6 +382,12 @@ public:
         return parent->SetNotify(keys);
     }
 
+    int get_state() const
+    {
+        const APClient* parent = this;
+        return (int)parent->get_state();
+    }
+
     // lua interface implementation details
 
     static constexpr char Lua_Name[] = "APClient";
@@ -684,7 +690,23 @@ static int register_apclient(lua_State *L)
     // functions
     SET_CFUNC(new);
     SET_METHOD(poll, void);
+    SET_METHOD(reset, void);
+    SET_METHOD(get_player_alias, int);
+    SET_METHOD(get_location_name, int64_t);
+    SET_METHOD(get_location_id, const char*);
+    SET_METHOD(get_item_name, int64_t);
+    SET_METHOD(get_item_id, const char*);
     SET_CFUNC(render_json);
+    SET_METHOD(get_state, void);
+    SET_METHOD(get_seed, void);
+    SET_METHOD(get_slot, void);
+    SET_METHOD(get_player_number, void);
+    SET_METHOD(get_team_number, void);
+    SET_METHOD(get_hint_points, void);
+    SET_METHOD(get_hint_cost_points, void);
+    SET_METHOD(get_hint_cost_percent, void);
+    SET_METHOD(is_data_package_valid, void);
+    SET_METHOD(get_server_time, void);
 
     // handlers
     SET_METHOD(set_socket_connected_handler, LuaRef);
@@ -707,6 +729,7 @@ static int register_apclient(lua_State *L)
     SET_METHOD(Say, const char*);
     SET_CFUNC(ConnectSlot);
     SET_CFUNC(ConnectUpdate);
+    SET_METHOD(Sync, void);
     SET_CFUNC(Bounce);
     SET_METHOD(StatusUpdate, int);
     SET_METHOD(LocationChecks, json);
@@ -738,6 +761,15 @@ static int register_apclient(lua_State *L)
         {"FLAG_TRAP", LuaAPClient::ItemFlags::FLAG_TRAP},
     });
     lua_setfield(L, -2, "ItemFlags");
+
+    json_to_lua(L, {
+        {"DISCONNECTED", LuaAPClient::State::DISCONNECTED},
+        {"SOCKET_CONNECTING", LuaAPClient::State::SOCKET_CONNECTING},
+        {"SOCKET_CONNECTED", LuaAPClient::State::SOCKET_CONNECTED},
+        {"ROOM_INFO", LuaAPClient::State::ROOM_INFO},
+        {"SLOT_CONNECTED", LuaAPClient::State::SLOT_CONNECTED},
+    });
+    lua_setfield(L, -2, "State");
 
     // calling the metatable should be the same as new for easy use,
     // so set a metatable for the metatable
