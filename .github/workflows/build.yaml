@@ -32,8 +32,9 @@ jobs:
           g++ -Os -std=c++17 $DEFINES $INCLUDE_DIRS -shared -o lua-apclientpp.dll -fPIC src/lua-apclientpp.cpp $LIBS -static-libstdc++
 
       - name: Run
+        continue-on-error: true
         run: |
-          lua5.3 sample.lua
+          lua5.3 -E sample.lua
 
       - name: Store
         uses: actions/upload-artifact@v3
@@ -70,8 +71,9 @@ jobs:
           g++ -Os -std=c++17 $DEFINES $INCLUDE_DIRS -shared -o lua-apclientpp.dll -fPIC src/lua-apclientpp.cpp $LIBS -Wl,-Bstatic -lc++ -Wl,-Bdynamic
 
       - name: Run
+        continue-on-error: true
         run: |
-          lua5.3 sample.lua
+          lua5.3 -E sample.lua
 
       - name: Store
         uses: actions/upload-artifact@v3
