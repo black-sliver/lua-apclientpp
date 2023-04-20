@@ -390,8 +390,8 @@ public:
         APClient* parent = this;
         if (parent->LocationChecks(locations)) {
             // sync location tables
-            add_list("checked_locations", locations);
-            assign_set("missing_locations", get_missing_locations());
+            add_list("checked_locations", locations, 1);
+            assign_set("missing_locations", get_missing_locations(), 1);
             return true;
         }
 
