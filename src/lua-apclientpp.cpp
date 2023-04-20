@@ -94,13 +94,69 @@ public:
         : APClient(uuid, game, uri), _L(L)
     {
         // TODO: cert Store
+
+        // connect internal handlers
+        APClient* parent = this;
+        parent->set_slot_connected_handler([this](const json& slot_data) {
+            on_slot_connected(slot_data);
+        });
+        parent->set_location_checked_handler([this](const std::list<int64_t>& locations) {
+            on_location_checked(locations);
+        });
     }
 
     virtual ~LuaAPClient()
     {
+        unref(socket_connected_cb);
+        unref(socket_error_cb);
+        unref(socket_disconnected_cb);
         unref(room_info_cb);
+        unref(slot_connected_cb);
+        unref(slot_refused_cb);
+        unref(items_received_cb);
+        unref(location_info_cb);
+        unref(location_checked_cb);
+        unref(data_package_changed_cb);
         unref(print_cb);
         unref(print_json_cb);
+        unref(bounced_cb);
+        unref(retrieved_cb);
+        unref(set_reply_cb);
+        unref(checked_locations);
+        unref(missing_locations);
+    }
+
+    // internal handlers
+
+    void on_slot_connected(const json& slot_data)
+    {
+        // sync location tables
+        assign_set("checked_locations", get_checked_locations());
+        assign_set("missing_locations", get_missing_locations());
+
+        if (slot_connected_cb.valid()) {
+            lua_rawgeti(_L, LUA_REGISTRYINDEX, slot_connected_cb.ref);
+            json_to_lua(_L, slot_data);
+            if (lua_pcall(_L, 1, 0, 0)) {
+                cb_err("slot_connected");
+            }
+        }
+    }
+
+    void on_location_checked(const std::list<int64_t>& locations)
+    {
+        // sync location tables
+        add_list("checked_locations", locations);
+        assign_set("missing_locations", get_missing_locations());
+
+        if (location_checked_cb.valid()) {
+            lua_rawgeti(_L, LUA_REGISTRYINDEX, location_checked_cb.ref);
+            json j = locations;
+            json_to_lua(_L, j);
+            if (lua_pcall(_L, 1, 0, 0)) {
+                cb_err("location_checked");
+            }
+        }
     }
 
     // lua methods
@@ -166,15 +222,6 @@ public:
     {
         unref(slot_connected_cb);
         slot_connected_cb = ref;
-
-        APClient* parent = this;
-        parent->set_slot_connected_handler([this](const json& slot_data) {
-            lua_rawgeti(_L, LUA_REGISTRYINDEX, slot_connected_cb.ref);
-            json_to_lua(_L, slot_data);
-            if (lua_pcall(_L, 1, 0, 0)) {
-                cb_err("slot_connected");
-            }
-        });
     }
 
     void set_slot_refused_handler(LuaRef ref)
@@ -229,16 +276,6 @@ public:
     {
         unref(location_checked_cb);
         location_checked_cb = ref;
-
-        APClient* parent = this;
-        parent->set_location_checked_handler([this](const std::list<int64_t>& locations) {
-            lua_rawgeti(_L, LUA_REGISTRYINDEX, location_checked_cb.ref);
-            json j = locations;
-            json_to_lua(_L, j);
-            if (lua_pcall(_L, 1, 0, 0)) {
-                cb_err("location_checked");
-            }
-        });
     }
 
     void set_data_package_changed_handler(LuaRef ref)
@@ -351,7 +388,14 @@ public:
         }
         
         APClient* parent = this;
-        return parent->LocationChecks(locations);
+        if (parent->LocationChecks(locations)) {
+            // sync location tables
+            add_list("checked_locations", locations);
+            assign_set("missing_locations", get_missing_locations());
+            return true;
+        }
+
+        return false;
     }
 
     bool Get(const json& j)
@@ -388,6 +432,17 @@ public:
         return (int)parent->get_state();
     }
 
+    bool poll()
+    {
+        try {
+            APClient* parent = this;
+            parent->poll();
+            return true;
+        } catch (std::exception) {
+            return false;
+        }
+    }
+
     // lua interface implementation details
 
     static constexpr char Lua_Name[] = "APClient";
@@ -395,6 +450,45 @@ public:
     static LuaAPClient* luaL_checkthis(lua_State *L, int narg)
     {
         return * (LuaAPClient**)luaL_checkudata(L, narg, LuaAPClient::Lua_Name);
+    }
+
+    static int __index(lua_State *L)
+    {
+        LuaAPClient *self = *(LuaAPClient**)lua_touserdata(L, 1);
+        const char* key = luaL_checkstring(L, 2);
+        if (strcmp(key, "checked_locations") == 0) {
+            if (self->checked_locations.valid()) {
+                lua_rawgeti(self->_L, LUA_REGISTRYINDEX, self->checked_locations.ref);
+                return 1;
+            }
+        }
+        else if (strcmp(key, "missing_locations") == 0) {
+            if (self->missing_locations.valid()) {
+                lua_rawgeti(self->_L, LUA_REGISTRYINDEX, self->missing_locations.ref);
+                return 1;
+            }
+        }
+        else if (lua_getmetatable(L, 1)) {
+            lua_insert(L, -2);
+            lua_rawget(L, -2);
+            return 1;
+        }
+        return 0;
+    }
+
+    static int __newindex(lua_State *L)
+    {
+        LuaAPClient *self = *(LuaAPClient**)lua_touserdata(L, 1);
+        const char* key = luaL_checkstring(L, 2);
+        if (strcmp(key, "checked_locations") == 0) {
+            self->unref(self->checked_locations);
+            self->checked_locations.ref = luaL_ref(self->_L, LUA_REGISTRYINDEX);
+        }
+        else if (strcmp(key, "missing_locations") == 0) {
+            self->unref(self->missing_locations);
+            self->missing_locations.ref = luaL_ref(self->_L, LUA_REGISTRYINDEX);
+        }
+        return 0;
     }
 
 private:
@@ -409,6 +503,66 @@ private:
         const char* err = luaL_checkstring(_L, -1);
         fprintf(stderr, "Error calling %s_handler:\n%s\n", name.c_str(), err);
         lua_pop(_L, 1); // pop error
+    }
+
+    template <class T>
+    void assign_set(const char* key, const std::set<T>& set, int table = -1)
+    {
+        // get table by name
+        lua_getfield(_L, table, key);
+        // assign values
+        size_t n = 0;
+        for (const auto& v: set) {
+            lua_pushinteger(_L, (lua_Integer)++n);
+            Lua(_L).Push(v);
+            lua_rawset(_L, -3);
+        }
+        // delete old values
+        size_t len = luaL_len(_L, -1);
+        for (size_t i = n; i <= len; i++) {
+            lua_pushinteger(_L, (lua_Integer)i);
+            lua_pushnil(_L);
+            lua_rawset(_L, -3);
+        }
+        // pop table
+        lua_pop(_L, 1);
+    }
+
+    template <class T>
+    bool contains(const T& v, int table = -1)
+    {
+        if (table < 0) table -= 2;
+        Lua(_L).Push(v); // push v
+        lua_pushnil(_L); // push nil for first key
+        while (lua_next(_L, table) != 0) {
+            if (lua_rawequal(_L, -1, -3)) {
+                // pop value, key and v
+                lua_pop(_L, 3);
+                return true;
+            }
+            lua_pop(_L, 1); // pop value, keep key
+        }
+        // lua_next will pop the last key once done
+        lua_pop(_L, 1); // pop v
+        return false;
+    }
+
+    template <class T>
+    void add_list(const char* key, const std::list<T>& lst, int table = -1)
+    {
+        // get table by name
+        lua_getfield(_L, table, key);
+        // append items if they don't exist already
+        size_t n = luaL_len(_L, -1);
+        for (const auto& v: lst) {
+            if (!contains(v)) {
+                lua_pushinteger(_L, (lua_Integer)++n);
+                Lua(_L).Push(v);
+                lua_rawset(_L, -3);
+            }
+        }
+        // pop table
+        lua_pop(_L, 1);
     }
 
     lua_State *_L;
@@ -427,6 +581,8 @@ private:
     LuaRef bounced_cb;
     LuaRef retrieved_cb;
     LuaRef set_reply_cb;
+    LuaRef checked_locations;
+    LuaRef missing_locations;
 };
 
 #if __cplusplus < 201500L // c++14 needs a proper declaration
@@ -448,6 +604,10 @@ static int apclient_new(lua_State *L)
     LuaAPClient **p = (LuaAPClient**)lua_newuserdata(L, sizeof(LuaAPClient*));
     *p = self;
     luaL_setmetatable(L, LuaAPClient::Lua_Name);
+    lua_newtable(L);
+    lua_setfield(L, -2, "checked_locations");
+    lua_newtable(L);
+    lua_setfield(L, -2, "missing_locations");
     return 1;
 }
 
@@ -683,9 +843,11 @@ static int register_apclient(lua_State *L)
     lua_pushcfunction(L, apclient_del);
     lua_setfield(L, -2, "__gc");
 
-    // let lua/table handle __index
-    lua_pushvalue(L, -1);
+    lua_pushcfunction(L, LuaAPClient::__index);
     lua_setfield(L, -2, "__index");
+
+    lua_pushcfunction(L, LuaAPClient::__newindex);
+    lua_setfield(L, -2, "__newindex");
 
     // functions
     SET_CFUNC(new);

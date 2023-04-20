@@ -34,11 +34,14 @@ function connect(server, slot, password)
     function on_slot_connected(slot_data)
         print("Slot connected")
         print(slot_data)
+        print("missing locations: " .. table.concat(ap.missing_locations, ", "))
+        print("checked locations: " .. table.concat(ap.checked_locations, ", "))
         ap:Say("Hello World!")
         ap:Bounce({name="test"}, {game_name})
         ap:Get({"counter"})
         ap:Set("counter", 0, true, {{"add", 1}}, {blerf="blubb"})
         ap:ConnectUpdate(nil, {"Lua-APClientPP", "DeathLink"})
+        ap:LocationChecks({64000, 64001, 64002})
     end
 
 
@@ -65,6 +68,7 @@ function connect(server, slot, password)
         for _, id in ipairs(locations) do
             print(id)
         end
+        print("checked locations: " .. table.concat(ap.checked_locations, ", "))
     end
 
     function on_data_package_changed(data_package)
