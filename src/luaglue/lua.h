@@ -38,20 +38,20 @@ public:
     {
         lua_pushstring(L, s.c_str());
     }
-    void Push(lua_Integer i)
-    {
-        lua_pushinteger(L, i);
-    }
     void Push(lua_Number n)
     {
         lua_pushnumber(L, n);
     }
+    void Push(int32_t i)
+    {
+        lua_pushinteger(L, i);
+    }
     void Push(int64_t n)
     {
         if (n < std::numeric_limits<int64_t>::min() || n > std::numeric_limits<int64_t>::max())
-            Push((lua_Number)n);
+            lua_pushnumber(L, (lua_Number)n);
         else
-            Push((lua_Integer)n);
+            lua_pushinteger(L, (lua_Integer)n);
     }
     void Push(bool b)
     {
