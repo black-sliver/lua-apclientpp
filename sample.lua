@@ -64,11 +64,8 @@ function connect(server, slot, password)
     end
 
     function on_location_checked(locations)
-        print("Locations checked:")
-        for _, id in ipairs(locations) do
-            print(id)
-        end
-        print("checked locations: " .. table.concat(ap.checked_locations, ", "))
+        print("Locations checked:" .. table.concat(locations, ", "))
+        print("Checked locations: " .. table.concat(ap.checked_locations, ", "))
     end
 
     function on_data_package_changed(data_package)

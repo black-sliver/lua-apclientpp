@@ -432,10 +432,17 @@ public:
         return (int)parent->get_state();
     }
 
-    bool poll()
+    static int poll(lua_State *L)
     {
+        LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
         try {
-            APClient* parent = this;
+            if (self->_L != L) {
+                const char* msg = "Lua state changed. Multi-threading not supported!";
+                fprintf(stderr, "%s\n", msg);
+                luaL_error(L, "%s", msg);
+                return false;
+            }
+            APClient* parent = self;
             parent->poll();
             return true;
         } catch (std::exception) {
@@ -454,7 +461,7 @@ public:
 
     static int __index(lua_State *L)
     {
-        LuaAPClient *self = *(LuaAPClient**)lua_touserdata(L, 1);
+        LuaAPClient *self = luaL_checkthis(L, 1);
         const char* key = luaL_checkstring(L, 2);
         if (strcmp(key, "checked_locations") == 0) {
             if (self->checked_locations.valid()) {
@@ -478,7 +485,7 @@ public:
 
     static int __newindex(lua_State *L)
     {
-        LuaAPClient *self = *(LuaAPClient**)lua_touserdata(L, 1);
+        LuaAPClient *self = luaL_checkthis(L, 1);
         const char* key = luaL_checkstring(L, 2);
         if (strcmp(key, "checked_locations") == 0) {
             self->unref(self->checked_locations);
@@ -496,6 +503,7 @@ private:
     {
         if (ref.valid())
             luaL_unref(_L, LUA_REGISTRYINDEX, ref.ref); 
+        ref = {};
     }
 
     void cb_err(const std::string& name)
@@ -595,6 +603,7 @@ decltype(LuaAPClient::NAME) constexpr LuaAPClient::NAME;
 
 static int apclient_new(lua_State *L)
 {
+    printf("APClient.new\n");
     const char* uuid = luaL_checkstring(L, 1);
     const char* game = luaL_checkstring(L, 2);
     const char* host = luaL_checkstring(L, 3);
@@ -619,6 +628,7 @@ static int apclient_call(lua_State *L)
 
 static int apclient_del(lua_State *L)
 {
+    printf("APClient.__gc\n");
     LuaAPClient *self = *(LuaAPClient**)lua_touserdata(L, 1);
     delete self;
     return 0;
@@ -851,7 +861,9 @@ static int register_apclient(lua_State *L)
 
     // functions
     SET_CFUNC(new);
-    SET_METHOD(poll, void);
+    //SET_METHOD(poll, void);  // lua glue does not allow passing state yet
+    lua_pushcfunction(L, LuaAPClient::poll);
+    lua_setfield(L, -2, "poll");
     SET_METHOD(reset, void);
     SET_METHOD(get_player_alias, int);
     SET_METHOD(get_location_name, int64_t);
