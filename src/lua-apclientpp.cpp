@@ -784,7 +784,7 @@ static int apclient_LocationScouts(lua_State *L)
         create_as_hints = lua_toboolean(L, 3);
     }
     
-    bool res = self->LocationChecks(locations);
+    bool res = self->LocationScouts(locations);
     lua_pushboolean(L, res);
     return 1;
 }
