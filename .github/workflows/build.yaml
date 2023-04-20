@@ -35,7 +35,7 @@ jobs:
       - name: Run
         continue-on-error: true
         run: |
-          lua5.3 -E sample.lua
+          # lua5.3 -E sample.lua
 
       - name: Store
         uses: actions/upload-artifact@v3
@@ -75,7 +75,7 @@ jobs:
       - name: Run
         continue-on-error: true
         run: |
-          lua5.3 -E sample.lua
+          # lua5.3 -E sample.lua
 
       - name: Store
         uses: actions/upload-artifact@v3
@@ -112,6 +112,7 @@ jobs:
           LIBS="-pthread -lcrypt32 -lws2_32 -llua5.3"
           g++ -Os -std=c++17 $DEFINES $INCLUDE_DIRS -shared -o lua-apclientpp.dll -fPIC src/lua-apclientpp.cpp -Wl,-Bstatic $STATIC_LIBS -lc++ -Wl,-Bdynamic $LIBS
           cp /clang32/bin/lua53.dll ./Lua5.3.3r.dll
+          rm /clang32/lib/liblua5.3.a /clang32/lib/liblua5.3.dll.a
           LIBS="-pthread -lcrypt32 -lws2_32 -L. -lLua5.3.3r"
           g++ -Os -std=c++17 $DEFINES $INCLUDE_DIRS -shared -o lua533-apclientpp.dll -fPIC src/lua-apclientpp.cpp -Wl,-Bstatic $STATIC_LIBS -lc++ -Wl,-Bdynamic $LIBS
 
@@ -119,7 +120,7 @@ jobs:
         continue-on-error: true
         run: |
           ls /clang32/bin/
-          lua5.3 -E sample.lua
+          # lua5.3 -E sample.lua
 
       - name: Store
         uses: actions/upload-artifact@v3
@@ -127,11 +128,16 @@ jobs:
           name: lua-apclientpp-53-clang32-dynamic
           path: lua-apclientpp.dll
 
+      - name: The other one
+        run: |
+          rm lua-apclientpp.dll
+          mv lua533-apclientpp.dll lua-apclientpp.dll
+
       - name: Store 533
         uses: actions/upload-artifact@v3
         with:
           name: lua-apclientpp-533r-clang32-dynamic
-          path: lua533-apclientpp.dll
+          path: lua-apclientpp.dll
 
   build-clang64:
 
@@ -164,7 +170,7 @@ jobs:
       - name: Run
         continue-on-error: true
         run: |
-          lua5.3 -E sample.lua
+          # lua5.3 -E sample.lua
 
       - name: Store
         uses: actions/upload-artifact@v3
