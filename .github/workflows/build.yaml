@@ -110,7 +110,7 @@ jobs:
           DEFINES="-DASIO_STANDALONE -DWSWRAP_SEND_EXCEPTIONS" # not using boost
           STATIC_LIBS="-lssl -lcrypto -lz -Wno-deprecated-declarations" # linking lua static for now because the DLL might be named differently
           LIBS="-pthread -lcrypt32 -lws2_32 -llua5.3"
-          EXTRA="-Wl,-undefined,dynamic_lookup -Wl,--allow-shlib-undefined"  # does not work on windows :(
+          EXTRA="" # "-Wl,-undefined,dynamic_lookup -Wl,--allow-shlib-undefined"  # does not work on windows :(
           g++ $EXTRA -Os -std=c++17 $DEFINES $INCLUDE_DIRS -shared -o lua-apclientpp.dll -fPIC src/lua-apclientpp.cpp -Wl,-Bstatic $STATIC_LIBS -lc++ -Wl,-Bdynamic $LIBS
           cp /clang32/bin/lua53.dll /clang32/bin/Lua5.3.3r.dll
           LIBS="-pthread -lcrypt32 -lws2_32 -lLua5.3.3r"
