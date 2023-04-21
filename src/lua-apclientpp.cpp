@@ -131,31 +131,35 @@ public:
     void on_slot_connected(const json& slot_data)
     {
         // sync location tables
-        assign_set("checked_locations", get_checked_locations());
-        assign_set("missing_locations", get_missing_locations());
+        assign_set("checked_locations", get_checked_locations(), 1);
+        assign_set("missing_locations", get_missing_locations(), 1);
 
         if (slot_connected_cb.valid()) {
+            lua_pushcfunction(_L, error_handler);
             lua_rawgeti(_L, LUA_REGISTRYINDEX, slot_connected_cb.ref);
             json_to_lua(_L, slot_data);
-            if (lua_pcall(_L, 1, 0, 0)) {
-                cb_err("slot_connected");
+            if (lua_pcall(_L, 1, 0, -3)) {
+                cb_error("slot_connected");
             }
+            lua_pop(_L, 1);
         }
     }
 
     void on_location_checked(const std::list<int64_t>& locations)
     {
         // sync location tables
-        add_list("checked_locations", locations);
-        assign_set("missing_locations", get_missing_locations());
+        add_list("checked_locations", locations, 1);
+        assign_set("missing_locations", get_missing_locations(), 1);
 
         if (location_checked_cb.valid()) {
+            lua_pushcfunction(_L, error_handler);
             lua_rawgeti(_L, LUA_REGISTRYINDEX, location_checked_cb.ref);
             json j = locations;
             json_to_lua(_L, j);
-            if (lua_pcall(_L, 1, 0, 0)) {
-                cb_err("location_checked");
+            if (lua_pcall(_L, 1, 0, -3)) {
+                cb_error("location_checked");
             }
+            lua_pop(_L, 1);
         }
     }
 
@@ -168,10 +172,12 @@ public:
 
         APClient* parent = this;
         parent->set_socket_connected_handler([this]() {
+            lua_pushcfunction(_L, error_handler);
             lua_rawgeti(_L, LUA_REGISTRYINDEX, socket_connected_cb.ref);
-            if (lua_pcall(_L, 0, 0, 0)) {
-                cb_err("socket_connected");
+            if (lua_pcall(_L, 0, 0, -2)) {
+                cb_error("socket_connected");
             }
+            lua_pop(_L, 1);
         });
     }
 
@@ -182,11 +188,13 @@ public:
 
         APClient* parent = this;
         parent->set_socket_error_handler([this](const std::string& msg) {
+            lua_pushcfunction(_L, error_handler);
             lua_rawgeti(_L, LUA_REGISTRYINDEX, socket_error_cb.ref);
             lua_pushstring(_L, msg.c_str());
-            if (lua_pcall(_L, 1, 0, 0)) {
-                cb_err("socket_error");
+            if (lua_pcall(_L, 1, 0, -3)) {
+                cb_error("socket_error");
             }
+            lua_pop(_L, 1);
         });
     }
 
@@ -197,10 +205,12 @@ public:
 
         APClient* parent = this;
         parent->set_socket_disconnected_handler([this]() {
+            lua_pushcfunction(_L, error_handler);
             lua_rawgeti(_L, LUA_REGISTRYINDEX, socket_disconnected_cb.ref);
-            if (lua_pcall(_L, 0, 0, 0)) {
-                cb_err("socket_disconnected");
+            if (lua_pcall(_L, 0, 0, -2)) {
+                cb_error("socket_disconnected");
             }
+            lua_pop(_L, 1);
         });
     }
 
@@ -211,10 +221,12 @@ public:
 
         APClient* parent = this;
         parent->set_room_info_handler([this]() {
+            lua_pushcfunction(_L, error_handler);
             lua_rawgeti(_L, LUA_REGISTRYINDEX, room_info_cb.ref);
-            if (lua_pcall(_L, 0, 0, 0)) {
-                cb_err("room_info");
+            if (lua_pcall(_L, 0, 0, -2)) {
+                cb_error("room_info");
             }
+            lua_pop(_L, 1);
         });
     }
 
@@ -231,12 +243,14 @@ public:
 
         APClient* parent = this;
         parent->set_slot_refused_handler([this](const std::list<std::string>& reason) {
+            lua_pushcfunction(_L, error_handler);
             lua_rawgeti(_L, LUA_REGISTRYINDEX, slot_refused_cb.ref);
             json j = reason;
             json_to_lua(_L, j);
-            if (lua_pcall(_L, 1, 0, 0)) {
-                cb_err("slot_refused");
+            if (lua_pcall(_L, 1, 0, -3)) {
+                cb_error("slot_refused");
             }
+            lua_pop(_L, 1);
         });
     }
 
@@ -247,12 +261,14 @@ public:
 
         APClient* parent = this;
         parent->set_items_received_handler([this](const std::list<NetworkItem>& items) {
+            lua_pushcfunction(_L, error_handler);
             lua_rawgeti(_L, LUA_REGISTRYINDEX, items_received_cb.ref);
             json j = items;
             json_to_lua(_L, j);
-            if (lua_pcall(_L, 1, 0, 0)) {
-                cb_err("items_received");
+            if (lua_pcall(_L, 1, 0, -3)) {
+                cb_error("items_received");
             }
+            lua_pop(_L, 1);
         });
     }
 
@@ -263,12 +279,14 @@ public:
 
         APClient* parent = this;
         parent->set_location_info_handler([this](const std::list<NetworkItem>& items) {
+            lua_pushcfunction(_L, error_handler);
             lua_rawgeti(_L, LUA_REGISTRYINDEX, location_info_cb.ref);
             json j = items;
             json_to_lua(_L, j);
-            if (lua_pcall(_L, 1, 0, 0)) {
-                cb_err("location_info");
+            if (lua_pcall(_L, 1, 0, -3)) {
+                cb_error("location_info");
             }
+            lua_pop(_L, 1);
         });
     }
 
@@ -285,11 +303,13 @@ public:
 
         APClient* parent = this;
         parent->set_data_package_changed_handler([this](const json& data_package) {
+            lua_pushcfunction(_L, error_handler);
             lua_rawgeti(_L, LUA_REGISTRYINDEX, data_package_changed_cb.ref);
             json_to_lua(_L, data_package);
-            if (lua_pcall(_L, 1, 0, 0)) {
-                cb_err("data_package_changed");
+            if (lua_pcall(_L, 1, 0, -3)) {
+                cb_error("data_package_changed");
             }
+            lua_pop(_L, 1);
         });
     }
 
@@ -300,11 +320,13 @@ public:
 
         APClient* parent = this;
         parent->set_print_handler([this](const std::string& msg) {
+            lua_pushcfunction(_L, error_handler);
             lua_rawgeti(_L, LUA_REGISTRYINDEX, print_cb.ref);
             lua_pushstring(_L, msg.c_str());
-            if (lua_pcall(_L, 1, 0, 0)) {
-                cb_err("print");
+            if (lua_pcall(_L, 1, 0, -3)) {
+                cb_error("print");
             }
+            lua_pop(_L, 1);
         });
     }
 
@@ -315,13 +337,15 @@ public:
 
         APClient* parent = this;
         parent->set_print_json_handler([this](const PrintJSONArgs& args) {
+            lua_pushcfunction(_L, error_handler);
             lua_rawgeti(_L, LUA_REGISTRYINDEX, print_json_cb.ref);
             json j;
             _to_json(j, args.data);
             json_to_lua(_L, j);
-            if (lua_pcall(_L, 1, 0, 0)) {
-                cb_err("print_json");
+            if (lua_pcall(_L, 1, 0, -3)) {
+                cb_error("print_json");
             }
+            lua_pop(_L, 1);
         });
     }
 
@@ -332,11 +356,13 @@ public:
 
         APClient* parent = this;
         parent->set_bounced_handler([this](const json& bounce) {
+            lua_pushcfunction(_L, error_handler);
             lua_rawgeti(_L, LUA_REGISTRYINDEX, bounced_cb.ref);
             json_to_lua(_L, bounce);
-            if (lua_pcall(_L, 1, 0, 0)) {
-                cb_err("bounced");
+            if (lua_pcall(_L, 1, 0, -3)) {
+                cb_error("bounced");
             }
+            lua_pop(_L, 1);
         });
     }
 
@@ -347,12 +373,14 @@ public:
 
         APClient* parent = this;
         parent->set_retrieved_handler([this](const std::map<std::string, json>& data) {
+            lua_pushcfunction(_L, error_handler);
             lua_rawgeti(_L, LUA_REGISTRYINDEX, retrieved_cb.ref);
             json j = data;
             json_to_lua(_L, j);
-            if (lua_pcall(_L, 1, 0, 0)) {
-                cb_err("retrieved");
+            if (lua_pcall(_L, 1, 0, -3)) {
+                cb_error("retrieved");
             }
+            lua_pop(_L, 1);
         });
     }
 
@@ -363,11 +391,13 @@ public:
 
         APClient* parent = this;
         parent->set_set_reply_handler([this](const json& message) {
+            lua_pushcfunction(_L, error_handler);
             lua_rawgeti(_L, LUA_REGISTRYINDEX, set_reply_cb.ref);
             json_to_lua(_L, message);
-            if (lua_pcall(_L, 1, 0, 0)) {
-                cb_err("set_reply");
+            if (lua_pcall(_L, 1, 0, -3)) {
+                cb_error("set_reply");
             }
+            lua_pop(_L, 1);
         });
     }
 
@@ -386,7 +416,7 @@ public:
             fprintf(stderr, "Invalid argument for locations\n");
             return false;
         }
-        
+
         APClient* parent = this;
         if (parent->LocationChecks(locations)) {
             // sync location tables
@@ -407,7 +437,7 @@ public:
             fprintf(stderr, "Invalid argument for keys\n");
             return false;
         }
-        
+
         APClient* parent = this;
         return parent->Get(keys);
     }
@@ -421,7 +451,7 @@ public:
             fprintf(stderr, "Invalid argument for keys\n");
             return false;
         }
-        
+
         APClient* parent = this;
         return parent->SetNotify(keys);
     }
@@ -440,14 +470,24 @@ public:
                 const char* msg = "Lua state changed. Multi-threading not supported!";
                 fprintf(stderr, "%s\n", msg);
                 luaL_error(L, "%s", msg);
-                return false;
+                return 0;
             }
             APClient* parent = self;
             parent->poll();
-            return true;
-        } catch (std::exception) {
-            return false;
+        } catch (std::exception ex) {
+            self->push_error(ex.what());
+            return 0;
         }
+
+        if (!self->errors.empty()) {
+            lua_pushstring(L, self->errors.c_str());
+            self->errors.clear();
+            lua_error(L);
+            return 0;
+        }
+
+        lua_pushboolean(L, true);
+        return 1;
     }
 
     // lua interface implementation details
@@ -506,11 +546,41 @@ private:
         ref = {};
     }
 
-    void cb_err(const std::string& name)
+    void cb_error(const std::string& name)
     {
-        const char* err = luaL_checkstring(_L, -1);
-        fprintf(stderr, "Error calling %s_handler:\n%s\n", name.c_str(), err);
+        const char* err = lua_tostring(_L, -1);
+        std::string error_message = "Error calling " + name + "_handler:\n" + err;
+        push_error(error_message);
         lua_pop(_L, 1); // pop error
+    }
+
+    void push_error(const std::string& message)
+    {
+        fprintf(stderr, "%s\n", message.c_str());
+        if (!errors.empty())
+            errors += "\n---\n";
+        errors += message;
+    }
+
+    static int error_handler(lua_State *L)
+    {
+        lua_getglobal(L, "debug");
+        if (lua_istable(L, -1)) {
+            lua_getfield(L, -1, "traceback");
+            if (lua_isfunction(L, -1)) {
+                lua_pushvalue(L, -3); // original message
+                lua_pushinteger(L, 2); // don't show error_handler
+                if (lua_pcall(L, 2, 1, 0) == LUA_OK) {
+                    // stack: original error, debug, traceback, message
+                    lua_insert(L, -5);
+                    lua_pop(L, 1); // also remove original error
+                }
+                lua_pop(L, 1);
+            }
+            lua_pop(L, 1);
+        }
+        lua_pop(L, 1);
+        return 1; // original error or traceback
     }
 
     template <class T>
@@ -591,6 +661,7 @@ private:
     LuaRef set_reply_cb;
     LuaRef checked_locations;
     LuaRef missing_locations;
+    std::string errors;
 };
 
 #if __cplusplus < 201500L // c++14 needs a proper declaration
