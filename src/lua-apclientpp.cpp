@@ -339,10 +339,20 @@ public:
         parent->set_print_json_handler([this](const PrintJSONArgs& args) {
             lua_pushcfunction(_L, error_handler);
             lua_rawgeti(_L, LUA_REGISTRYINDEX, print_json_cb.ref);
-            json j;
-            _to_json(j, args.data);
-            json_to_lua(_L, j);
-            if (lua_pcall(_L, 1, 0, -3)) {
+            json jMessage;
+            _to_json(jMessage, args.data);
+            json_to_lua(_L, jMessage);
+            json jExtra = {{"type", args.type}};
+            if (args.countdown)
+                jExtra["countdown"] = *args.countdown;
+            if (args.found)
+                jExtra["found"] = *args.found;
+            if (args.item)
+                jExtra["item"] = *args.item;
+            if (args.receiving)
+                jExtra["receiving"] = *args.receiving;
+            json_to_lua(_L, jExtra);
+            if (lua_pcall(_L, 2, 0, -4)) {
                 cb_error("print_json");
             }
             lua_pop(_L, 1);

@@ -77,8 +77,11 @@ function connect(server, slot, password)
         print(msg)
     end
 
-    function on_print_json(msg)
+    function on_print_json(msg, extra)
         print(ap:render_json(msg, message_format))
+        for key, value in pairs(extra) do
+            -- print("  " .. key .. ": " .. tostring(value))
+        end
     end
 
     function on_bounced(bounce)
