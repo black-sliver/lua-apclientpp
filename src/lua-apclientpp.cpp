@@ -48,38 +48,9 @@ static void from_json(const json& j, APClient::DataStorageOperation& op) {
     }
 }
 
-static void _to_json(json& j, const APClient::TextNode& node) {
-    j = json{
-        {"type", node.type},
-        {"color", node.color},
-        {"text", node.text},
-        {"player", node.player},
-        {"flags",  node.flags},
-    };
-}
-static void _to_json(json& j, const std::list<APClient::TextNode>& nodes) {
-    j = json::array();
-    for (const auto& node: nodes) {
-        json jnode;
-        _to_json(jnode, node);
-        j.push_back(jnode);
-    }
-}
-
-static void _from_json(const json& j, APClient::TextNode& node) {
-    node.type = j.value("type", "");
-    node.color = j.value("color", "");
-    node.text = j.value("text", "");
-    node.player = j.value("player", 0);
-    node.flags = j.value("flags", 0U);
-}
-
-
-static void _from_json(const json& j, std::list<APClient::TextNode>& nodes) {
+static void from_json(const json& j, std::list<APClient::TextNode>& nodes) {
     for (const auto& v: j) {
-        APClient::TextNode node;
-        _from_json(v, node);
-        nodes.push_back(node);
+        nodes.push_back(APClient::TextNode::from_json(v));
     }
 }
 
@@ -336,22 +307,12 @@ public:
         print_json_cb = ref;
 
         APClient* parent = this;
-        parent->set_print_json_handler([this](const PrintJSONArgs& args) {
+        parent->set_print_json_handler([this](const json& command) {
             lua_pushcfunction(_L, error_handler);
             lua_rawgeti(_L, LUA_REGISTRYINDEX, print_json_cb.ref);
-            json jMessage;
-            _to_json(jMessage, args.data);
-            json_to_lua(_L, jMessage);
-            json jExtra = {{"type", args.type}};
-            if (args.countdown)
-                jExtra["countdown"] = *args.countdown;
-            if (args.found)
-                jExtra["found"] = *args.found;
-            if (args.item)
-                jExtra["item"] = *args.item;
-            if (args.receiving)
-                jExtra["receiving"] = *args.receiving;
-            json_to_lua(_L, jExtra);
+            json_to_lua(_L, command);
+            lua_getfield(_L, -1, "data");
+            lua_insert(_L, -2); // first arg is data, second is full command
             if (lua_pcall(_L, 2, 0, -4)) {
                 cb_error("print_json");
             }
@@ -720,9 +681,9 @@ static int apclient_render_json(lua_State *L)
     LuaAPClient *self = *(LuaAPClient**)lua_touserdata(L, 1);
     std::list<APClient::TextNode> msg;
     try {
-        _from_json(lua_to_json(L, 2), msg);
+        from_json(lua_to_json(L, 2), msg);
     } catch (std::exception ex) {
-        fprintf(stderr, "Invalid argument for msg");
+        fprintf(stderr, "Invalid argument for msg: %s\n", ex.what());
         return 0;
     }
     APClient::RenderFormat fmt = APClient::RenderFormat::TEXT;
