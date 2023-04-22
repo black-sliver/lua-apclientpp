@@ -17,7 +17,7 @@ allowing to connect to an [Archipelago](https://archipelago.gg/) server with nat
     If you see "msvcrt.dll" or "api-ms-*.dll", the clang build should work
   * On Linux and Mac: you can check with ldd - likely to just work as long as the build machine/target is old enough
 * If the DLL of the host application is not named lua5x.dll / liblua.so.5.x / liblua.5.x.dylib:
-  * On Windows: the lua-apclient.dll will have to be modified to link to the correct name (insert link here)
+  * On Windows: the lua-apclient.dll will have to be modified to link to the correct name, see [here](#changing-target-dll-name).
   * On Linux: the dynamic builds should not be tied to a specific .so, but resolve symbols from the application
   * On Mac: either is possible. Need to investigate when we get there.
 * If there is no DLL at all:
@@ -36,6 +36,7 @@ This requires stripping the DLL (which is currently not done for the automated b
 pip install machomachomangler mingw_ldd
 strip lua-apclientpp.dll  # strip the build (i686-w64-mingw32-strip or whatever)
 mv lua-apclientpp.dll _lua-apclientpp.dll # rename the original
+# replace lua53.dll and lua53.3r.dll with the original and correct names below
 python -m machomachomangler.cmd.redll _lua-apclientpp.dll lua-apclientpp.dll lua53.dll Lua5.3.3r.dll
 python -m mingw_ldd lua-apclientpp.dll --dll-lookup-dirs . # check the result, or use Dependency Walker
 ```
