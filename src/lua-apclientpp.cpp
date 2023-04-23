@@ -7,6 +7,7 @@ extern "C" {
 //#define APCLIENT_DEBUG // to get debug output
 #include <apclient.hpp>
 #include "luaglue/luamethod.h"
+#include "luaglue/luacompat.h"
 
 
 // IMPORTANT: apclientpp can't be used across threads, so capturing L is kind of ok
@@ -567,9 +568,9 @@ private:
             lua_rawset(_L, -3);
         }
         // delete old values
-        size_t len = luaL_len(_L, -1);
-        for (size_t i = n; i <= len; i++) {
-            lua_pushinteger(_L, (lua_Integer)i);
+        lua_Integer len = luaL_len(_L, -1);
+        for (lua_Integer i = n; i <= len; i++) {
+            lua_pushinteger(_L, i);
             lua_pushnil(_L);
             lua_rawset(_L, -3);
         }
@@ -654,7 +655,8 @@ static int apclient_new(lua_State *L)
 
     LuaAPClient **p = (LuaAPClient**)lua_newuserdata(L, sizeof(LuaAPClient*));
     *p = self;
-    luaL_setmetatable(L, LuaAPClient::Lua_Name);
+    luaL_getmetatable(L, LuaAPClient::Lua_Name);
+    lua_setmetatable(L, -2);
     lua_newtable(L);
     lua_setfield(L, -2, "checked_locations");
     lua_newtable(L);
