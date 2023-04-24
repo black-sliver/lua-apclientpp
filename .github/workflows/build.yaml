@@ -40,12 +40,12 @@ jobs:
       - name: Install gcc
         if: ${{ !startsWith(matrix.sys, 'clang') }}
         run: |
-          pacboy -S gcc:p
+          pacboy --noconfirm -S gcc:p
 
       - name: Install clang + gcc-wrapper
         if: ${{ startsWith(matrix.sys, 'clang') }}
         run: |
-          pacboy -S gcc-compat:p
+          pacboy --noconfirm -S gcc-compat:p
 
       - name: Build lua51-dynamic
         run: |
