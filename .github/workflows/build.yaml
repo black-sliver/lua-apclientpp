@@ -29,23 +29,23 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Install MSYS ${{matrix.sys}}
+      - name: Install MSYS ${{matrix.sys}} + gcc
+        if: ${{ !startsWith(matrix.sys, 'clang') }}
         uses: msys2/setup-msys2@v2
         with:
           msystem: ${{matrix.sys}}
           # update: true
-          pacboy: openssl:p lua:p lua51:p lua53:p
+          pacboy: openssl:p lua:p lua51:p lua53:p pkg-config:p gcc:p
           # NOTE: msys does not have lua52, so we will have to build from source or download prebuilts
 
-      - name: Install gcc
+      - name: Install MSYS ${{matrix.sys}} + clang + gcc-wrapper
         if: ${{ !startsWith(matrix.sys, 'clang') }}
-        run: |
-          pacboy --noconfirm -S gcc:p
-
-      - name: Install clang + gcc-wrapper
-        if: ${{ startsWith(matrix.sys, 'clang') }}
-        run: |
-          pacboy --noconfirm -S gcc-compat:p
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: ${{matrix.sys}}
+          # update: true
+          pacboy: openssl:p lua:p lua51:p lua53:p pkg-config:p gcc-compat:p
+          # NOTE: msys does not have lua52, so we will have to build from source or download prebuilts
 
       - name: Build lua51-dynamic
         run: |
