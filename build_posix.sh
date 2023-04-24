@@ -28,7 +28,7 @@ else
     EXTRA_LIBS="-Wl,-Bdynamic $EXTRA_LIBS_DYNAMIC"
 fi
 
-CFLAGS="-std=c++1z -Wno-deprecated-declarations $EXTRA_CFLAGS $CFLAGS"
+CFLAGS="-Os -std=c++1z -Wno-deprecated-declarations $EXTRA_CFLAGS $CFLAGS"
 
 OUT="$FILENAME"
 
@@ -39,3 +39,4 @@ if [ $? -ne 0 ]; then
     "$CC" $CFLAGS $DEFINES $INCLUDE_DIRS -shared -o "$OUT" -fPIC src/lua-apclientpp.cpp $DYNAMIC_LIBS $EXTRA_LIBS $STATIC_LIBS -Wl,-Bdynamic $LIBS
     exit $?
 fi
+strip "$OUT"

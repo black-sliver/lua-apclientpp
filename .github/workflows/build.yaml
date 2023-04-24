@@ -35,7 +35,7 @@ jobs:
         with:
           msystem: ${{matrix.sys}}
           # update: true
-          pacboy: openssl:p lua:p lua51:p lua53:p pkg-config:p gcc:p
+          pacboy: openssl:p lua:p lua51:p lua53:p pkg-config:p gcc:p binutils:p
           # NOTE: msys does not have lua52, so we will have to build from source or download prebuilts
 
       - name: Install MSYS ${{matrix.sys}} + clang + gcc-wrapper
