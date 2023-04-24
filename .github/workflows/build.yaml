@@ -16,6 +16,11 @@ jobs:
           - mingw32
           - mingw64
           - ucrt64
+        lua:
+          - 5.1
+          #- 5.2  # needs manual install
+          - 5.3
+          - 5.4
 
     runs-on: windows-latest
 
@@ -23,11 +28,33 @@ jobs:
       run:
         shell: msys2 {0}
 
+    env:
+      DEFAULT_LUA: 5.4
+
     steps:
       - name: Checkout
         uses: actions/checkout@v3
         with:
           submodules: recursive
+
+      - name: Set ENV
+        shell: bash
+        run: |
+          export LUA_NUMBER=`echo ${{matrix.lua}} | sed 's/\.//'`
+          echo "LUA_NAME=lua$LUA_NUMBER" >> $GITHUB_ENV
+          echo "LUA_VERSION=lua${{matrix.lua}}" >> $GITHUB_ENV
+
+      - name: Set env (PKG, versioned lua)
+        if: ${{ matrix.lua != env.DEFAULT_LUA }}
+        shell: bash
+        run: |
+          echo "LUA_PKG=${{env.LUA_NAME}}:p" >> $GITHUB_ENV
+
+      - name: Set env (PKG, default lua)
+        if: ${{ matrix.lua == env.DEFAULT_LUA }}
+        shell: bash
+        run: |
+          echo "LUA_PKG=lua:p" >> $GITHUB_ENV
 
       - name: Install MSYS ${{matrix.sys}} + gcc
         if: ${{ !startsWith(matrix.sys, 'clang') }}
@@ -35,8 +62,7 @@ jobs:
         with:
           msystem: ${{matrix.sys}}
           # update: true
-          pacboy: openssl:p lua:p lua51:p lua53:p pkg-config:p gcc:p binutils:p
-          # NOTE: msys does not have lua52, so we will have to build from source or download prebuilts
+          pacboy: openssl:p pkg-config:p gcc:p binutils:p ${{env.LUA_PKG}}
 
       - name: Install MSYS ${{matrix.sys}} + clang + gcc-wrapper
         if: ${{ startsWith(matrix.sys, 'clang') }}
@@ -44,71 +70,26 @@ jobs:
         with:
           msystem: ${{matrix.sys}}
           # update: true
-          pacboy: openssl:p lua:p lua51:p lua53:p pkg-config:p gcc-compat:p
-          # NOTE: msys does not have lua52, so we will have to build from source or download prebuilts
+          pacboy: openssl:p pkg-config:p gcc-compat:p ${{env.LUA_PKG}}
 
-      - name: Build lua51-dynamic
+      - name: Build ${{env.LUA_NAME}}-dynamic
         run: |
           rm -f *.dll
-          ./build_posix.sh lua5.1
+          ./build_posix.sh ${{env.LUA_VERSION}}
 
-      - name: Store lua51-dynamic
+      - name: Store ${{env.LUA_NAME}}-dynamic
         uses: actions/upload-artifact@v3
         with:
-          name: lua-apclientpp-lua51-${{matrix.sys}}-dynamic
+          name: lua-apclientpp-${{env.LUA_NAME}}-${{matrix.sys}}-dynamic
           path: lua-apclientpp.dll
 
-      - name: Build lua51-static
+      - name: Build ${{env.LUA_NAME}}-static
         run: |
           rm -f *.dll
-          ./build_posix.sh lua5.1 static
+          ./build_posix.sh ${{env.LUA_VERSION}} static
 
-      - name: Store lua51-static
+      - name: Store ${{env.LUA_NAME}}-static
         uses: actions/upload-artifact@v3
         with:
-          name: lua-apclientpp-lua51-${{matrix.sys}}-dynamic
-          path: lua-apclientpp.dll
-
-      - name: Build lua53-dynamic
-        run: |
-          rm -f *.dll
-          ./build_posix.sh lua5.3
-
-      - name: Store lua53-dynamic
-        uses: actions/upload-artifact@v3
-        with:
-          name: lua-apclientpp-lua53-${{matrix.sys}}-dynamic
-          path: lua-apclientpp.dll
-
-      - name: Build lua53-static
-        run: |
-          rm -f *.dll
-          ./build_posix.sh lua5.3 static
-
-      - name: Store lua53-static
-        uses: actions/upload-artifact@v3
-        with:
-          name: lua-apclientpp-lua53-${{matrix.sys}}-static
-          path: lua-apclientpp.dll
-
-      - name: Build lua54-dynamic
-        run: |
-          rm -f *.dll
-          ./build_posix.sh lua5.4
-
-      - name: Store lua54-dynamic
-        uses: actions/upload-artifact@v3
-        with:
-          name: lua-apclientpp-lua54-${{matrix.sys}}-dynamic
-          path: lua-apclientpp.dll
-
-      - name: Build lua54-static
-        run: |
-          rm -f *.dll
-          ./build_posix.sh lua5.4 static
-
-      - name: Store lua54-static
-        uses: actions/upload-artifact@v3
-        with:
-          name: lua-apclientpp-lua54-${{matrix.sys}}-static
+          name: lua-apclientpp-${{env.LUA_NAME}}-${{matrix.sys}}-dynamic
           path: lua-apclientpp.dll
