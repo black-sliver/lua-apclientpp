@@ -50,7 +50,7 @@ jobs:
       - name: Build lua51-dynamic
         run: |
           rm -f *.dll
-          ./build_posix.sh lua51
+          ./build_posix.sh lua5.1
 
       - name: Store lua51-dynamic
         uses: actions/upload-artifact@v3
@@ -61,7 +61,7 @@ jobs:
       - name: Build lua51-static
         run: |
           rm -f *.dll
-          ./build_posix.sh lua51 static
+          ./build_posix.sh lua5.1 static
 
       - name: Store lua51-static
         uses: actions/upload-artifact@v3
@@ -72,7 +72,7 @@ jobs:
       - name: Build lua53-dynamic
         run: |
           rm -f *.dll
-          ./build_posix.sh lua53
+          ./build_posix.sh lua5.3
 
       - name: Store lua53-dynamic
         uses: actions/upload-artifact@v3
@@ -83,7 +83,7 @@ jobs:
       - name: Build lua53-static
         run: |
           rm -f *.dll
-          ./build_posix.sh lua53 static
+          ./build_posix.sh lua5.3 static
 
       - name: Store lua53-static
         uses: actions/upload-artifact@v3
@@ -94,7 +94,7 @@ jobs:
       - name: Build lua54-dynamic
         run: |
           rm -f *.dll
-          ./build_posix.sh lua54
+          ./build_posix.sh lua5.4
 
       - name: Store lua54-dynamic
         uses: actions/upload-artifact@v3
@@ -105,7 +105,7 @@ jobs:
       - name: Build lua54-static
         run: |
           rm -f *.dll
-          ./build_posix.sh lua54 static
+          ./build_posix.sh lua5.4 static
 
       - name: Store lua54-static
         uses: actions/upload-artifact@v3

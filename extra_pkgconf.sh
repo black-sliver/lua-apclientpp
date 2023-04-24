@@ -6,16 +6,15 @@
 
 if [[ "$LUA" == "lua" ]]; then
     # try to get the version from the standard include
-    LUA="lua$(echo -e '#include <lua.h>\nLUA_VERSION_MAJOR LUA_VERSION_MINOR' | $CC $(pkg-config --cflags lua) -E - | tail -n1 | sed 's/[\t "]//g')"
+    LUA="$(echo -e '#include <lua.h>\nLUA_VERSION' | $CC $(pkg-config --cflags lua) -E - | tail -n1 | sed 's/[\t "]//g' | tr '[:upper:]' '[:lower:]')"
 fi
 
-# remove '.'
-LUA="$(echo $LUA | sed 's/\.//g')"
+# NOTE: we keep the '.' because MSYS requires it
 
 EXTRA_CFLAGS="$(pkg-config $PKGCONFIG_CONF --cflags $LUA)"
 EXTRA_LIBS_STATIC="$(pkg-config $PKGCONFIG_CONF --libs $LUA)"
 if [ $? -ne 0 ]; then
-    if [[ "$LUA" == "lua54" ]]; then # try without version
+    if [[ "$LUA" == "lua5.4" ]]; then # try without version
         EXTRA_CFLAGS="$(pkg-config $PKGCONFIG_CONF --cflags lua)"
         EXTRA_LIBS_STATIC="$(pkg-config $PKGCONFIG_CONF --libs lua)"
         if [ $? -ne 0 ]; then
