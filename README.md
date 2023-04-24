@@ -56,9 +56,33 @@ or use `install_name_tool` to change linkage after the build.
 See [sample.lua](https://github.com/black-sliver/lua-apclientpp/blob/main/sample.lua).
 Follows the API of [apclientpp](https://github.com/black-sliver/apclientpp).
 
+### Handling Connection Failures
+
+Same as with apclientpp, it will try to reconnect and in case of automatic protocol detection (SSL or plain), a socket
+error might be generated even though the connection might succeed on the second attempt.
+
+If a game needs to be connected at all times, not receiving SlotConnected within e.g. 10 seconds would be the indicator
+of a failed connect / connect timeout. Receiving a disconnect or error after being connected would be a lost connection.
+
+
+## To-Do
+
+* Full build matrix
+  * Lua5.2 - not available in msys and brew :(
+  * Linux - Ubuntu 20.04 might be fine? Otherwise alma container.
+  * Mac - using brew? Brew's targets somewhat recent macos.
+  * MSVC builds
+* Special versions
+  * clang32-lua5.3.3r-dynamic
+* Strip all builds?
+* Tests
+* Submodule luaglue
+* UUID helper - currently uuid is not being used, so you can just pass in an empty string
+
 
 ## Downloads
 
-Until there is a proper release, you can use the downloads from the latest build in the "Actions" tab.
+Until there is a proper release, you can use the downloads from the latest build in the
+[Actions tab](https://github.com/black-sliver/lua-apclientpp/actions).
 
 Not all possible variations are being built yet.
