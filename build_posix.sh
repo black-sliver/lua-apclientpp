@@ -33,10 +33,10 @@ CFLAGS="-Os -std=c++1z -Wno-deprecated-declarations $EXTRA_CFLAGS $CFLAGS"
 OUT="$FILENAME"
 
 # prefer static openssl
-"$CC" $CFLAGS $DEFINES $INCLUDE_DIRS -shared -o "$OUT" -fPIC src/lua-apclientpp.cpp $DYNAMIC_LIBS $EXTRA_LIBS $STATIC_LIBS -Wl,-Bstatic $LIBS > /dev/null 2>&1
+"$CXX" $CFLAGS $DEFINES $INCLUDE_DIRS -shared -o "$OUT" -fPIC src/lua-apclientpp.cpp $DYNAMIC_LIBS $EXTRA_LIBS $STATIC_LIBS -Wl,-Bstatic $LIBS > /dev/null 2>&1
 if [ $? -ne 0 ]; then
     # try again with dynamic libssl
-    "$CC" $CFLAGS $DEFINES $INCLUDE_DIRS -shared -o "$OUT" -fPIC src/lua-apclientpp.cpp $DYNAMIC_LIBS $EXTRA_LIBS $STATIC_LIBS -Wl,-Bdynamic $LIBS
+    "$CXX" $CFLAGS $DEFINES $INCLUDE_DIRS -shared -o "$OUT" -fPIC src/lua-apclientpp.cpp $DYNAMIC_LIBS $EXTRA_LIBS $STATIC_LIBS -Wl,-Bdynamic $LIBS
     exit $?
 fi
 strip "$OUT"
