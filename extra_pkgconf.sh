@@ -37,3 +37,6 @@ elif [[ "$OS_NAME" == "macos" ]]; then
     EXTRA_LIBS_DYNAMIC="-Wl,-undefined,dynamic_lookup"
     # FIXME: linking to brew's libssl requires a recent macos to actually load the dylib
 fi
+
+echo "Libs for static build: $EXTRA_LIBS_STATIC"
+echo "Libs for dynamic build: $EXTRA_LIBS_DYNAMIC"

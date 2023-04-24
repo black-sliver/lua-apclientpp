@@ -15,7 +15,16 @@ case $(uname | tr '[:upper:]' '[:lower:]') in
         ;;
     cygwin*)
         OS_NAME=windows
+        ;;
+    mingw*)
+        OS_NAME=windows
+        ;;
+    *)
+        echo "Unknown OS: $(uname | tr '[:upper:]' '[:lower:]')"
 esac
+
+echo "Detected OS: $OS_NAME"
+
 
 if [[ "$OS_NAME" == "windows" ]]; then
     FILENAME="$NAME.dll"
