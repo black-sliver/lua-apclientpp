@@ -37,6 +37,16 @@ jobs:
           pacboy: openssl:p lua:p lua51:p lua53:p
           # NOTE: msys does not have lua52, so we will have to build from source or download prebuilts
 
+      - name: Install gcc
+        if: ${{ !startsWith(matrix.sys, 'clang') }}
+        run: |
+          pacboy gcc:p
+
+      - name: Install clang + gcc-wrapper
+        if: ${{ startsWith(matrix.sys, 'clang') }}
+        run: |
+          pacboy gcc-compat:p
+
       - name: Build lua51-dynamic
         run: |
           rm -f *.dll
