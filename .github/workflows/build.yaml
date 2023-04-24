@@ -4,9 +4,21 @@ on: workflow_dispatch
 
 jobs:
 
-  build-ucrt64:
+  build-msys2:
+
+    strategy:
+      # NOTE: setting up msys takes longer than building, so we don't matrix the lua versions
+      # TODO: use sub-action to make this cleaner
+      matrix:
+        sys:
+          - clang32
+          - clang64
+          - mingw32
+          - mingw64
+          - ucrt64
 
     runs-on: windows-latest
+
     defaults:
       run:
         shell: msys2 {0}
@@ -17,189 +29,76 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Install MSYS UCRT
+      - name: Install MSYS ${{matrix.sys}}
         uses: msys2/setup-msys2@v2
         with:
-          msystem: UCRT64
+          msystem: ${{matrix.sys}}
           # update: true
-          install: mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-lua53 mingw-w64-ucrt-x86_64-openssl
+          pacboy: openssl:p lua:p lua51:p lua53:p
+          # NOTE: msys does not have lua52, so we will have to build from source or download prebuilts
 
-      - name: Build
+      - name: Build lua51-dynamic
         run: |
-          INCLUDE_DIRS="-I subprojects/json/include -I subprojects/valijson/include -I subprojects/wswrap/include -I subprojects/apclientpp -Isubprojects/asio/include -Isubprojects/websocketpp -I/ucrt64/include/lua5.3"
-          DEFINES="-DASIO_STANDALONE -DWSWRAP_SEND_EXCEPTIONS" # not using boost
-          STATIC_LIBS=" -lssl -lcrypto -llua5.3 -lz -Wno-deprecated-declarations" # linking lua static for now because the DLL might be named differently
-          LIBS="-pthread -lcrypt32 -lws2_32"
-          g++ -Os -std=c++17 $DEFINES $INCLUDE_DIRS -shared -o lua-apclientpp.dll -fPIC src/lua-apclientpp.cpp -Wl,-Bstatic $STATIC_LIBS -Wl,-Bdynamic $LIBS -static-libstdc++
+          rm -f *.dll
+          ./build_posix.sh lua51
 
-      - name: Run
-        continue-on-error: true
-        run: |
-          # lua5.3 -E sample.lua
-
-      - name: Store
+      - name: Store lua51-dynamic
         uses: actions/upload-artifact@v3
         with:
-          name: lua-apclientpp-53-ucrt64
+          name: lua-apclientpp-lua51-${{matrix.sys}}-dynamic
           path: lua-apclientpp.dll
 
-
-  build-clang32-static:
-
-    runs-on: windows-latest
-    defaults:
-      run:
-        shell: msys2 {0}
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          submodules: recursive
-
-      - name: Install MSYS CLANG32
-        uses: msys2/setup-msys2@v2
-        with:
-          msystem: CLANG32
-          # update: true
-          install: mingw-w64-clang-i686-gcc-compat mingw-w64-clang-i686-lua53 mingw-w64-clang-i686-openssl
-
-      - name: Build
+      - name: Build lua51-static
         run: |
-          INCLUDE_DIRS="-I subprojects/json/include -I subprojects/valijson/include -I subprojects/wswrap/include -I subprojects/apclientpp -Isubprojects/asio/include -Isubprojects/websocketpp -I/clang32/include/lua5.3"
-          DEFINES="-DASIO_STANDALONE -DWSWRAP_SEND_EXCEPTIONS" # not using boost
-          STATIC_LIBS=" -lssl -lcrypto -llua5.3 -lz -Wno-deprecated-declarations" # linking lua static for now because the DLL might be named differently
-          LIBS="-pthread -lcrypt32 -lws2_32"
-          g++ -Os -std=c++17 $DEFINES $INCLUDE_DIRS -shared -o lua-apclientpp.dll -fPIC src/lua-apclientpp.cpp -Wl,-Bstatic $STATIC_LIBS -lc++ -Wl,-Bdynamic $LIBS
+          rm -f *.dll
+          ./build_posix.sh lua51 static
 
-      - name: Run
-        continue-on-error: true
-        run: |
-          # lua5.3 -E sample.lua
-
-      - name: Store
+      - name: Store lua51-static
         uses: actions/upload-artifact@v3
         with:
-          name: lua-apclientpp-53-clang32-static
+          name: lua-apclientpp-lua51-${{matrix.sys}}-dynamic
           path: lua-apclientpp.dll
 
-
-  build-lua53-clang32-dynamic:
-
-    runs-on: windows-latest
-    defaults:
-      run:
-        shell: msys2 {0}
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          submodules: recursive
-
-      - name: Install MSYS CLANG32
-        uses: msys2/setup-msys2@v2
-        with:
-          msystem: CLANG32
-          # update: true
-          install: mingw-w64-clang-i686-gcc-compat mingw-w64-clang-i686-lua53 mingw-w64-clang-i686-openssl
-
-      - name: Build
+      - name: Build lua53-dynamic
         run: |
-          INCLUDE_DIRS="-I subprojects/json/include -I subprojects/valijson/include -I subprojects/wswrap/include -I subprojects/apclientpp -Isubprojects/asio/include -Isubprojects/websocketpp -I/clang32/include/lua5.3"
-          DEFINES="-DASIO_STANDALONE -DWSWRAP_SEND_EXCEPTIONS" # not using boost
-          STATIC_LIBS="-lssl -lcrypto -lz -Wno-deprecated-declarations" # linking lua static for now because the DLL might be named differently
-          LIBS="-pthread -lcrypt32 -lws2_32 -llua5.3"
-          g++ -Os -std=c++17 $DEFINES $INCLUDE_DIRS -shared -o lua-apclientpp.dll -fPIC src/lua-apclientpp.cpp -Wl,-Bstatic $STATIC_LIBS -lc++ -Wl,-Bdynamic $LIBS
-          # TODO: strip and make a copy of the DLL that links to Lua5.3.3r.dll
+          rm -f *.dll
+          ./build_posix.sh lua53
 
-      - name: Run
-        continue-on-error: true
-        run: |
-          # lua5.3 -E sample.lua
-
-      - name: Store
+      - name: Store lua53-dynamic
         uses: actions/upload-artifact@v3
         with:
-          name: lua-apclientpp-53-clang32-dynamic
+          name: lua-apclientpp-lua53-${{matrix.sys}}-dynamic
           path: lua-apclientpp.dll
 
-
-  build-lua54-clang32-dynamic:
-
-    runs-on: windows-latest
-    defaults:
-      run:
-        shell: msys2 {0}
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          submodules: recursive
-
-      - name: Install MSYS CLANG32
-        uses: msys2/setup-msys2@v2
-        with:
-          msystem: CLANG32
-          # update: true
-          install: mingw-w64-clang-i686-gcc-compat mingw-w64-clang-i686-lua mingw-w64-clang-i686-openssl
-
-      - name: Build
+      - name: Build lua53-static
         run: |
-          INCLUDE_DIRS="-I subprojects/json/include -I subprojects/valijson/include -I subprojects/wswrap/include -I subprojects/apclientpp -Isubprojects/asio/include -Isubprojects/websocketpp -I/clang32/include"
-          DEFINES="-DASIO_STANDALONE -DWSWRAP_SEND_EXCEPTIONS" # not using boost
-          STATIC_LIBS="-lssl -lcrypto -lz -Wno-deprecated-declarations"
-          LIBS="-pthread -lcrypt32 -lws2_32 -llua"
-          g++ -Os -std=c++17 $DEFINES $INCLUDE_DIRS -shared -o lua-apclientpp.dll -fPIC src/lua-apclientpp.cpp -Wl,-Bstatic $STATIC_LIBS -lc++ -Wl,-Bdynamic $LIBS
+          rm -f *.dll
+          ./build_posix.sh lua53 static
 
-      - name: Run
-        continue-on-error: true
-        run: |
-          # lua5.3 -E sample.lua
-
-      - name: Store
+      - name: Store lua53-static
         uses: actions/upload-artifact@v3
         with:
-          name: lua-apclientpp-54-clang32-dynamic
+          name: lua-apclientpp-lua53-${{matrix.sys}}-static
           path: lua-apclientpp.dll
 
-  build-clang64:
-
-    runs-on: windows-latest
-    defaults:
-      run:
-        shell: msys2 {0}
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          submodules: recursive
-
-      - name: Install MSYS CLANG64
-        uses: msys2/setup-msys2@v2
-        with:
-          msystem: CLANG64
-          # update: true
-          install: mingw-w64-clang-x86_64-gcc-compat mingw-w64-clang-x86_64-lua53 mingw-w64-clang-x86_64-openssl
-
-      - name: Build
+      - name: Build lua54-dynamic
         run: |
-          INCLUDE_DIRS="-I subprojects/json/include -I subprojects/valijson/include -I subprojects/wswrap/include -I subprojects/apclientpp -Isubprojects/asio/include -Isubprojects/websocketpp -I/clang64/include/lua5.3"
-          DEFINES="-DASIO_STANDALONE -DWSWRAP_SEND_EXCEPTIONS" # not using boost
-          STATIC_LIBS=" -lssl -lcrypto -llua5.3 -lz -Wno-deprecated-declarations" # linking lua static for now because the DLL might be named differently
-          LIBS="-pthread -lcrypt32 -lws2_32"
-          g++ -Os -std=c++17 $DEFINES $INCLUDE_DIRS -shared -o lua-apclientpp.dll -fPIC src/lua-apclientpp.cpp -Wl,-Bstatic $STATIC_LIBS -lc++ -Wl,-Bdynamic $LIBS
+          rm -f *.dll
+          ./build_posix.sh lua54
 
-      - name: Run
-        continue-on-error: true
-        run: |
-          # lua5.3 -E sample.lua
-
-      - name: Store
+      - name: Store lua54-dynamic
         uses: actions/upload-artifact@v3
         with:
-          name: lua-apclientpp-53-clang64
+          name: lua-apclientpp-lua54-${{matrix.sys}}-dynamic
           path: lua-apclientpp.dll
 
+      - name: Build lua54-static
+        run: |
+          rm -f *.dll
+          ./build_posix.sh lua54 static
+
+      - name: Store lua54-static
+        uses: actions/upload-artifact@v3
+        with:
+          name: lua-apclientpp-lua54-${{matrix.sys}}-static
+          path: lua-apclientpp.dll
