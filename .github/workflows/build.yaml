@@ -91,5 +91,5 @@ jobs:
       - name: Store ${{env.LUA_NAME}}-static
         uses: actions/upload-artifact@v3
         with:
-          name: lua-apclientpp-${{env.LUA_NAME}}-${{matrix.sys}}-dynamic
+          name: lua-apclientpp-${{env.LUA_NAME}}-${{matrix.sys}}-static
           path: lua-apclientpp.dll
