@@ -68,13 +68,11 @@ of a failed connect / connect timeout. Receiving a disconnect or error after bei
 ## To-Do
 
 * Full build matrix
-  * Lua5.2 - not available in msys and brew :(
   * Linux - Ubuntu 20.04 might be fine? Otherwise alma container.
   * Mac - using brew? Brew's targets somewhat recent macos.
   * MSVC builds
 * Special versions
   * clang32-lua5.3.3r-dynamic
-* Strip all builds?
 * Tests
 * Submodule luaglue
 * UUID helper - currently uuid is not being used, so you can just pass in an empty string
