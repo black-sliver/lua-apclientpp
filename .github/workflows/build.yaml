@@ -171,15 +171,15 @@ jobs:
           cat LICENSE > lua-apclientpp-license.txt
           echo -e "\n\n# apclientpp\n" >> lua-apclientpp-license.txt
           cat subprojects/apclientpp/LICENSE >> lua-apclientpp-license.txt
-          echo -e "\n\n# asio\n"
+          echo -e "\n\n# Asio C++ Library\n" >> lua-apclientpp-license.txt
           cat subprojects/asio/COPYING >> lua-apclientpp-license.txt
-          echo -e "\n\n# json\n"
+          echo -e "\n\n# JSON for Modern C++\n" >> lua-apclientpp-license.txt
           cat subprojects/json/LICENSE.MIT >> lua-apclientpp-license.txt
-          echo -e "\n\n# valijson\n"
+          echo -e "\n\n# Valijson\n" >> lua-apclientpp-license.txt
           cat subprojects/valijson/LICENSE >> lua-apclientpp-license.txt
-          echo -e "\n\n# websocketpp\n"
+          echo -e "\n\n# WebSocket++\n" >> lua-apclientpp-license.txt
           cat subprojects/websocketpp/websocketpp/COPYING >> lua-apclientpp-license.txt
-          echo -e "\n\n# wswrap\n"
+          echo -e "\n\n# black-sliver/wswrap\n" >> lua-apclientpp-license.txt
           cat subprojects/wswrap/LICENSE >> lua-apclientpp-license.txt
 
       - name: Store
