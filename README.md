@@ -68,11 +68,10 @@ of a failed connect / connect timeout. Receiving a disconnect or error after bei
 ## To-Do
 
 * Full build matrix
-  * Linux - Ubuntu 20.04 might be fine? Otherwise alma container.
+  * Linux - Ubuntu 20.04 might be fine and has static libssl? Otherwise alma container.
   * Mac - using brew? Brew's targets somewhat recent macos.
   * MSVC builds
-* Special versions
-  * clang32-lua5.3.3r-dynamic
+* Bundle CA certs
 * Tests
 * Submodule luaglue
 * UUID helper - currently uuid is not being used, so you can just pass in an empty string
