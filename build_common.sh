@@ -1,4 +1,4 @@
-INCLUDE_DIRS="-I subprojects/json/include -I subprojects/valijson/include -I subprojects/wswrap/include -I subprojects/apclientpp -Isubprojects/asio/include -Isubprojects/websocketpp"
+INCLUDE_DIRS="-I subprojects/json/include -I subprojects/valijson/include -I subprojects/wswrap/include -I subprojects/apclientpp -Isubprojects/asio/include -Isubprojects/websocketpp -Isubprojects"
 DEFINES="-DASIO_STANDALONE -DWSWRAP_SEND_EXCEPTIONS"
 NAME="lua-apclientpp"
 

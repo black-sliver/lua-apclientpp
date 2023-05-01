@@ -6,8 +6,8 @@ extern "C" {
 
 //#define APCLIENT_DEBUG // to get debug output
 #include <apclient.hpp>
-#include "luaglue/luamethod.h"
-#include "luaglue/luacompat.h"
+#include <luaglue/luamethod.h>
+#include <luaglue/luacompat.h>
 
 
 // IMPORTANT: apclientpp can't be used across threads, so capturing L is kind of ok
