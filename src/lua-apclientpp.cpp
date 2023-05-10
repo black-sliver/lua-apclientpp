@@ -709,7 +709,9 @@ static int apclient_ConnectSlot(lua_State *L)
 
     if (lua_gettop(L) >= 5) {
         try {
-            tags = lua_to_json(L, 5).get<std::list<std::string>>();
+            auto j = lua_to_json(L, 5);
+            if (j.size() > 0)
+                tags = j.get<std::list<std::string>>();
         } catch (std::exception ex) {
             fprintf(stderr, "Invalid tags argument\n");
             return 0;
@@ -762,7 +764,9 @@ static int apclient_ConnectUpdate(lua_State *L)
     } else {
         std::list<std::string> tags;
         try {
-            tags = lua_to_json(L, 3).get<std::list<std::string>>();
+            auto j = lua_to_json(L, 3);
+            if (j.size() > 0)
+                tags = j.get<std::list<std::string>>();
         } catch (std::exception ex) {
             fprintf(stderr, "Invalid tags argument\n");
             return 0;
@@ -792,7 +796,9 @@ static int apclient_Bounce(lua_State *L)
 
     if (lua_gettop(L) >= 3) {
         try {
-            games = lua_to_json(L, 3).get<std::list<std::string>>();
+            auto j = lua_to_json(L, 3);
+            if (j.size() > 0)
+                games = j.get<std::list<std::string>>();
         } catch (std::exception) {
             fprintf(stderr, "Invalid games argument\n");
             return 0;
@@ -801,7 +807,9 @@ static int apclient_Bounce(lua_State *L)
 
     if (lua_gettop(L) >= 4) {
         try {
-            slots = lua_to_json(L, 4).get<std::list<int>>();
+            auto j = lua_to_json(L, 4);
+            if (j.size() > 0)
+                slots = j.get<std::list<int>>();
         } catch (std::exception) {
             fprintf(stderr, "Invalid slots argument\n");
             return 0;
@@ -810,7 +818,9 @@ static int apclient_Bounce(lua_State *L)
 
     if (lua_gettop(L) >= 5) {
         try {
-            tags = lua_to_json(L, 5).get<std::list<std::string>>();
+            auto j = lua_to_json(L, 5);
+            if (j.size() > 0)
+                tags = j.get<std::list<std::string>>();
         } catch (std::exception) {
             fprintf(stderr, "Invalid tags argument\n");
             return 0;
