@@ -1,0 +1,12 @@
+name: MSBuild
+
+on: workflow_dispatch
+
+jobs:
+
+  msbuild:
+    runs-on: windows-latest
+    steps:
+      - name: noop
+        runs: echo "This is blank"
+
