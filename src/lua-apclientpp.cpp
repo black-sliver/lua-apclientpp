@@ -1,3 +1,7 @@
+#ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
+#endif
+
 extern "C" {
 #include <lua.h>
 #include <lualib.h>
