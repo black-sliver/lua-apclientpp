@@ -1,5 +1,7 @@
 #ifdef _WIN32
+// we currently don't do project-wide defines for msvc
 #define WIN32_LEAN_AND_MEAN
+#define ASIO_STANDALONE
 #endif
 
 extern "C" {
