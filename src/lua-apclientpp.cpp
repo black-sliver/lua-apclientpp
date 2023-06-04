@@ -897,11 +897,11 @@ static int apclient_Set(lua_State *L)
     lua_setfield(L, -2, #name);
 
 
-#define SET_CLASS_METHOD(CLASS, F, ARGS...) \
-    lua_pushcclosure(L, LuaMethod<CLASS, &CLASS::F, ARGS>::Func, 0); \
+#define SET_CLASS_METHOD(CLASS, F, ...) \
+    lua_pushcclosure(L, LuaMethod<CLASS, &CLASS::F, __VA_ARGS__>::Func, 0); \
     lua_setfield(L, -2, #F);
 
-#define SET_METHOD(F, ARGS...) SET_CLASS_METHOD(LuaAPClient, F, ARGS)
+#define SET_METHOD(F, ...) SET_CLASS_METHOD(LuaAPClient, F, __VA_ARGS__)
 
 
 static int register_apclient(lua_State *L)
