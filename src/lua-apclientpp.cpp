@@ -19,10 +19,12 @@ extern "C" {
 // TODO: show an error when polling on a different thread
 
 
+#ifndef DLL_EXPORT
 #ifdef _WIN32
 #define DLL_EXPORT __declspec(dllexport)
 #else
 #define DLL_EXPORT __attribute__ ((visibility ("default")))
+#endif
 #endif
 
 
