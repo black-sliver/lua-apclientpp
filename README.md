@@ -53,7 +53,8 @@ or use `install_name_tool` to change linkage after the build.
 
 ## API
 
-See [sample.lua](https://github.com/black-sliver/lua-apclientpp/blob/main/sample.lua).
+See [sample.lua](https://github.com/black-sliver/lua-apclientpp/blob/main/samples/sample.lua)
+and [other samples](https://github.com/black-sliver/lua-apclientpp/tree/main/samples).
 Follows the API of [apclientpp](https://github.com/black-sliver/apclientpp).
 
 ### Handling Connection Failures
