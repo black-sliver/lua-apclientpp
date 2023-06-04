@@ -750,7 +750,6 @@ static int apclient_ConnectUpdate(lua_State *L)
 {
     LuaAPClient *self = *(LuaAPClient**)lua_touserdata(L, 1);
 
-    bool res;
     if (lua_isnil(L, 3)) {
         if (lua_isnil(L, 2)) {
             // invalid arguments
@@ -782,7 +781,7 @@ static int apclient_ConnectUpdate(lua_State *L)
         }
     }
 
-    lua_pushboolean(L, res);
+    lua_pushboolean(L, true);
     return 1;
 }
 
