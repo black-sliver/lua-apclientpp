@@ -8,5 +8,5 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: noop
-        runs: echo "This is blank"
+        run: echo "This is blank"
 
