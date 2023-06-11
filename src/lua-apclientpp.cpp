@@ -237,6 +237,8 @@ public:
 
     void set_items_received_handler(LuaRef ref)
     {
+        static_assert(sizeof(lua_Number) >= 8, "Can't represent required ID range in lua_Number");
+
         unref(items_received_cb);
         items_received_cb = ref;
 
