@@ -7,7 +7,7 @@ jobs:
   build-51-msbuild:
     env:
       SOLUTION_FILE_PATH: vs2017
-      OPENSSL_SOLUTION_FILE_PATH: build-VS2017
+      OPENSSL_SOLUTION_FILE_PATH: build-VS2017\openssl1_1-lite.sln
       BUILD_CONFIGURATION: Release
       BUILD_PLATFORM: "x86"
     runs-on: windows-latest
