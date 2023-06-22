@@ -6,7 +6,7 @@ jobs:
 
   build-51-msbuild:
     env:
-      SOLUTION_FILE_PATH: .
+      SOLUTION_FILE_PATH: vs2017
       BUILD_CONFIGURATION: Release
       BUILD_PLATFORM: "x86"
     runs-on: windows-latest
@@ -21,7 +21,8 @@ jobs:
         uses: microsoft/setup-msbuild@v1
 
       - name: Build Project
-        run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} ${{env.SOLUTION_FILE_PATH}} /p:Platform=${{env.BUILD_PLATFORM}}
+        run: |
+          msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} ${{env.SOLUTION_FILE_PATH}} /p:Platform=${{env.BUILD_PLATFORM}}
 
       - name: dir
         run: dir
@@ -29,6 +30,6 @@ jobs:
       - name: Store
         uses: actions/upload-artifact@v3
         with:
-          name: lua-apclientpp-51-msbuild
+          name: lua-apclientpp-51-vs2017
           path: Release
 
