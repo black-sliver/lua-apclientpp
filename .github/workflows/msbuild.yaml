@@ -7,6 +7,7 @@ jobs:
   build-51-msbuild:
     env:
       SOLUTION_FILE_PATH: vs2017
+      OPENSSL_SOLUTION_FILE_PATH: build-VS2017
       BUILD_CONFIGURATION: Release
       BUILD_PLATFORM: "x86"
     runs-on: windows-latest
@@ -20,18 +21,23 @@ jobs:
       - name: Add MSBuild to PATH
         uses: microsoft/setup-msbuild@v1
 
+      - name: Build OpenSSL
+        run: |
+          git clone https://github.com/kiyolee/openssl1_1-win-build.git openssl-1.1.1
+          cd openssl-1.1.1
+          msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} ${{env.OPENSSL_SOLUTION_FILE_PATH}} /p:Platform=${{env.BUILD_PLATFORM}}
+          dir ${{env.OPENSSL_SOLUTION_FILE_PATH}}\${{env.BUILD_CONFIGURATION}}
+
+
       - name: Build Project
         run: |
           msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} ${{env.SOLUTION_FILE_PATH}} /p:Platform=${{env.BUILD_PLATFORM}}
           md ${{env.SOLUTION_FILE_PATH}}\${{env.BUILD_CONFIGURATION}}\lua51
           move ${{env.SOLUTION_FILE_PATH}}\${{env.BUILD_CONFIGURATION}}\lua-apclient-51.dll ${{env.SOLUTION_FILE_PATH}}\${{env.BUILD_CONFIGURATION}}\lua51\lua-apclient.dll
 
-      - name: dir
-        run: dir
-
       - name: Store
         uses: actions/upload-artifact@v3
         with:
-          name: lua-apclientpp-51-vs2017
+          name: lua-apclientpp-lua51-vs2017
           path: ${{env.SOLUTION_FILE_PATH}}\${{env.BUILD_CONFIGURATION}}\lua51\lua-apclient.dll
 
