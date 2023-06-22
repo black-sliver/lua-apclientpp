@@ -24,11 +24,12 @@ jobs:
 
       - name: Build OpenSSL
         run: |
-          git clone https://github.com/kiyolee/openssl1_1-win-build.git openssl-1.1.1
-          cd openssl-1.1.1
-          msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} ${{env.OPENSSL_SOLUTION_FILE_PATH}} /p:Platform=${{env.OPENSSL_BUILD_PLATFORM}}
-          dir ${{env.OPENSSL_SOLUTION_FILE_PATH}}\${{env.BUILD_CONFIGURATION}}
-
+          git clone https://github.com/openssl/openssl.git
+          cd openssl
+          git checkout OpenSSL_1_1_1-stable
+          perl Configure VC-WIN32 no-shared
+          nmake
+          dir
 
       - name: Build Project
         run: |
