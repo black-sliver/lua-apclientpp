@@ -30,12 +30,14 @@ jobs:
 
       - name: Build OpenSSL
         run: |
+          cd dep
           git clone https://github.com/openssl/openssl.git
           cd openssl
           git checkout OpenSSL_1_1_1-stable
-          perl Configure VC-WIN32 no-shared
-          nmake
-          dir
+          md x86
+          cd x86
+          perl ..\Configure VC-WIN32 no-shared
+          nmake /S
 
       - name: Add MSBuild to PATH
         uses: microsoft/setup-msbuild@v1
