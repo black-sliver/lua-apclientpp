@@ -74,27 +74,27 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(ProjectDir)..\subprojects\json\include;$(ProjectDir)..\subprojects\valijson\include;$(ProjectDir)..\subprojects\wswrap\include;$(ProjectDir)..\subprojects\apclientpp;$(ProjectDir)..\subprojects\asio\include;$(ProjectDir)..\subprojects\websocketpp;$(ProjectDir)..\subprojects;$(ProjectDir)..\lua51\include;$(ProjectDir)..\openssl\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <IncludePath>$(ProjectDir)..\subprojects\json\include;$(ProjectDir)..\subprojects\valijson\include;$(ProjectDir)..\subprojects\wswrap\include;$(ProjectDir)..\subprojects\apclientpp;$(ProjectDir)..\subprojects\asio\include;$(ProjectDir)..\subprojects\websocketpp;$(ProjectDir)..\subprojects;$(ProjectDir)..\dep\lua51\include;$(ProjectDir)..\dep\dep\openssl\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
     <LibraryPath>$(ProjectDir)..\dep\lua51\x86;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(ProjectDir)..\subprojects\json\include;$(ProjectDir)..\subprojects\valijson\include;$(ProjectDir)..\subprojects\wswrap\include;$(ProjectDir)..\subprojects\apclientpp;$(ProjectDir)..\subprojects\asio\include;$(ProjectDir)..\subprojects\websocketpp;$(ProjectDir)..\subprojects;$(ProjectDir)..\lua51\include;$(ProjectDir)..\openssl\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <IncludePath>$(ProjectDir)..\subprojects\json\include;$(ProjectDir)..\subprojects\valijson\include;$(ProjectDir)..\subprojects\wswrap\include;$(ProjectDir)..\subprojects\apclientpp;$(ProjectDir)..\subprojects\asio\include;$(ProjectDir)..\subprojects\websocketpp;$(ProjectDir)..\subprojects;$(ProjectDir)..\dep\lua51\include;$(ProjectDir)..\dep\openssl\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
     <LibraryPath>$(ProjectDir)..\dep\lua51\x86;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(ProjectDir)..\subprojects\json\include;$(ProjectDir)..\subprojects\valijson\include;$(ProjectDir)..\subprojects\wswrap\include;$(ProjectDir)..\subprojects\apclientpp;$(ProjectDir)..\subprojects\asio\include;$(ProjectDir)..\subprojects\websocketpp;$(ProjectDir)..\subprojects;$(ProjectDir)..\lua51\include;$(ProjectDir)..\openssl\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <IncludePath>$(ProjectDir)..\subprojects\json\include;$(ProjectDir)..\subprojects\valijson\include;$(ProjectDir)..\subprojects\wswrap\include;$(ProjectDir)..\subprojects\apclientpp;$(ProjectDir)..\subprojects\asio\include;$(ProjectDir)..\subprojects\websocketpp;$(ProjectDir)..\subprojects;$(ProjectDir)..\dep\lua51\include;$(ProjectDir)..\dep\openssl\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
     <LinkIncremental>false</LinkIncremental>
     <LibraryPath>$(ProjectDir)..\dep\lua51\x86;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(ProjectDir)..\subprojects\json\include;$(ProjectDir)..\subprojects\valijson\include;$(ProjectDir)..\subprojects\wswrap\include;$(ProjectDir)..\subprojects\apclientpp;$(ProjectDir)..\subprojects\asio\include;$(ProjectDir)..\subprojects\websocketpp;$(ProjectDir)..\subprojects;$(ProjectDir)..\lua51\include;$(ProjectDir)..\openssl\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <IncludePath>$(ProjectDir)..\subprojects\json\include;$(ProjectDir)..\subprojects\valijson\include;$(ProjectDir)..\subprojects\wswrap\include;$(ProjectDir)..\subprojects\apclientpp;$(ProjectDir)..\subprojects\asio\include;$(ProjectDir)..\subprojects\websocketpp;$(ProjectDir)..\subprojects;$(ProjectDir)..\dep\lua51\include;$(ProjectDir)..\dep\openssl\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
     <LinkIncremental>false</LinkIncremental>
     <LibraryPath>$(ProjectDir)..\dep\lua51\x86;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\subprojects\json\include;$(ProjectDir)..\subprojects\valijson\include;$(ProjectDir)..\subprojects\wswrap\include;$(ProjectDir)..\subprojects\apclientpp;$(ProjectDir)..\subprojects\asio\include;$(ProjectDir)..\subprojects\websocketpp;$(ProjectDir)..\subprojects;$(ProjectDir)..\lua51\include;$(ProjectDir)..\openssl\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\subprojects\json\include;$(ProjectDir)..\subprojects\valijson\include;$(ProjectDir)..\subprojects\wswrap\include;$(ProjectDir)..\subprojects\apclientpp;$(ProjectDir)..\subprojects\asio\include;$(ProjectDir)..\subprojects\websocketpp;$(ProjectDir)..\subprojects;$(ProjectDir)..\dep\lua51\include;$(ProjectDir)..\dep\openssl\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
@@ -116,7 +116,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\subprojects\json\include;$(ProjectDir)..\subprojects\valijson\include;$(ProjectDir)..\subprojects\wswrap\include;$(ProjectDir)..\subprojects\apclientpp;$(ProjectDir)..\subprojects\asio\include;$(ProjectDir)..\subprojects\websocketpp;$(ProjectDir)..\subprojects;$(ProjectDir)..\lua51\include;$(ProjectDir)..\openssl\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\subprojects\json\include;$(ProjectDir)..\subprojects\valijson\include;$(ProjectDir)..\subprojects\wswrap\include;$(ProjectDir)..\subprojects\apclientpp;$(ProjectDir)..\subprojects\asio\include;$(ProjectDir)..\subprojects\websocketpp;$(ProjectDir)..\subprojects;$(ProjectDir)..\dep\lua51\include;$(ProjectDir)..\dep\openssl\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
