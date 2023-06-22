@@ -2,7 +2,6 @@
 // we currently don't do project-wide defines for msvc
 #define WIN32_LEAN_AND_MEAN
 #define ASIO_STANDALONE
-#define WSWRAP_NO_SSL  // FIXME: just for testing
 #endif
 
 extern "C" {
