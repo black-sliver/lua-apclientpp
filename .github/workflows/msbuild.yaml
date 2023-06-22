@@ -7,9 +7,10 @@ jobs:
   build-51-msbuild:
     env:
       SOLUTION_FILE_PATH: vs2017
-      OPENSSL_SOLUTION_FILE_PATH: build-VS2017\openssl1_1-lite.sln
-      BUILD_CONFIGURATION: Release
       BUILD_PLATFORM: "x86"
+      BUILD_CONFIGURATION: Release
+      OPENSSL_SOLUTION_FILE_PATH: build-VS2017\openssl1_1-lite.sln
+      OPENSSL_BUILD_PLATFORM: Win32
     runs-on: windows-latest
 
     steps:
@@ -25,7 +26,7 @@ jobs:
         run: |
           git clone https://github.com/kiyolee/openssl1_1-win-build.git openssl-1.1.1
           cd openssl-1.1.1
-          msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} ${{env.OPENSSL_SOLUTION_FILE_PATH}} /p:Platform=${{env.BUILD_PLATFORM}}
+          msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} ${{env.OPENSSL_SOLUTION_FILE_PATH}} /p:Platform=${{env.OPENSSL_BUILD_PLATFORM}}
           dir ${{env.OPENSSL_SOLUTION_FILE_PATH}}\${{env.BUILD_CONFIGURATION}}
 
 
