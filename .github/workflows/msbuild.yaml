@@ -11,6 +11,7 @@ jobs:
       BUILD_CONFIGURATION: Release
       OPENSSL_SOLUTION_FILE_PATH: build-VS2017\openssl1_1-lite.sln
       OPENSSL_BUILD_PLATFORM: Win32
+      ARCH: win32
     runs-on: windows-latest
 
     steps:
@@ -19,8 +20,13 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Add MSBuild to PATH
-        uses: microsoft/setup-msbuild@v1
+      - uses: ilammy/setup-nasm@v1
+
+      - uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: ${{env.ARCH}}
+
+      - uses: shogo82148/actions-setup-perl@v1
 
       - name: Build OpenSSL
         run: |
@@ -30,6 +36,9 @@ jobs:
           perl Configure VC-WIN32 no-shared
           nmake
           dir
+
+      - name: Add MSBuild to PATH
+        uses: microsoft/setup-msbuild@v1
 
       - name: Build Project
         run: |
