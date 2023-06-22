@@ -31,9 +31,8 @@ jobs:
       - name: Build OpenSSL
         run: |
           cd dep
-          git clone https://github.com/openssl/openssl.git
+          git clone -b OpenSSL_1_1_1-stable --depth 1 https://github.com/openssl/openssl.git
           cd openssl
-          git checkout OpenSSL_1_1_1-stable
           md x86
           cd x86
           perl ..\Configure VC-WIN32 no-shared
