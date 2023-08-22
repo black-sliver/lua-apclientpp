@@ -1,0 +1,123 @@
+name: Build MSYS2
+
+on:
+  workflow_dispatch:
+  workflow_call:
+
+jobs:
+  build-msys2:
+    # TODO: automated testing
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        sys:
+          - clang32
+          - clang64
+          - mingw32
+          - mingw64
+          - ucrt64
+        lua:
+          - 5.1
+          - 5.2
+          - 5.3
+          - 5.4
+
+    defaults:
+      run:
+        shell: msys2 {0}
+
+    env:
+      DEFAULT_LUA: 5.4
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Set ENV
+        shell: bash
+        run: |
+          export LUA_NUMBER=`echo ${{matrix.lua}} | sed 's/\.//'`
+          echo "LUA_NAME=lua$LUA_NUMBER" >> $GITHUB_ENV
+          echo "LUA_VERSION=lua${{matrix.lua}}" >> $GITHUB_ENV
+
+      - name: Set env (PKG, versioned lua)
+        if: |
+          matrix.lua != env.DEFAULT_LUA &&
+          matrix.lua != '5.2'
+        shell: bash
+        run: |
+          echo "LUA_PKG=${{env.LUA_NAME}}:p" >> $GITHUB_ENV
+
+      - name: Set env (PKG, default lua)
+        if: ${{ matrix.lua == env.DEFAULT_LUA }}
+        shell: bash
+        run: |
+          echo "LUA_PKG=lua:p" >> $GITHUB_ENV
+
+      - name: Install MSYS ${{matrix.sys}} + gcc
+        if: ${{ !startsWith(matrix.sys, 'clang') }}
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: ${{matrix.sys}}
+          # update: true
+          pacboy: openssl:p pkg-config:p gcc:p binutils:p wget:p make:p ${{env.LUA_PKG}}
+
+      - name: Install MSYS ${{matrix.sys}} + clang + gcc-wrapper
+        if: ${{ startsWith(matrix.sys, 'clang') }}
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: ${{matrix.sys}}
+          # update: true
+          pacboy: openssl:p pkg-config:p gcc-compat:p wget:p make:p ${{env.LUA_PKG}}
+
+      - name: Install lua52
+        if: |
+          matrix.lua == '5.2'
+        env:
+          FULL_NAME: lua-5.2.4
+        run: |
+          wget https://www.lua.org/ftp/${{env.FULL_NAME}}.tar.gz
+          tar -xzvf ${{env.FULL_NAME}}.tar.gz
+          cd ${{env.FULL_NAME}}
+          mingw32-make mingw -j3 INSTALL_TOP=/${{matrix.sys}}
+          mingw32-make install INSTALL_TOP=/${{matrix.sys}}
+          cp src/${{env.LUA_NAME}}.dll /${{matrix.sys}}/bin/
+          mingw32-make pc INSTALL_TOP=/${{matrix.sys}} > /${{matrix.sys}}/lib/pkgconfig/lua5.2.pc
+          echo "Name: Lua" >> /${{matrix.sys}}/lib/pkgconfig/lua5.2.pc
+          echo "Description: An Extensible Extension Language" >> /${{matrix.sys}}/lib/pkgconfig/lua5.2.pc
+          echo "Version: ${{matrix.lua}}" >> /${{matrix.sys}}/lib/pkgconfig/lua5.2.pc
+          echo "Requires:" >> /${{matrix.sys}}/lib/pkgconfig/lua5.2.pc
+          echo "Libs: -L/${{matrix.sys}}/bin/ -l${{env.LUA_NAME}} -lm" >> /${{matrix.sys}}/lib/pkgconfig/lua5.2.pc
+          echo "Cflags: -I\${includedir}" >> /${{matrix.sys}}/lib/pkgconfig/lua5.2.pc
+          pkg-config --cflags --libs ${{env.LUA_VERSION}}  # test
+          cd ..
+
+      - name: Build ${{env.LUA_NAME}}-dynamic
+        run: |
+          rm -f *.dll
+          ./build_posix.sh ${{env.LUA_VERSION}}
+
+      - name: Store ${{env.LUA_NAME}}-dynamic
+        uses: actions/upload-artifact@v3
+        with:
+          name: lua-apclientpp-${{env.LUA_NAME}}-${{matrix.sys}}-dynamic
+          path: lua-apclientpp.dll
+
+      - name: Rename liblua.a -> lib${{env.LUA_NAME}}.a
+        if: |
+          matrix.lua == '5.2'
+        run: |
+          cp /${{matrix.sys}}/lib/liblua.a /${{matrix.sys}}/lib/lib${{env.LUA_NAME}}.a
+
+      - name: Build ${{env.LUA_NAME}}-static
+        run: |
+          rm -f *.dll
+          ./build_posix.sh ${{env.LUA_VERSION}} static
+
+      - name: Store ${{env.LUA_NAME}}-static
+        uses: actions/upload-artifact@v3
+        with:
+          name: lua-apclientpp-${{env.LUA_NAME}}-${{matrix.sys}}-static
+          path: lua-apclientpp.dll

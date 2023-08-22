@@ -1,0 +1,56 @@
+name: Build MSBuild
+
+on:
+  workflow_dispatch:
+  workflow_call:
+
+jobs:
+  build-51-msbuild:
+    # TODO: automated testing
+    env:
+      SOLUTION_FILE_PATH: vs2017
+      BUILD_PLATFORM: "x86"
+      BUILD_CONFIGURATION: Release
+      OPENSSL_SOLUTION_FILE_PATH: build-VS2017\openssl1_1-lite.sln
+      OPENSSL_BUILD_PLATFORM: Win32
+      ARCH: win32
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      - uses: ilammy/setup-nasm@v1
+
+      - uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: ${{env.ARCH}}
+
+      - uses: shogo82148/actions-setup-perl@v1
+
+      - name: Build OpenSSL
+        run: |
+          cd dep
+          git clone -b OpenSSL_1_1_1-stable --depth 1 https://github.com/openssl/openssl.git
+          cd openssl
+          md x86
+          cd x86
+          perl ..\Configure VC-WIN32 no-shared
+          nmake /S
+
+      - name: Add MSBuild to PATH
+        uses: microsoft/setup-msbuild@v1
+
+      - name: Build Project
+        run: |
+          msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} ${{env.SOLUTION_FILE_PATH}} /p:Platform=${{env.BUILD_PLATFORM}}
+          md ${{env.SOLUTION_FILE_PATH}}\${{env.BUILD_CONFIGURATION}}\lua51
+          move ${{env.SOLUTION_FILE_PATH}}\${{env.BUILD_CONFIGURATION}}\lua-apclient-51.dll ${{env.SOLUTION_FILE_PATH}}\${{env.BUILD_CONFIGURATION}}\lua51\lua-apclient.dll
+
+      - name: Store
+        uses: actions/upload-artifact@v3
+        with:
+          name: lua-apclientpp-lua51-vs2017
+          path: ${{env.SOLUTION_FILE_PATH}}\${{env.BUILD_CONFIGURATION}}\lua51\lua-apclient.dll
