@@ -13,24 +13,31 @@ allowing to connect to an [Archipelago](https://archipelago.gg/) server with nat
 * The libc/toolchain has to match more or less.
   * On Windows: you can check with Dependency Walker or `python -m mingw_ldd path/to/exe --dll-lookup-dirs .`.
     * If you see `libgcc_*.dll` it's a mingw (`msvcrXX.dll`) or ucrt build (`msvcrt.dll`).
-    * If you see `msvcrXX.dll`, but no libgcc, we currently don't have builds for that, but you can still try clang.
+    * If you see `msvcrXX.dll` but no libgcc, you can try msvc (vs20xx) builds if available, clang otherwise.
     * If you see `msvcrt.dll` or `api-ms-*.dll`, the clang build should work.
   * On Linux and Mac: you can check with ldd - likely to just work as long as the build machine/target is old enough
 * If the DLL of the host application is not named lua5x.dll / liblua.so.5.x / liblua.5.x.dylib:
-  * On Windows: the lua-apclient.dll will have to be modified to link to the correct name, see [here](#changing-target-dll-name).
-  * On Linux: the dynamic builds should not be tied to a specific .so, but resolve symbols from the application
+  * On Windows: the lua-apclient.dll will have to be modified to link to the correct name,
+    see [here](#changing-target-dll-name).
+  * On Linux: the dynamic builds should not be tied to a specific .so, but resolve symbols from the application,
+    so no futher action should be required.
   * On Mac: either is possible. Need to investigate when we get there.
 * If there is no DLL at all:
-  * On Windows: you can try to add a Lua DLL or use a static build, but this is likely to crash
+  * On Windows: you can try to add a Lua DLL or use a static build, but this is likely to crash.
   * On Linux: the dynamic build should resolve the symbols from the application if libc matches
   * On Mac: see above
 
 
 ## Changing Target DLL name
 
+The lua.dll used by the EXE might have a different filename than what lua-apclientpp was linked to.
+If this is the case and lua-apclientpp actually references the filename (see below), you will have to fix the reference.
+This is easy to automate, so some fixed up versions might exist in the automated builds.
+
 ### Windows
 
-This requires stripping the DLL, which is done for the automated builds.
+Dynamic Windows builds always link to a specific DLL by filename.
+Changing it may require stripping the DLL, which is done for the automated builds already.
 
 ```bash
 # strip lua-apclientpp.dll  # strip the build (i686-w64-mingw32-strip or whatever)
@@ -38,7 +45,7 @@ pip install machomachomangler mingw_ldd
 mv lua-apclientpp.dll _lua-apclientpp.dll # rename the original
 # replace lua53.dll and lua53.3r.dll with the original and correct names below
 python -m machomachomangler.cmd.redll _lua-apclientpp.dll lua-apclientpp.dll lua53.dll Lua5.3.3r.dll
-python -m mingw_ldd lua-apclientpp.dll --dll-lookup-dirs . # check the result, or use Dependency Walker
+python -m mingw_ldd lua-apclientpp.dll --dll-lookup-dirs .  # check the result, or use Dependency Walker
 ```
 
 ### Linux
@@ -70,17 +77,18 @@ of a failed connect / connect timeout. Receiving a disconnect or error after bei
 
 * Full build matrix
   * Linux - Ubuntu 20.04 might be fine and has static libssl? Otherwise alma container.
-  * Mac - using brew? Brew's targets somewhat recent macos.
-  * MSVC builds
+  * Mac - using brew? Brew's libs target somewhat recent macos.
+  * MSVC builds - currently there is only a 32bit lua5.1 build
 * Bundle CA certs
 * Tests
-* Submodule luaglue
 * UUID helper - currently uuid is not being used, so you can just pass in an empty string
 
 
 ## Downloads
 
-Until there is a proper release, you can use the downloads from the latest build in the
+Until there is a proper
+[release](https://github.com/black-sliver/lua-apclientpp/releases),
+you can use the downloads from the latest build in the
 [Actions tab](https://github.com/black-sliver/lua-apclientpp/actions).
 
 Not all possible variations are being built yet.
