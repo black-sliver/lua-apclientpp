@@ -1,0 +1,15 @@
+# IMPORTANT: run this **after** builds are complete
+# TODO: trigger automatically
+
+name: Release
+
+on: workflow_dispatch
+
+jobs:
+
+  msbuild:
+    runs-on: ubuntu-latest
+    steps:
+      - name: noop
+        run: echo "This is blank"
+
