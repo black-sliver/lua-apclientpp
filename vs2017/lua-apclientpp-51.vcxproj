@@ -22,7 +22,7 @@
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{12B085BF-243A-4206-A487-63A1C44F0CC0}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>lua-apclient-51</RootNamespace>
+    <RootNamespace>lua-apclientpp-51</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />

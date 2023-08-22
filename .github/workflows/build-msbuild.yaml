@@ -47,10 +47,10 @@ jobs:
         run: |
           msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} ${{env.SOLUTION_FILE_PATH}} /p:Platform=${{env.BUILD_PLATFORM}}
           md ${{env.SOLUTION_FILE_PATH}}\${{env.BUILD_CONFIGURATION}}\lua51
-          move ${{env.SOLUTION_FILE_PATH}}\${{env.BUILD_CONFIGURATION}}\lua-apclient-51.dll ${{env.SOLUTION_FILE_PATH}}\${{env.BUILD_CONFIGURATION}}\lua51\lua-apclient.dll
+          move ${{env.SOLUTION_FILE_PATH}}\${{env.BUILD_CONFIGURATION}}\lua-apclientpp-51.dll ${{env.SOLUTION_FILE_PATH}}\${{env.BUILD_CONFIGURATION}}\lua51\lua-apclientpp.dll
 
       - name: Store
         uses: actions/upload-artifact@v3
         with:
           name: lua-apclientpp-lua51-vs2017
-          path: ${{env.SOLUTION_FILE_PATH}}\${{env.BUILD_CONFIGURATION}}\lua51\lua-apclient.dll
+          path: ${{env.SOLUTION_FILE_PATH}}\${{env.BUILD_CONFIGURATION}}\lua51\lua-apclientpp.dll
