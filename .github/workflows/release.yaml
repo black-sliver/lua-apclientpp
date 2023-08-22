@@ -7,9 +7,58 @@ on: workflow_dispatch
 
 jobs:
 
-  msbuild:
+  release:
     runs-on: ubuntu-latest
-    steps:
-      - name: noop
-        run: echo "This is blank"
 
+    strategy:
+      matrix:
+        lua:
+          - lua51
+          - lua52
+          - lua53
+          - lua54
+
+    steps:
+      - name: Grab README
+        uses: actions/checkout@v3
+        with:
+          path: src
+
+      - name: Download ${{ matrix.lua }} Artifacts
+        id: download-artifact
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          workflow: build.yaml
+          name: ${{ matrix.lua }}|license
+          name_is_regexp: true
+
+      - name: Bundle ${{ matrix.lua }}
+        run: |
+          for d in *-lua*; do
+            cp lua-apclientpp-license/* $d/
+          done
+          mkdir -p ${{ matrix.lua }}
+          cp src/README.md ${{ matrix.lua }}/
+          for d in lua-apclientpp-${{ matrix.lua }}*; do
+            mkdir -p ${{ matrix.lua }}/${d:15}
+            cp $d/* ${{ matrix.lua }}/${d:15}/
+          done
+          7z a -mx=9 -ms=on ${{ matrix.lua }}.7z ${{ matrix.lua }}
+
+      - name: Upload ${{ matrix.lua }} Bundle
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.lua }}
+          path: ${{ matrix.lua }}.7z
+
+      - name: Set env
+        if: ${{ github.ref_type == 'tag' }}
+        run: echo "RELEASE_TAG=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+
+      - name: Release ${{ matrix.lua }} Bundle
+        if: ${{ github.ref_type == 'tag' }}
+        uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844
+        with:
+          draft: true
+          name: lua-apclientpp ${{ env.RELEASE_TAG }}
+          files: ${{ matrix.lua }}.7z
