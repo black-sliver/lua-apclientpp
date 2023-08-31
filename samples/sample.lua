@@ -38,8 +38,9 @@ function connect(server, slot, password)
         print("checked locations: " .. table.concat(ap.checked_locations, ", "))
         ap:Say("Hello World!")
         ap:Bounce({name="test"}, {game_name})
-        ap:Get({"counter"})
-        ap:Set("counter", 0, true, {{"add", 1}}, {blerf="blubb"})
+        local extra = {nonce = 123}  -- optional extra data will be in the server reply
+        ap:Get({"counter"}, extra)
+        ap:Set("counter", 0, true, {{"add", 1}}, extra)
         ap:ConnectUpdate(nil, {"Lua-APClientPP", "DeathLink"})
         ap:LocationChecks({64000, 64001, 64002})
     end
@@ -89,11 +90,18 @@ function connect(server, slot, password)
         print(bounce)
     end
 
-    function on_retrieved(map)
+    function on_retrieved(map, keys, extra)
         print("Retrieved:")
-        for key, value in pairs(map) do
+        -- since lua tables won't contain nil values, we can use keys array
+        for _, key in ipairs(keys) do
+            print("  " .. key .. ": " .. tostring(map[key]))
+        end
+        -- extra will include extra fields from Get
+        print("Extra:")
+        for key, value in pairs(extra) do
             print("  " .. key .. ": " .. tostring(value))
         end
+        -- both keys and extra are optional
     end
 
     function on_set_reply(message)

@@ -354,12 +354,17 @@ public:
         retrieved_cb = ref;
 
         APClient* parent = this;
-        parent->set_retrieved_handler([this](const std::map<std::string, json>& data) {
+        parent->set_retrieved_handler([this](const std::map<std::string, json>& data, const json& message) {
             lua_pushcfunction(_L, error_handler);
             lua_rawgeti(_L, LUA_REGISTRYINDEX, retrieved_cb.ref);
             json j = data;
+            std::list<std::string> keys;
+            for (const auto& item: j.items())
+                keys.push_back(item.key());
             json_to_lua(_L, j);
-            if (lua_pcall(_L, 1, 0, -3)) {
+            json_to_lua(_L, keys);
+            json_to_lua(_L, message);
+            if (lua_pcall(_L, 3, 0, -5)) {
                 cb_error("retrieved");
             }
             lua_pop(_L, 1);
@@ -410,7 +415,7 @@ public:
         return false;
     }
 
-    bool Get(const json& j)
+    bool Get(const json& j, const json& extra = json::value_t::null)
     {
         std::list<std::string> keys;
         try {
@@ -421,7 +426,7 @@ public:
         }
 
         APClient* parent = this;
-        return parent->Get(keys);
+        return parent->Get(keys, extra);
     }
 
     bool SetNotify(const json& j)
@@ -862,6 +867,19 @@ static int apclient_LocationScouts(lua_State *L)
     return 1;
 }
 
+static int apclient_Get(lua_State *L)
+{
+    LuaAPClient *self = *(LuaAPClient**)lua_touserdata(L, 1);
+    json keys = lua_to_json(L, 2);
+    json extra;
+    if (lua_gettop(L) >= 3)
+        extra = lua_to_json(L, 3);
+
+    bool res = self->Get(keys, extra);
+    lua_pushboolean(L, res);
+    return 1;
+}
+
 static int apclient_Set(lua_State *L)
 {
     LuaAPClient *self = *(LuaAPClient**)lua_touserdata(L, 1);
@@ -971,7 +989,7 @@ static int register_apclient(lua_State *L)
     SET_METHOD(StatusUpdate, int);
     SET_METHOD(LocationChecks, json);
     SET_CFUNC(LocationScouts);
-    SET_METHOD(Get, json);
+    SET_CFUNC(Get);
     SET_METHOD(SetNotify, json);
     SET_CFUNC(Set);
 

@@ -64,6 +64,15 @@ See [sample.lua](https://github.com/black-sliver/lua-apclientpp/blob/main/sample
 and [other samples](https://github.com/black-sliver/lua-apclientpp/tree/main/samples).
 Follows the API of [apclientpp](https://github.com/black-sliver/apclientpp).
 
+### Lua-specific API
+
+Due to limitations in Lua, some calls or callbacks may be different. Read below and check the samples.
+
+* `set_retrieved_handler -> on_retrieved(map, keys, extra)`
+  * map: repsonse dict key -> value; nil values will be missing from pairs(map)
+  * keys: array of all keys including nil values
+  * extra: extra data sent during Get
+
 ### Handling Connection Failures
 
 Same as with apclientpp, it will try to reconnect and in case of automatic protocol detection (SSL or plain), a socket
@@ -71,7 +80,6 @@ error might be generated even though the connection might succeed on the second 
 
 If a game needs to be connected at all times, not receiving SlotConnected within e.g. 10 seconds would be the indicator
 of a failed connect / connect timeout. Receiving a disconnect or error after being connected would be a lost connection.
-
 
 ## To-Do
 
