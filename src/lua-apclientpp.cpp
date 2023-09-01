@@ -927,6 +927,9 @@ static int apclient_Set(lua_State *L)
 
 static int register_apclient(lua_State *L)
 {
+    // register dependency types
+    LuaJson_EmptyArray::Lua_Register(L);
+
     // register type/metatable for ctor and dtor
     luaL_newmetatable(L, LuaAPClient::Lua_Name);
 
@@ -1025,6 +1028,10 @@ static int register_apclient(lua_State *L)
         {"SLOT_CONNECTED", LuaAPClient::State::SLOT_CONNECTED},
     });
     lua_setfield(L, -2, "State");
+
+    // pseudo constant to emit empty json array
+    LuaJson_EmptyArray().Lua_Push(L);
+    lua_setfield(L, -2, "EMPTY_ARRAY");
 
     // calling the metatable should be the same as new for easy use,
     // so set a metatable for the metatable

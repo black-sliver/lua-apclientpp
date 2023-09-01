@@ -41,6 +41,7 @@ function connect(server, slot, password)
         local extra = {nonce = 123}  -- optional extra data will be in the server reply
         ap:Get({"counter"}, extra)
         ap:Set("counter", 0, true, {{"add", 1}}, extra)
+        ap:Set("empty_array", nil, true, {{"replace", AP.EMPTY_ARRAY}})
         ap:ConnectUpdate(nil, {"Lua-APClientPP", "DeathLink"})
         ap:LocationChecks({64000, 64001, 64002})
     end
@@ -108,6 +109,11 @@ function connect(server, slot, password)
         print("Set Reply:")
         for key, value in pairs(message) do
             print("  " .. key .. ": " .. tostring(value))
+            if key == "value" and type(value) == "table" then
+                for subkey, subvalue in pairs(value) do
+                    print("    " .. subkey .. ": " .. tostring(subvalue))
+                end
+            end
         end
     end
 

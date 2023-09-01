@@ -73,6 +73,8 @@ Due to limitations in Lua, some calls or callbacks may be different. Read below 
   * keys: array of all keys including nil values
   * extra: extra data sent during Get
 
+* `AP.EMPTY_ARRAY` use this to send an empty array in json since `{}` will be an empty json object
+
 ### Handling Connection Failures
 
 Same as with apclientpp, it will try to reconnect and in case of automatic protocol detection (SSL or plain), a socket
