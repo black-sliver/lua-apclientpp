@@ -688,14 +688,14 @@ static int apclient_call(lua_State *L)
 static int apclient_del(lua_State *L)
 {
     printf("APClient.__gc\n");
-    LuaAPClient *self = *(LuaAPClient**)lua_touserdata(L, 1);
+    LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
     delete self;
     return 0;
 }
 
 static int apclient_render_json(lua_State *L)
 {
-    LuaAPClient *self = *(LuaAPClient**)lua_touserdata(L, 1);
+    LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
     std::list<APClient::TextNode> msg;
     try {
         from_json(lua_to_json(L, 2), msg);
@@ -715,7 +715,7 @@ static int apclient_render_json(lua_State *L)
 
 static int apclient_ConnectSlot(lua_State *L)
 {
-    LuaAPClient *self = *(LuaAPClient**)lua_touserdata(L, 1);
+    LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
     const char* slot = luaL_checkstring(L, 2);
     const char* password = luaL_checkstring(L, 3);
     int items_handling = luaL_checkinteger(L, 4);
@@ -763,7 +763,7 @@ static int apclient_ConnectSlot(lua_State *L)
 
 static int apclient_ConnectUpdate(lua_State *L)
 {
-    LuaAPClient *self = *(LuaAPClient**)lua_touserdata(L, 1);
+    LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
 
     if (lua_isnil(L, 3)) {
         if (lua_isnil(L, 2)) {
@@ -802,7 +802,7 @@ static int apclient_ConnectUpdate(lua_State *L)
 
 static int apclient_Bounce(lua_State *L)
 {
-    LuaAPClient *self = *(LuaAPClient**)lua_touserdata(L, 1);
+    LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
     json data = lua_to_json(L, 2);
     std::list<std::string> games;
     std::list<int> slots;
@@ -848,7 +848,7 @@ static int apclient_Bounce(lua_State *L)
 
 static int apclient_LocationScouts(lua_State *L)
 {
-    LuaAPClient *self = *(LuaAPClient**)lua_touserdata(L, 1);
+    LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
     std::list<int64_t> locations;
     try {
         locations = lua_to_json(L, 2).get<std::list<int64_t>>();
@@ -869,7 +869,7 @@ static int apclient_LocationScouts(lua_State *L)
 
 static int apclient_Get(lua_State *L)
 {
-    LuaAPClient *self = *(LuaAPClient**)lua_touserdata(L, 1);
+    LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
     json keys = lua_to_json(L, 2);
     json extra;
     if (lua_gettop(L) >= 3)
@@ -882,7 +882,7 @@ static int apclient_Get(lua_State *L)
 
 static int apclient_Set(lua_State *L)
 {
-    LuaAPClient *self = *(LuaAPClient**)lua_touserdata(L, 1);
+    LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
     const char* key = luaL_checkstring(L, 2);
     json dflt = lua_to_json(L, 3);
     luaL_checkany(L, 4);
