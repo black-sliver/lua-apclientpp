@@ -449,6 +449,12 @@ public:
         return (int)parent->get_state();
     }
 
+    json get_players() const
+    {
+        const APClient* parent = this;
+        return parent->get_players();
+    }
+
     static int poll(lua_State *L)
     {
         LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
@@ -965,6 +971,7 @@ static int register_apclient(lua_State *L)
     SET_METHOD(get_hint_cost_percent, void);
     SET_METHOD(is_data_package_valid, void);
     SET_METHOD(get_server_time, void);
+    SET_METHOD(get_players, void);
 
     // handlers
     SET_METHOD(set_socket_connected_handler, LuaRef);

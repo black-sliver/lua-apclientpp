@@ -44,6 +44,11 @@ function connect(server, slot, password)
         ap:Set("empty_array", nil, true, {{"replace", AP.EMPTY_ARRAY}})
         ap:ConnectUpdate(nil, {"Lua-APClientPP", "DeathLink"})
         ap:LocationChecks({64000, 64001, 64002})
+        print("Players:")
+        local players = ap:get_players()
+        for _, player in ipairs(players) do
+            print(tostring("  " .. player.slot) .. ": " .. player.name)
+        end
     end
 
 
