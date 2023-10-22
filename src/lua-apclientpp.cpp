@@ -590,7 +590,7 @@ private:
         }
         // delete old values
         lua_Integer len = luaL_len(_L, -1);
-        for (lua_Integer i = n; i <= len; i++) {
+        for (lua_Integer i = n + 1; i <= len; i++) {
             lua_pushinteger(_L, i);
             lua_pushnil(_L);
             lua_rawset(_L, -3);
