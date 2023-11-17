@@ -47,7 +47,8 @@ function connect(server, slot, password)
         print("Players:")
         local players = ap:get_players()
         for _, player in ipairs(players) do
-            print(tostring("  " .. player.slot) .. ": " .. player.name)
+            print("  " .. tostring(player.slot) .. ": " .. player.name ..
+                  " playing " .. ap:get_player_game(player.slot))
         end
     end
 
