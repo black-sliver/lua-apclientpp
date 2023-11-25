@@ -3,25 +3,27 @@ DEFINES="-DASIO_STANDALONE -DWSWRAP_SEND_EXCEPTIONS"
 NAME="lua-apclientpp"
 
 
-case $(uname | tr '[:upper:]' '[:lower:]') in
-    linux*)
-        OS_NAME=linux
-        ;;
-    darwin*)
-        OS_NAME=macos
-        ;;
-    msys*)
-        OS_NAME=windows
-        ;;
-    cygwin*)
-        OS_NAME=windows
-        ;;
-    mingw*)
-        OS_NAME=windows
-        ;;
-    *)
-        echo "Unknown OS: $(uname | tr '[:upper:]' '[:lower:]')"
-esac
+if [ -z "$OS_NAME" ]; then
+    case $(uname | tr '[:upper:]' '[:lower:]') in
+        linux*)
+            OS_NAME=linux
+            ;;
+        darwin*)
+            OS_NAME=macos
+            ;;
+        msys*)
+            OS_NAME=windows
+            ;;
+        cygwin*)
+            OS_NAME=windows
+            ;;
+        mingw*)
+            OS_NAME=windows
+            ;;
+        *)
+            echo "Unknown OS: $(uname | tr '[:upper:]' '[:lower:]')"
+    esac
+fi
 
 echo "Detected OS: $OS_NAME"
 
