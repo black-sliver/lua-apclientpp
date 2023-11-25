@@ -659,7 +659,8 @@ private:
 
 #if __cplusplus < 201500L // c++14 needs a proper declaration
 decltype(APClient::DEFAULT_URI) constexpr APClient::DEFAULT_URI;
-decltype(LuaAPClient::NAME) constexpr LuaAPClient::NAME;
+decltype(LuaAPClient::Lua_Name) constexpr LuaAPClient::Lua_Name;
+decltype(LuaJson_EmptyArray::Lua_Name) constexpr LuaJson_EmptyArray::Lua_Name;
 #endif
 
 // C functions - read above
@@ -961,10 +962,15 @@ static int apclient_Set(lua_State *L)
     lua_pushcfunction(L, apclient_ ## name); \
     lua_setfield(L, -2, #name);
 
-
+#ifdef LUA_METHOD_LONG_FORM // long form (c++14) needs decltype and func
+#define SET_CLASS_METHOD(CLASS, F, ...) \
+    lua_pushcclosure(L, LuaMethod<CLASS, decltype(&CLASS::F), &CLASS::F, __VA_ARGS__>::Func, 0); \
+    lua_setfield(L, -2, #F);
+#else // short form (c++17) uses auto for the func type
 #define SET_CLASS_METHOD(CLASS, F, ...) \
     lua_pushcclosure(L, LuaMethod<CLASS, &CLASS::F, __VA_ARGS__>::Func, 0); \
     lua_setfield(L, -2, #F);
+#endif
 
 #define SET_METHOD(F, ...) SET_CLASS_METHOD(LuaAPClient, F, __VA_ARGS__)
 

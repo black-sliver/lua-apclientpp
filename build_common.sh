@@ -53,4 +53,9 @@ elif [[ -z "$CXX" ]]; then
     exit 1
 fi
 
+# pick a C++ standard if not provided
+if [ -z "$STD" ]; then
+    STD="c++1z"
+fi
+
 "$CC" --version | grep -q "clang" && CC_IS_CLANG=1
