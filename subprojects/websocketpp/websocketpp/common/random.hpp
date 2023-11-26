@@ -42,9 +42,9 @@
 
 // If we're on Visual Studio 2010 or higher and haven't explicitly disabled
 // the use of C++11 random header then prefer it to boost.
-#if defined(_MSC_VER) && _MSC_VER >= 1600 && !defined _WEBSOCKETPP_NO_CPP11_MEMORY_
-    #ifndef _WEBSOCKETPP_CPP11_MEMORY_
-        #define _WEBSOCKETPP_CPP11_MEMORY_
+#if defined(_MSC_VER) && _MSC_VER >= 1600 && !defined _WEBSOCKETPP_NO_CPP11_RANDOM_DEVICE_
+    #ifndef _WEBSOCKETPP_CPP11_RANDOM_DEVICE_
+        #define _WEBSOCKETPP_CPP11_RANDOM_DEVICE_
     #endif
 #endif
 
