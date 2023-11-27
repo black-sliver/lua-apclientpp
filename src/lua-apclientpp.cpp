@@ -491,7 +491,11 @@ public:
 
     // lua interface implementation details
 
+#if !defined _MSC_VER || _MSC_VER >= 1911
     static constexpr char Lua_Name[] = "APClient";
+#else
+    static char Lua_Name[]; // = "APClient"; // assign this in implementation
+#endif
 
     static LuaAPClient* luaL_checkthis(lua_State *L, int narg)
     {
@@ -663,7 +667,11 @@ private:
     std::string errors;
 };
 
-#if __cplusplus < 201500L // c++14 needs a proper declaration
+#if defined _MSC_VER && _MSC_VER < 1911
+decltype(APClient::DEFAULT_URI) APClient::DEFAULT_URI = "localhost:38281";
+decltype(LuaAPClient::Lua_Name) LuaAPClient::Lua_Name = "APClient";
+decltype(LuaJson_EmptyArray::Lua_Name) LuaJson_EmptyArray::Lua_Name = "LuaJson_EmptyArray";
+#elif __cplusplus < 201500L // c++14 needs a proper declaration
 decltype(APClient::DEFAULT_URI) constexpr APClient::DEFAULT_URI;
 decltype(LuaAPClient::Lua_Name) constexpr LuaAPClient::Lua_Name;
 decltype(LuaJson_EmptyArray::Lua_Name) constexpr LuaJson_EmptyArray::Lua_Name;
