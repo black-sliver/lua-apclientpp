@@ -752,7 +752,7 @@ static int apclient_get_location_id(lua_State *L)
 {
     LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
     int64_t id = self->get_location_id(luaL_checkstring(L, 2));
-    if (sizeof(lua_Integer) > 4 || (id < 2147483647 && id > -2147483648))
+    if (id >= std::numeric_limits<lua_Integer>::min() && id <= std::numeric_limits<lua_Integer>::max())
         lua_pushinteger(L, (lua_Integer)id);
     else
         lua_pushnumber(L, id);
@@ -782,7 +782,7 @@ static int apclient_get_item_id(lua_State *L)
 {
     LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
     int64_t id = self->get_item_id(luaL_checkstring(L, 2));
-    if (sizeof(lua_Integer) > 4 || (id < 2147483647 && id > -2147483648))
+    if (id >= std::numeric_limits<lua_Integer>::min() && id <= std::numeric_limits<lua_Integer>::max())
         lua_pushinteger(L, (lua_Integer)id);
     else
         lua_pushnumber(L, id);
