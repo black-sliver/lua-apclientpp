@@ -40,6 +40,14 @@
 #endif
 
 
+// VS2013 should have aligned_storage
+#if defined(_MSC_VER) && _MSC_VER >= 1800 && !defined _WEBSOCKETPP_NO_CPP11_TYPE_TRAITS_
+    #ifndef _WEBSOCKETPP_CPP11_TYPE_TRAITS_
+        #define _WEBSOCKETPP_CPP11_TYPE_TRAITS_
+    #endif
+#endif
+
+
 #ifdef _WEBSOCKETPP_CPP11_TYPE_TRAITS_
     #include <type_traits>
 #else

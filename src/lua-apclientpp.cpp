@@ -1,7 +1,11 @@
 #ifdef _WIN32
-// we currently don't do project-wide defines for msvc
+// we currently don't do project-wide defines for msvc, so define the relevant ones here
+#ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
+#endif
+#ifndef ASIO_STANDALONE
 #define ASIO_STANDALONE
+#endif
 #endif
 
 extern "C" {
@@ -12,8 +16,10 @@ extern "C" {
 
 //#define APCLIENT_DEBUG // to get debug output
 #include <apclient.hpp>
-#include <luaglue/luamethod.h>
 #include <luaglue/luacompat.h>
+#include <luaglue/luapp.h>
+#include <luaglue/luaref.h>
+#include <luaglue/lua_json.h>
 
 
 // IMPORTANT: apclientpp can't be used across threads, so capturing L is kind of ok
@@ -485,7 +491,11 @@ public:
 
     // lua interface implementation details
 
+#if !defined _MSC_VER || _MSC_VER >= 1911
     static constexpr char Lua_Name[] = "APClient";
+#else
+    static char Lua_Name[]; // = "APClient"; // assign this in implementation
+#endif
 
     static LuaAPClient* luaL_checkthis(lua_State *L, int narg)
     {
@@ -657,7 +667,11 @@ private:
     std::string errors;
 };
 
-#if __cplusplus < 201500L // c++14 needs a proper declaration
+#if defined _MSC_VER && _MSC_VER < 1911
+decltype(APClient::DEFAULT_URI) APClient::DEFAULT_URI = "localhost:38281";
+decltype(LuaAPClient::Lua_Name) LuaAPClient::Lua_Name = "APClient";
+decltype(LuaJson_EmptyArray::Lua_Name) LuaJson_EmptyArray::Lua_Name = "LuaJson_EmptyArray";
+#elif __cplusplus < 201500L // c++14 needs a proper declaration
 decltype(APClient::DEFAULT_URI) constexpr APClient::DEFAULT_URI;
 decltype(LuaAPClient::Lua_Name) constexpr LuaAPClient::Lua_Name;
 decltype(LuaJson_EmptyArray::Lua_Name) constexpr LuaJson_EmptyArray::Lua_Name;
@@ -700,23 +714,26 @@ static int apclient_del(lua_State *L)
     return 0;
 }
 
-static int apclient_render_json(lua_State *L)
+static int apclient_reset(lua_State *L)
 {
     LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
-    std::list<APClient::TextNode> msg;
-    try {
-        from_json(lua_to_json(L, 2), msg);
-    } catch (std::exception ex) {
-        fprintf(stderr, "Invalid argument for msg: %s\n", ex.what());
-        return 0;
-    }
-    APClient::RenderFormat fmt = APClient::RenderFormat::TEXT;
-    if (lua_gettop(L) >= 3) {
-        fmt = (APClient::RenderFormat)luaL_checkinteger(L, 3);
-    }
+    self->reset();
+    return 0;
+}
 
-    std::string res = self->render_json(msg, fmt);
-    lua_pushstring(L, res.c_str());
+static int apclient_get_player_alias(lua_State *L)
+{
+    LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
+    int slot = luaL_checkinteger(L, 2);
+    lua_pushstring(L, self->get_player_alias(slot).c_str());
+    return 1;
+}
+
+static int apclient_get_player_game(lua_State *L)
+{
+    LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
+    int slot = luaL_checkinteger(L, 2);
+    lua_pushstring(L, self->get_player_game(slot).c_str());
     return 1;
 }
 
@@ -739,6 +756,17 @@ static int apclient_get_location_name(lua_State *L)
     return 1;
 }
 
+static int apclient_get_location_id(lua_State *L)
+{
+    LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
+    int64_t id = self->get_location_id(luaL_checkstring(L, 2));
+    if (id >= std::numeric_limits<lua_Integer>::min() && id <= std::numeric_limits<lua_Integer>::max())
+        lua_pushinteger(L, (lua_Integer)id);
+    else
+        lua_pushnumber(L, id);
+    return 1;
+}
+
 static int apclient_get_item_name(lua_State *L)
 {
     LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
@@ -755,6 +783,17 @@ static int apclient_get_item_name(lua_State *L)
     }
 
     lua_pushstring(L, self->get_item_name(code).c_str());
+    return 1;
+}
+
+static int apclient_get_item_id(lua_State *L)
+{
+    LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
+    int64_t id = self->get_item_id(luaL_checkstring(L, 2));
+    if (id >= std::numeric_limits<lua_Integer>::min() && id <= std::numeric_limits<lua_Integer>::max())
+        lua_pushinteger(L, (lua_Integer)id);
+    else
+        lua_pushnumber(L, id);
     return 1;
 }
 
@@ -804,6 +843,253 @@ static int apclient_ConnectSlot(lua_State *L)
 
     lua_pushboolean(L, res);
     return 1;
+}
+
+static int apclient_render_json(lua_State *L)
+{
+    LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
+    std::list<APClient::TextNode> msg;
+    try {
+        from_json(lua_to_json(L, 2), msg);
+    } catch (std::exception ex) {
+        fprintf(stderr, "Invalid argument for msg: %s\n", ex.what());
+        return 0;
+    }
+    APClient::RenderFormat fmt = APClient::RenderFormat::TEXT;
+    if (lua_gettop(L) >= 3) {
+        fmt = (APClient::RenderFormat)luaL_checkinteger(L, 3);
+    }
+
+    std::string res = self->render_json(msg, fmt);
+    lua_pushstring(L, res.c_str());
+    return 1;
+}
+
+static int apclient_get_state(lua_State *L)
+{
+    LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
+    lua_pushinteger(L, self->get_state());
+    return 1;
+}
+
+static int apclient_get_seed(lua_State *L)
+{
+    LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
+    lua_pushstring(L, self->get_seed().c_str());
+    return 1;
+}
+
+static int apclient_get_slot(lua_State *L)
+{
+    LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
+    lua_pushstring(L, self->get_slot().c_str());
+    return 1;
+}
+
+static int apclient_get_player_number(lua_State *L)
+{
+    LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
+    lua_pushinteger(L, self->get_player_number());
+    return 1;
+}
+
+static int apclient_get_team_number(lua_State *L)
+{
+    LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
+    lua_pushinteger(L, self->get_team_number());
+    return 1;
+}
+
+static int apclient_get_hint_points(lua_State *L)
+{
+    LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
+    lua_pushinteger(L, self->get_hint_points());
+    return 1;
+}
+
+static int apclient_get_hint_cost_points(lua_State *L)
+{
+    LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
+    lua_pushinteger(L, self->get_hint_cost_points());
+    return 1;
+}
+
+static int apclient_get_hint_cost_percent(lua_State *L)
+{
+    LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
+    lua_pushinteger(L, self->get_hint_cost_percent());
+    return 1;
+}
+
+static int apclient_is_data_package_valid(lua_State *L)
+{
+    LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
+    lua_pushboolean(L, self->is_data_package_valid());
+    return 1;
+}
+
+static int apclient_get_server_time(lua_State *L)
+{
+    LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
+    lua_pushnumber(L, self->get_server_time());
+    return 1;
+}
+
+static int apclient_get_players(lua_State *L)
+{
+    LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
+    json_to_lua(L, self->get_players());
+    return 1;
+}
+
+static int apclient_set_socket_connected_handler(lua_State *L)
+{
+    LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
+    LuaRef ref;
+    lua_pushvalue(L, 2); // make copy on top of stack
+    ref.ref = luaL_ref(L, LUA_REGISTRYINDEX); // pop copy and store
+    self->set_socket_connected_handler(ref);
+    return 0;
+}
+
+static int apclient_set_socket_error_handler(lua_State *L)
+{
+    LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
+    LuaRef ref;
+    lua_pushvalue(L, 2); // make copy on top of stack
+    ref.ref = luaL_ref(L, LUA_REGISTRYINDEX); // pop copy and store
+    self->set_socket_error_handler(ref);
+    return 0;
+}
+
+static int apclient_set_socket_disconnected_handler(lua_State *L)
+{
+    LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
+    LuaRef ref;
+    lua_pushvalue(L, 2); // make copy on top of stack
+    ref.ref = luaL_ref(L, LUA_REGISTRYINDEX); // pop copy and store
+    self->set_socket_disconnected_handler(ref);
+    return 0;
+}
+
+static int apclient_set_room_info_handler(lua_State *L)
+{
+    LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
+    LuaRef ref;
+    lua_pushvalue(L, 2); // make copy on top of stack
+    ref.ref = luaL_ref(L, LUA_REGISTRYINDEX); // pop copy and store
+    self->set_room_info_handler(ref);
+    return 0;
+}
+
+static int apclient_set_slot_connected_handler(lua_State *L)
+{
+    LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
+    LuaRef ref;
+    lua_pushvalue(L, 2); // make copy on top of stack
+    ref.ref = luaL_ref(L, LUA_REGISTRYINDEX); // pop copy and store
+    self->set_slot_connected_handler(ref);
+    return 0;
+}
+
+static int apclient_set_slot_refused_handler(lua_State *L)
+{
+    LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
+    LuaRef ref;
+    lua_pushvalue(L, 2); // make copy on top of stack
+    ref.ref = luaL_ref(L, LUA_REGISTRYINDEX); // pop copy and store
+    self->set_slot_refused_handler(ref);
+    return 0;
+}
+
+static int apclient_set_items_received_handler(lua_State *L)
+{
+    LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
+    LuaRef ref;
+    lua_pushvalue(L, 2); // make copy on top of stack
+    ref.ref = luaL_ref(L, LUA_REGISTRYINDEX); // pop copy and store
+    self->set_items_received_handler(ref);
+    return 0;
+}
+
+static int apclient_set_location_info_handler(lua_State *L)
+{
+    LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
+    LuaRef ref;
+    lua_pushvalue(L, 2); // make copy on top of stack
+    ref.ref = luaL_ref(L, LUA_REGISTRYINDEX); // pop copy and store
+    self->set_location_info_handler(ref);
+    return 0;
+}
+
+static int apclient_set_location_checked_handler(lua_State *L)
+{
+    LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
+    LuaRef ref;
+    lua_pushvalue(L, 2); // make copy on top of stack
+    ref.ref = luaL_ref(L, LUA_REGISTRYINDEX); // pop copy and store
+    self->set_location_checked_handler(ref);
+    return 0;
+}
+
+static int apclient_set_data_package_changed_handler(lua_State *L)
+{
+    LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
+    LuaRef ref;
+    lua_pushvalue(L, 2); // make copy on top of stack
+    ref.ref = luaL_ref(L, LUA_REGISTRYINDEX); // pop copy and store
+    self->set_data_package_changed_handler(ref);
+    return 0;
+}
+
+static int apclient_set_print_handler(lua_State *L)
+{
+    LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
+    LuaRef ref;
+    lua_pushvalue(L, 2); // make copy on top of stack
+    ref.ref = luaL_ref(L, LUA_REGISTRYINDEX); // pop copy and store
+    self->set_print_handler(ref);
+    return 0;
+}
+
+static int apclient_set_print_json_handler(lua_State *L)
+{
+    LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
+    LuaRef ref;
+    lua_pushvalue(L, 2); // make copy on top of stack
+    ref.ref = luaL_ref(L, LUA_REGISTRYINDEX); // pop copy and store
+    self->set_print_json_handler(ref);
+    return 0;
+}
+
+static int apclient_set_bounced_handler(lua_State *L)
+{
+    LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
+    LuaRef ref;
+    lua_pushvalue(L, 2); // make copy on top of stack
+    ref.ref = luaL_ref(L, LUA_REGISTRYINDEX); // pop copy and store
+    self->set_bounced_handler(ref);
+    return 0;
+}
+
+static int apclient_set_retrieved_handler(lua_State *L)
+{
+    LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
+    LuaRef ref;
+    lua_pushvalue(L, 2); // make copy on top of stack
+    ref.ref = luaL_ref(L, LUA_REGISTRYINDEX); // pop copy and store
+    self->set_retrieved_handler(ref);
+    return 0;
+}
+
+static int apclient_set_set_reply_handler(lua_State *L)
+{
+    LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
+    LuaRef ref;
+    lua_pushvalue(L, 2); // make copy on top of stack
+    ref.ref = luaL_ref(L, LUA_REGISTRYINDEX); // pop copy and store
+    self->set_set_reply_handler(ref);
+    return 0;
 }
 
 static int apclient_ConnectUpdate(lua_State *L)
@@ -891,6 +1177,36 @@ static int apclient_Bounce(lua_State *L)
     return 1;
 }
 
+static int apclient_Say(lua_State *L)
+{
+    LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
+    const char* text = luaL_checkstring(L, 2);
+    lua_pushboolean(L, self->Say(text));
+    return 1;
+}
+
+static int apclient_Sync(lua_State *L)
+{
+    LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
+    lua_pushboolean(L, self->Sync());
+    return 1;
+}
+
+static int apclient_StatusUpdate(lua_State *L)
+{
+    LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
+    lua_pushboolean(L, self->StatusUpdate(luaL_checkinteger(L, 2)));
+    return 1;
+}
+
+static int apclient_LocationChecks(lua_State *L)
+{
+    LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
+    json locations = lua_to_json(L, 2).get<std::list<int64_t>>();
+    lua_pushboolean(L, self->LocationChecks(locations));
+    return 1;
+}
+
 static int apclient_LocationScouts(lua_State *L)
 {
     LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
@@ -904,11 +1220,13 @@ static int apclient_LocationScouts(lua_State *L)
 
     bool create_as_hints = false;
     if (lua_gettop(L) >= 3) {
-        create_as_hints = lua_toboolean(L, 3);
+        if (lua_isboolean(L, 3))
+            create_as_hints = lua_toboolean(L, 3) ? 1 : 0;
+        else
+            create_as_hints = (int)luaL_checkinteger(L, 3);
     }
-    
-    bool res = self->LocationScouts(locations);
-    lua_pushboolean(L, res);
+
+    lua_pushboolean(L, self->LocationScouts(locations, create_as_hints));
     return 1;
 }
 
@@ -923,6 +1241,18 @@ static int apclient_Get(lua_State *L)
     bool res = self->Get(keys, extra);
     lua_pushboolean(L, res);
     return 1;
+}
+
+static int apclient_SetNotify(lua_State *L)
+{
+    LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
+    try {
+        lua_pushboolean(L, self->SetNotify(lua_to_json(L, 2)));
+        return 1;
+    } catch (std::exception ex) {
+        fprintf(stderr, "SetNotify failed: %s\n", ex.what());
+        return 0;
+    }
 }
 
 static int apclient_Set(lua_State *L)
@@ -962,18 +1292,6 @@ static int apclient_Set(lua_State *L)
     lua_pushcfunction(L, apclient_ ## name); \
     lua_setfield(L, -2, #name);
 
-#ifdef LUA_METHOD_LONG_FORM // long form (c++14) needs decltype and func
-#define SET_CLASS_METHOD(CLASS, F, ...) \
-    lua_pushcclosure(L, LuaMethod<CLASS, decltype(&CLASS::F), &CLASS::F, __VA_ARGS__>::Func, 0); \
-    lua_setfield(L, -2, #F);
-#else // short form (c++17) uses auto for the func type
-#define SET_CLASS_METHOD(CLASS, F, ...) \
-    lua_pushcclosure(L, LuaMethod<CLASS, &CLASS::F, __VA_ARGS__>::Func, 0); \
-    lua_setfield(L, -2, #F);
-#endif
-
-#define SET_METHOD(F, ...) SET_CLASS_METHOD(LuaAPClient, F, __VA_ARGS__)
-
 
 static int register_apclient(lua_State *L)
 {
@@ -998,54 +1316,54 @@ static int register_apclient(lua_State *L)
     //SET_METHOD(poll, void);  // lua glue does not allow passing state yet
     lua_pushcfunction(L, LuaAPClient::poll);
     lua_setfield(L, -2, "poll");
-    SET_METHOD(reset, void);
-    SET_METHOD(get_player_alias, int);
-    SET_METHOD(get_player_game, int);
+    SET_CFUNC(reset);
+    SET_CFUNC(get_player_alias);
+    SET_CFUNC(get_player_game);
     SET_CFUNC(get_location_name);
-    SET_METHOD(get_location_id, const char*);
+    SET_CFUNC(get_location_id);
     SET_CFUNC(get_item_name);
-    SET_METHOD(get_item_id, const char*);
+    SET_CFUNC(get_item_id);
     SET_CFUNC(render_json);
-    SET_METHOD(get_state, void);
-    SET_METHOD(get_seed, void);
-    SET_METHOD(get_slot, void);
-    SET_METHOD(get_player_number, void);
-    SET_METHOD(get_team_number, void);
-    SET_METHOD(get_hint_points, void);
-    SET_METHOD(get_hint_cost_points, void);
-    SET_METHOD(get_hint_cost_percent, void);
-    SET_METHOD(is_data_package_valid, void);
-    SET_METHOD(get_server_time, void);
-    SET_METHOD(get_players, void);
+    SET_CFUNC(get_state);
+    SET_CFUNC(get_seed);
+    SET_CFUNC(get_slot);
+    SET_CFUNC(get_player_number);
+    SET_CFUNC(get_team_number);
+    SET_CFUNC(get_hint_points);
+    SET_CFUNC(get_hint_cost_points);
+    SET_CFUNC(get_hint_cost_percent);
+    SET_CFUNC(is_data_package_valid);
+    SET_CFUNC(get_server_time);
+    SET_CFUNC(get_players);
 
     // handlers
-    SET_METHOD(set_socket_connected_handler, LuaRef);
-    SET_METHOD(set_socket_error_handler, LuaRef);
-    SET_METHOD(set_socket_disconnected_handler, LuaRef);
-    SET_METHOD(set_room_info_handler, LuaRef);
-    SET_METHOD(set_slot_connected_handler, LuaRef);
-    SET_METHOD(set_slot_refused_handler, LuaRef);
-    SET_METHOD(set_items_received_handler, LuaRef);
-    SET_METHOD(set_location_info_handler, LuaRef);
-    SET_METHOD(set_location_checked_handler, LuaRef);
-    SET_METHOD(set_data_package_changed_handler, LuaRef);
-    SET_METHOD(set_print_handler, LuaRef);
-    SET_METHOD(set_print_json_handler, LuaRef);
-    SET_METHOD(set_bounced_handler, LuaRef);
-    SET_METHOD(set_retrieved_handler, LuaRef);
-    SET_METHOD(set_set_reply_handler, LuaRef);
+    SET_CFUNC(set_socket_connected_handler);
+    SET_CFUNC(set_socket_error_handler);
+    SET_CFUNC(set_socket_disconnected_handler);
+    SET_CFUNC(set_room_info_handler);
+    SET_CFUNC(set_slot_connected_handler);
+    SET_CFUNC(set_slot_refused_handler);
+    SET_CFUNC(set_items_received_handler);
+    SET_CFUNC(set_location_info_handler);
+    SET_CFUNC(set_location_checked_handler);
+    SET_CFUNC(set_data_package_changed_handler);
+    SET_CFUNC(set_print_handler);
+    SET_CFUNC(set_print_json_handler);
+    SET_CFUNC(set_bounced_handler);
+    SET_CFUNC(set_retrieved_handler);
+    SET_CFUNC(set_set_reply_handler);
 
     // commands
-    SET_METHOD(Say, const char*);
+    SET_CFUNC(Say);
     SET_CFUNC(ConnectSlot);
     SET_CFUNC(ConnectUpdate);
-    SET_METHOD(Sync, void);
+    SET_CFUNC(Sync);
     SET_CFUNC(Bounce);
-    SET_METHOD(StatusUpdate, int);
-    SET_METHOD(LocationChecks, json);
+    SET_CFUNC(StatusUpdate);
+    SET_CFUNC(LocationChecks);
     SET_CFUNC(LocationScouts);
     SET_CFUNC(Get);
-    SET_METHOD(SetNotify, json);
+    SET_CFUNC(SetNotify);
     SET_CFUNC(Set);
 
     // enums
