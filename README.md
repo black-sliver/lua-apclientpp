@@ -20,7 +20,7 @@ allowing to connect to an [Archipelago](https://archipelago.gg/) server with nat
   * On Windows: the lua-apclient.dll will have to be modified to link to the correct name,
     see [here](#changing-target-dll-name).
   * On Linux: the dynamic builds should not be tied to a specific .so, but resolve symbols from the application,
-    so no futher action should be required.
+    so no further action should be required.
   * On Mac: either is possible. Need to investigate when we get there.
 * If there is no DLL at all:
   * On Windows: you can try to add a Lua DLL or use a static build, but this is likely to crash.
@@ -69,7 +69,7 @@ Follows the API of [apclientpp](https://github.com/black-sliver/apclientpp).
 Due to limitations in Lua, some calls or callbacks may be different. Read below and check the samples.
 
 * `set_retrieved_handler -> on_retrieved(map, keys, extra)`
-  * map: repsonse dict key -> value; nil values will be missing from pairs(map)
+  * map: response dict key -> value; nil values will be missing from pairs(map)
   * keys: array of all keys including nil values
   * extra: extra data sent during Get
 
