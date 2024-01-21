@@ -13,7 +13,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update -y -qq
-          sudo apt-get install coreutils build-essential libssl-dev
+          sudo apt-get install coreutils build-essential libssl-dev liblua5.4-dev
 
       - name: Checkout code
         uses: actions/checkout@v4
