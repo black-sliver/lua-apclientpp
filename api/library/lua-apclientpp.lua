@@ -61,7 +61,7 @@ function APClient:get_item_name(code, game) end
 ---@return integer ID of the item
 function APClient:get_item_id(name) end
 
----Convert PritnJson json structure to readable string.
+---Convert PrintJson json structure to readable string.
 ---@param json table message data as passed into print_json handler
 ---@param format renderformat
 ---@return string text representation of the message
@@ -182,8 +182,8 @@ function APClient:set_print_json_handler(callback) end
 function APClient:set_bounced_handler(callback) end
 
 ---Callback will be called as response to Get.
----`data` is a table key -> value.
----`keys` is the list of keys. This is required because a `nil` value can't be checked for existence in data.
+---`data` is a key-value table for the requested keys.
+---`keys` is the list of the requested keys. This is required because keys will not be existent in data for `nil` values.
 ---`command` is the raw command including `extra`.
 ---@param callback fun(data:{[string]: any}, keys:string[], command:{[string]: any})
 function APClient:set_retrieved_handler(callback) end
@@ -205,7 +205,7 @@ function APClient:Say(text) end
 ---@param password string
 ---@param items_handling ItemsHandling describes which items to receive from the server
 ---@param tags string[]? optional list of tags to use, e.g. `{"DeathLink"}`
----@param version integer[]? optional client version, e.g. `{0, 5, 0}`
+---@param version integer[]? optional client version in the format of `{major, minor, build}`, e.g. `{0, 5, 0}`
 ---@return boolean true if connect was queued, false if state was invalid
 function APClient:ConnectSlot(name, password, items_handling, tags, version) end
 
@@ -213,6 +213,7 @@ function APClient:ConnectSlot(name, password, items_handling, tags, version) end
 ---@param items_handling? ItemsHandling Unchanged if `nil`. See ConnectSlot.
 ---@param tags string[]? Unchanged if `nil`. See ConnectSlot.
 ---@return boolean true if update was queued, false if state was invalid
+---@see APClient.ConnectSlot
 function APClient:ConnectUpdate(items_handling, tags) end
 
 ---Ask server for all items again, resulting in ReceivedItems starting at 0.
@@ -229,7 +230,7 @@ function APClient:Bounce(data, games, slots, tags) end
 
 ---Send status update to the server. Use this to report goal completion to the server.
 ---@param status clientstatus
----@return boolean true is message was queued
+---@return boolean true if message was queued
 function APClient:StatusUpdate(status) end
 
 ---Report locations as checked/looted to the server.
@@ -312,8 +313,9 @@ APClient.State = {
 ---| false # same as 0
 ---| true # same as 1
 
----Special type to represent empty array. See APClient.EMPTY_ARRAY.
+---Special type to represent empty array.
 ---@class LuaJson_EmptyArray
+---@see APClient.EMPTY_ARRAY
 LuaJson_EmptyArray = {}
 
 ---Special object to represent an empty array/list (since {} is an empty table/dict/object)
