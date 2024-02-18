@@ -4,6 +4,7 @@ local AP = require "lua-apclientpp"
 local game_name = "Secret of Evermore"
 local items_handling = 7  -- full remote
 local message_format = AP.RenderFormat.TEXT
+---@type APClient
 local ap = nil
 
 
