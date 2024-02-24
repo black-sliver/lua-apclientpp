@@ -41,6 +41,41 @@ extern "C" {
 DLL_EXPORT int luaopen_apclientpp(lua_State *L);
 }
 
+// print functions
+//#define LUA_APCLIENTPP_USE_PRINTF // to use stdout/stderr directly instead
+
+#ifdef LUA_APCLIENTPP_USE_PRINTF
+static void print(lua_State *, const std::string& line)
+{
+    puts(line.c_str());
+}
+#define errorf(L, S, ...) fprintf(stderr, S "\n", ##__VA_ARGS__)
+#else
+static void print(lua_State *L, const std::string& line)
+{
+    lua_getglobal(L, "print");
+    lua_pushstring(L, line.c_str());
+    if (lua_pcall(L, 1, 0, 0) != 0) {
+        fprintf(stderr, "Could not call Lua print!\n");
+    }
+}
+static void errorf(lua_State *L, const char* fmt, ...)
+{
+    char buf[256];
+    va_list args;
+    va_start (args, fmt);
+    snprintf(buf, sizeof(buf), fmt, args);
+    print(L, buf);
+    va_end (args);
+}
+#endif
+
+#ifdef NDEBUG
+#define debug(...)
+#else
+#define debug print
+#endif
+
 
 // json conversion functions - NetworkItem and DataStorageOperation can be public, TextNode can not (_ prefix)
 static void to_json(json& j, const APClient::NetworkItem& item) {
@@ -406,7 +441,7 @@ public:
         try {
             locations = j.get<std::list<int64_t>>();
         } catch (std::exception ex) {
-            fprintf(stderr, "Invalid argument for locations\n");
+            print_error("Invalid argument for locations");
             return false;
         }
 
@@ -427,7 +462,7 @@ public:
         try {
             keys = j.get<std::list<std::string>>();
         } catch (std::exception ex) {
-            fprintf(stderr, "Invalid argument for keys\n");
+            print_error("Invalid argument for keys");
             return false;
         }
 
@@ -441,7 +476,7 @@ public:
         try {
             keys = j.get<std::list<std::string>>();
         } catch (std::exception ex) {
-            fprintf(stderr, "Invalid argument for keys\n");
+            print_error("Invalid argument for keys");
             return false;
         }
 
@@ -467,7 +502,7 @@ public:
         try {
             if (self->_L != L) {
                 const char* msg = "Lua state changed. Multi-threading not supported!";
-                fprintf(stderr, "%s\n", msg);
+                errorf(L, "%s", msg);
                 luaL_error(L, "%s", msg);
                 return 0;
             }
@@ -557,9 +592,14 @@ private:
         lua_pop(_L, 1); // pop error
     }
 
+    void print_error(const std::string& message)
+    {
+        errorf(_L, "%s", message.c_str());
+    }
+
     void push_error(const std::string& message)
     {
-        fprintf(stderr, "%s\n", message.c_str());
+        print_error(message.c_str());
         if (!errors.empty())
             errors += "\n---\n";
         errors += message;
@@ -682,7 +722,7 @@ decltype(LuaJson_EmptyArray::Lua_Name) constexpr LuaJson_EmptyArray::Lua_Name;
 
 static int apclient_new(lua_State *L)
 {
-    printf("APClient.new\n");
+    debug(L, "APClient.new");
     const char* uuid = luaL_checkstring(L, 1);
     const char* game = luaL_checkstring(L, 2);
     const char* host = luaL_checkstring(L, 3);
@@ -697,6 +737,7 @@ static int apclient_new(lua_State *L)
     lua_setfield(L, -2, "checked_locations");
     lua_newtable(L);
     lua_setfield(L, -2, "missing_locations");
+    debug(L, "APClient instance created");
     return 1;
 }
 
@@ -708,9 +749,10 @@ static int apclient_call(lua_State *L)
 
 static int apclient_del(lua_State *L)
 {
-    printf("APClient.__gc\n");
+    debug(L, "APClient.__gc");
     LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
     delete self;
+    debug(L, "APClient instance deleted");
     return 0;
 }
 
@@ -812,7 +854,7 @@ static int apclient_ConnectSlot(lua_State *L)
             if (j.size() > 0)
                 tags = j.get<std::list<std::string>>();
         } catch (std::exception ex) {
-            fprintf(stderr, "Invalid tags argument\n");
+            errorf(L, "Invalid tags argument");
             return 0;
         }
     }
@@ -830,7 +872,7 @@ static int apclient_ConnectSlot(lua_State *L)
                     version.build = jversion[2].get<int>();
             }
         } catch (std::exception ex) {
-            fprintf(stderr, "Invalid version argument\n");
+            errorf(L, "Invalid version argument");
             return 0;
         }
     }
@@ -852,7 +894,7 @@ static int apclient_render_json(lua_State *L)
     try {
         from_json(lua_to_json(L, 2), msg);
     } catch (std::exception ex) {
-        fprintf(stderr, "Invalid argument for msg: %s\n", ex.what());
+        errorf(L, "Invalid argument for msg: %s", ex.what());
         return 0;
     }
     APClient::RenderFormat fmt = APClient::RenderFormat::TEXT;
@@ -1099,7 +1141,7 @@ static int apclient_ConnectUpdate(lua_State *L)
     if (lua_isnil(L, 3)) {
         if (lua_isnil(L, 2)) {
             // invalid arguments
-            fprintf(stderr, "Either items_handling or tags required\n");
+            errorf(L, "Either items_handling or tags required");
             return 0;
         } else {
             // update items_handling
@@ -1113,7 +1155,7 @@ static int apclient_ConnectUpdate(lua_State *L)
             if (j.size() > 0)
                 tags = j.get<std::list<std::string>>();
         } catch (std::exception ex) {
-            fprintf(stderr, "Invalid tags argument\n");
+            errorf(L, "Invalid tags argument");
             return 0;
         }
 
@@ -1145,7 +1187,7 @@ static int apclient_Bounce(lua_State *L)
             if (j.size() > 0)
                 games = j.get<std::list<std::string>>();
         } catch (std::exception) {
-            fprintf(stderr, "Invalid games argument\n");
+            errorf(L, "Invalid games argument");
             return 0;
         }
     }
@@ -1156,7 +1198,7 @@ static int apclient_Bounce(lua_State *L)
             if (j.size() > 0)
                 slots = j.get<std::list<int>>();
         } catch (std::exception) {
-            fprintf(stderr, "Invalid slots argument\n");
+            errorf(L, "Invalid slots argument");
             return 0;
         }
     }
@@ -1167,7 +1209,7 @@ static int apclient_Bounce(lua_State *L)
             if (j.size() > 0)
                 tags = j.get<std::list<std::string>>();
         } catch (std::exception) {
-            fprintf(stderr, "Invalid tags argument\n");
+            errorf(L, "Invalid tags argument");
             return 0;
         }
     }
@@ -1214,7 +1256,7 @@ static int apclient_LocationScouts(lua_State *L)
     try {
         locations = lua_to_json(L, 2).get<std::list<int64_t>>();
     } catch (std::exception ex) {
-        fprintf(stderr, "Invalid argument for locations\n");
+        errorf(L, "Invalid argument for locations");
         return 0;
     }
 
@@ -1250,7 +1292,7 @@ static int apclient_SetNotify(lua_State *L)
         lua_pushboolean(L, self->SetNotify(lua_to_json(L, 2)));
         return 1;
     } catch (std::exception ex) {
-        fprintf(stderr, "SetNotify failed: %s\n", ex.what());
+        errorf(L, "SetNotify failed: %s", ex.what());
         return 0;
     }
 }
@@ -1267,7 +1309,7 @@ static int apclient_Set(lua_State *L)
     try {
         lua_to_json(L, 5).get_to(operations);
     } catch (std::exception) {
-        fprintf(stderr, "Invalid argument for operations\n");
+        errorf(L, "Invalid argument for operations");
         return 0;
     }
 
@@ -1281,7 +1323,7 @@ static int apclient_Set(lua_State *L)
         lua_pushboolean(L, res);
         return 1;
     } catch (std::exception ex) {
-        fprintf(stderr, "Set failed: %s\n", ex.what());
+        errorf(L, "Set failed: %s", ex.what());
         return 0;
     }
 }
@@ -1424,7 +1466,7 @@ DLL_EXPORT int luaopen_apclientpp(lua_State *L)
         // return constructor
         return 1;
     } else {
-        fprintf(stderr, "register_apclient returned %d (expected 1)\n", res);
+        errorf(L, "register_apclient returned %d (expected 1)", res);
         return 0;
     }
 }
