@@ -28,7 +28,7 @@ else
     EXTRA_LIBS="-Wl,-Bdynamic $EXTRA_LIBS_DYNAMIC"
 fi
 
-CFLAGS="-Os -DNDEBUG -std=$STD -Wno-deprecated-declarations $EXTRA_CFLAGS $CFLAGS"
+CFLAGS="-Og -g -std=$STD -Wno-deprecated-declarations $EXTRA_CFLAGS $CFLAGS"
 
 OUT="$FILENAME"
 
