@@ -153,3 +153,5 @@ while os.clock() - t0 < 10 do
     ap:poll()  -- call this e.g. once per frame
 end
 print("shutting down...");
+ap = nil
+collectgarbage("collect")

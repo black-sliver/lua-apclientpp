@@ -75,6 +75,12 @@ Due to limitations in Lua, some calls or callbacks may be different. Read below 
 
 * `AP.EMPTY_ARRAY` use this to send an empty array in json since `{}` will be an empty json object
 
+* To properly close the connectiong in place, use `collectgarbage("collect")` after replacing the APClient object, i.e.
+  ```lua
+  ap = nil
+  collectgarbage("collect")
+  ```
+
 ### Handling Connection Failures
 
 Same as with apclientpp, it will try to reconnect and in case of automatic protocol detection (SSL or plain), a socket
