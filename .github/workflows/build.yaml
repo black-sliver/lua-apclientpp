@@ -22,16 +22,16 @@ jobs:
 
     steps:
       - name: Install python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: '3.11'
 
       - name: Install dependencies
         run: |
           pip install --upgrade machomachomangler mingw_ldd
 
       - name: Load lua53-clang32-dynamic
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: lua-apclientpp-lua53-clang32-dynamic
 
@@ -43,13 +43,13 @@ jobs:
           python -m mingw_ldd lua-apclientpp.dll --dll-lookup-dirs . | grep lua
 
       - name: Store lua533r-clang32-dynamic
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: lua-apclientpp-lua533r-clang32-dynamic
           path: lua-apclientpp.dll
 
       - name: Load lua51-vs2015
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: lua-apclientpp-lua51-vs2015
 
@@ -60,7 +60,7 @@ jobs:
           python -m mingw_ldd lua-apclientpp.dll --dll-lookup-dirs . | grep lua
 
       - name: Store lua51-51-vs2015
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: lua-apclientpp-lua51-51-vs2015
           path: lua-apclientpp.dll
@@ -71,7 +71,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           submodules: recursive
 
@@ -92,7 +92,7 @@ jobs:
           cat subprojects/wswrap/LICENSE >> lua-apclientpp-license.txt
 
       - name: Store
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: lua-apclientpp-license
           path: lua-apclientpp-license.txt

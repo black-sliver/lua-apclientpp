@@ -21,7 +21,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           submodules: recursive
 
@@ -63,7 +63,7 @@ jobs:
       - name: Add MSBuild to PATH
         if: |
           matrix.sln == 'vs2017'
-        uses: microsoft/setup-msbuild@v1
+        uses: microsoft/setup-msbuild@v2
 
       - name: Build Project
         run: |
@@ -72,7 +72,7 @@ jobs:
           move ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua-apclientpp-51.dll ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua51\lua-apclientpp.dll
 
       - name: Store
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: lua-apclientpp-lua51-${{matrix.sln}}
           path: ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua51\lua-apclientpp.dll

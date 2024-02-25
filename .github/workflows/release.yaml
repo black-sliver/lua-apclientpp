@@ -16,7 +16,7 @@ jobs:
 
       - name: Create Release
         if: ${{ github.ref_type == 'tag' }}
-        uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844
+        uses: softprops/action-gh-release@975c1b265e11dd76618af1c374e7981f9a6ff44a
         with:
           draft: true
           name: lua-apclientpp ${{ env.RELEASE_TAG }}
@@ -37,13 +37,13 @@ jobs:
 
     steps:
       - name: Grab README
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: src
 
       - name: Download ${{ matrix.lua }} Artifacts
         id: download-artifact
-        uses: dawidd6/action-download-artifact@v2
+        uses: dawidd6/action-download-artifact@v4
         with:
           workflow: build.yaml
           name: ${{ matrix.lua }}|license
@@ -63,7 +63,7 @@ jobs:
           7z a -mx=9 -ms=on ${{ matrix.lua }}.7z ${{ matrix.lua }}
 
       - name: Upload ${{ matrix.lua }} Bundle
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.lua }}
           path: ${{ matrix.lua }}.7z
@@ -74,7 +74,7 @@ jobs:
 
       - name: Release ${{ matrix.lua }} Bundle
         if: ${{ github.ref_type == 'tag' }}
-        uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844
+        uses: softprops/action-gh-release@975c1b265e11dd76618af1c374e7981f9a6ff44a
         with:
           draft: true
           name: lua-apclientpp ${{ env.RELEASE_TAG }}
