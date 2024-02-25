@@ -89,8 +89,9 @@ Due to limitations in Lua, some calls or callbacks may be different. Read below 
 * To properly close the connection in place, use `collectgarbage("collect")` after replacing the APClient object, i.e.
   ```lua
   ap = nil
-  collectgarbage("collect")
+  collectgarbage("collect") -- or collectgarbage("step")
   ```
+  In most case 1 or 2 "step" will be enough to close the APClient and avoid lag spikes.
 
 ### Handling Connection Failures
 
