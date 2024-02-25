@@ -75,7 +75,7 @@ Due to limitations in Lua, some calls or callbacks may be different. Read below 
 
 * `AP.EMPTY_ARRAY` use this to send an empty array in json since `{}` will be an empty json object
 
-* To properly close the connectiong in place, use `collectgarbage("collect")` after replacing the APClient object, i.e.
+* To properly close the connection in place, use `collectgarbage("collect")` after replacing the APClient object, i.e.
   ```lua
   ap = nil
   collectgarbage("collect")
