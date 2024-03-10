@@ -43,7 +43,7 @@ jobs:
 
       - name: Download ${{ matrix.lua }} Artifacts
         id: download-artifact
-        uses: dawidd6/action-download-artifact@v4
+        uses: dawidd6/action-download-artifact@v3
         with:
           workflow: build.yaml
           name: ${{ matrix.lua }}|license
