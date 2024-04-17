@@ -69,8 +69,8 @@ Follows the API of [apclientpp](https://github.com/black-sliver/apclientpp).
 You can use [LuaLS](https://github.com/LuaLS/lua-language-server) to provide proper auto-complete and type checking in
 e.g. VSCode/ium using an extension (e.g. sumneko.lua).
 You should create a [.luarc.json](https://luals.github.io/wiki/configuration/) in the top level of your project and
-either put [api/library/lua-apclientpp.lua](api/library/apclientpp.lua) into your project or add a reference to it in your
-`.luarc.json`.
+either put [api/library/lua-apclientpp.lua](api/library/lua-apclientpp.lua) into your project
+or add a reference to it in your `.luarc.json`.
 After doing that, restart the LS or IDE.
 
 **NOTE**: you may have to type annotate your ap client instance with `---@type APClient`.
