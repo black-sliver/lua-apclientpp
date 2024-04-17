@@ -61,10 +61,12 @@ static void print(lua_State *L, const std::string& line)
 }
 static void errorf(lua_State *L, const char* fmt, ...)
 {
-    char buf[256];
+    char buf[1024];
     va_list args;
     va_start (args, fmt);
-    snprintf(buf, sizeof(buf), fmt, args);
+    auto res = vsnprintf(buf, sizeof(buf), fmt, args);
+    if (res >= sizeof(buf))
+        memcpy(buf + sizeof(buf) - 4, "...", 4);
     print(L, buf);
     va_end (args);
 }
