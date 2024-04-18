@@ -512,7 +512,6 @@ public:
             parent->poll();
         } catch (std::exception ex) {
             self->push_error(ex.what());
-            return 0;
         }
 
         if (!self->errors.empty()) {
@@ -1330,6 +1329,17 @@ static int apclient_Set(lua_State *L)
     }
 }
 
+static int apclient_poll(lua_State *L)
+{
+    // run actual poll via pcall to avoid trashing any state
+    lua_pushcfunction(L, LuaAPClient::poll);
+    lua_pushvalue(L, -2);
+    if (lua_pcall(L, 1, 1, 0)) {
+        lua_error(L);
+    }
+    return 1;
+}
+
 // meta table ("class")
 
 #define SET_CFUNC(name) \
@@ -1357,9 +1367,7 @@ static int register_apclient(lua_State *L)
 
     // functions
     SET_CFUNC(new);
-    //SET_METHOD(poll, void);  // lua glue does not allow passing state yet
-    lua_pushcfunction(L, LuaAPClient::poll);
-    lua_setfield(L, -2, "poll");
+    SET_CFUNC(poll);
     SET_CFUNC(reset);
     SET_CFUNC(get_player_alias);
     SET_CFUNC(get_player_game);
