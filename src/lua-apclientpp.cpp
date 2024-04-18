@@ -453,8 +453,10 @@ public:
         try {
             locations = j.get<std::list<int64_t>>();
         } catch (std::exception ex) {
-            print_error("Invalid argument for locations");
-            return false;
+            if (!j.is_object() || !j.empty()) {
+                print_error("Invalid argument for locations");
+                return false;
+            }
         }
 
         APClient* parent = this;
@@ -1255,21 +1257,13 @@ static int apclient_StatusUpdate(lua_State *L)
 static int apclient_LocationChecks(lua_State *L)
 {
     LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
-    json locations = lua_to_json(L, 2).get<std::list<int64_t>>();
-    lua_pushboolean(L, self->LocationChecks(locations));
+    lua_pushboolean(L, self->LocationChecks(lua_to_json(L, 2)));
     return 1;
 }
 
 static int apclient_LocationScouts(lua_State *L)
 {
     LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
-    std::list<int64_t> locations;
-    try {
-        locations = lua_to_json(L, 2).get<std::list<int64_t>>();
-    } catch (std::exception ex) {
-        errorf(L, "Invalid argument for locations");
-        return 0;
-    }
 
     bool create_as_hints = false;
     if (lua_gettop(L) >= 3) {
@@ -1279,8 +1273,22 @@ static int apclient_LocationScouts(lua_State *L)
             create_as_hints = (int)luaL_checkinteger(L, 3);
     }
 
-    lua_pushboolean(L, self->LocationScouts(locations, create_as_hints));
-    return 1;
+    {
+        std::list<int64_t> locations;
+        {
+            json j = lua_to_json(L, 2);
+            try {
+                locations = j.get<std::list<int64_t>>();
+            } catch (std::exception ex) {
+                if (!j.is_object() || !j.empty()) {
+                    errorf(L, "Invalid argument for locations");
+                    return 0;
+                }
+            }
+        }
+        lua_pushboolean(L, self->LocationScouts(locations, create_as_hints));
+        return 1;
+    }
 }
 
 static int apclient_Get(lua_State *L)
