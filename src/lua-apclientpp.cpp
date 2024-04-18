@@ -177,8 +177,10 @@ public:
         if (location_checked_cb.valid()) {
             lua_pushcfunction(_L, error_handler);
             lua_rawgeti(_L, LUA_REGISTRYINDEX, location_checked_cb.ref);
-            json j = locations;
-            json_to_lua(_L, j);
+            {
+                json j = locations;
+                json_to_lua(_L, j);
+            }
             if (lua_pcall(_L, 1, 0, -3)) {
                 cb_error("location_checked");
             }
@@ -268,8 +270,10 @@ public:
         parent->set_slot_refused_handler([this](const std::list<std::string>& reason) {
             lua_pushcfunction(_L, error_handler);
             lua_rawgeti(_L, LUA_REGISTRYINDEX, slot_refused_cb.ref);
-            json j = reason;
-            json_to_lua(_L, j);
+            {
+                json j = reason;
+                json_to_lua(_L, j);
+            }
             if (lua_pcall(_L, 1, 0, -3)) {
                 cb_error("slot_refused");
             }
@@ -288,8 +292,10 @@ public:
         parent->set_items_received_handler([this](const std::list<NetworkItem>& items) {
             lua_pushcfunction(_L, error_handler);
             lua_rawgeti(_L, LUA_REGISTRYINDEX, items_received_cb.ref);
-            json j = items;
-            json_to_lua(_L, j);
+            {
+                json j = items;
+                json_to_lua(_L, j);
+            }
             if (lua_pcall(_L, 1, 0, -3)) {
                 cb_error("items_received");
             }
@@ -306,8 +312,10 @@ public:
         parent->set_location_info_handler([this](const std::list<NetworkItem>& items) {
             lua_pushcfunction(_L, error_handler);
             lua_rawgeti(_L, LUA_REGISTRYINDEX, location_info_cb.ref);
-            json j = items;
-            json_to_lua(_L, j);
+            {
+                json j = items;
+                json_to_lua(_L, j);
+            }
             if (lua_pcall(_L, 1, 0, -3)) {
                 cb_error("location_info");
             }
@@ -400,13 +408,15 @@ public:
         parent->set_retrieved_handler([this](const std::map<std::string, json>& data, const json& message) {
             lua_pushcfunction(_L, error_handler);
             lua_rawgeti(_L, LUA_REGISTRYINDEX, retrieved_cb.ref);
-            json j = data;
-            std::list<std::string> keys;
-            for (const auto& item: j.items())
-                keys.push_back(item.key());
-            json_to_lua(_L, j);
-            json_to_lua(_L, keys);
-            json_to_lua(_L, message);
+            {
+                json j = data;
+                std::list<std::string> keys;
+                for (const auto& item: j.items())
+                    keys.push_back(item.key());
+                json_to_lua(_L, j);
+                json_to_lua(_L, keys);
+                json_to_lua(_L, message);
+            }
             if (lua_pcall(_L, 3, 0, -5)) {
                 cb_error("retrieved");
             }
