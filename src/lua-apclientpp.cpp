@@ -600,7 +600,7 @@ private:
     void cb_error(const std::string& name)
     {
         const char* err = lua_tostring(_L, -1);
-        std::string error_message = "Error calling " + name + "_handler:\n" + err;
+        std::string error_message = "Error calling " + name + "_handler:\n" + (err ? err : "<null>");
         push_error(error_message);
         lua_pop(_L, 1); // pop error
     }
