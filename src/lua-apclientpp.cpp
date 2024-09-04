@@ -792,6 +792,13 @@ static int apclient_get_player_game(lua_State *L)
     return 1;
 }
 
+static int apclient_get_game(lua_State *L)
+{
+    LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
+    lua_pushstring(L, self->get_game().c_str());
+    return 1;
+}
+
 static int apclient_get_location_name(lua_State *L)
 {
     LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
@@ -802,13 +809,17 @@ static int apclient_get_location_name(lua_State *L)
         code = (int64_t)luaL_checknumber(L, 2);
 
     if (lua_gettop(L) >= 3) {
-        const char* game = luaL_checkstring(L, 3);
-        lua_pushstring(L, self->get_location_name(code, game).c_str());
+        if (lua_isnil(L, 3)) {
+            lua_pushstring(L, self->get_location_name(code, self->get_game()).c_str());
+        } else {
+            const char* game = luaL_checkstring(L, 3);
+            lua_pushstring(L, self->get_location_name(code, game).c_str());
+        }
         return 1;
+    } else {
+        luaL_error(L, "missing argument #2 to 'get_location_name' (string or nil expected)");
+        return 0;
     }
-
-    lua_pushstring(L, self->get_location_name(code).c_str());
-    return 1;
 }
 
 static int apclient_get_location_id(lua_State *L)
@@ -832,13 +843,17 @@ static int apclient_get_item_name(lua_State *L)
         code = (int64_t)luaL_checknumber(L, 2);
 
     if (lua_gettop(L) >= 3) {
-        const char* game = luaL_checkstring(L, 3);
-        lua_pushstring(L, self->get_item_name(code, game).c_str());
+        if (lua_isnil(L, 3)) {
+            lua_pushstring(L, self->get_item_name(code, self->get_game()).c_str());
+        } else {
+            const char* game = luaL_checkstring(L, 3);
+            lua_pushstring(L, self->get_item_name(code, game).c_str());
+        }
         return 1;
+    } else {
+        luaL_error(L, "missing argument #2 to 'get_item_name' (string or nil expected)");
+        return 0;
     }
-
-    lua_pushstring(L, self->get_item_name(code).c_str());
-    return 1;
 }
 
 static int apclient_get_item_id(lua_State *L)
@@ -1389,6 +1404,7 @@ static int register_apclient(lua_State *L)
     SET_CFUNC(reset);
     SET_CFUNC(get_player_alias);
     SET_CFUNC(get_player_game);
+    SET_CFUNC(get_game);
     SET_CFUNC(get_location_name);
     SET_CFUNC(get_location_id);
     SET_CFUNC(get_item_name);

@@ -39,9 +39,13 @@ function APClient:get_player_alias(slot) end
 ---@return string game
 function APClient:get_player_game(slot) end
 
+---Get currently played game.
+---@return string game
+function APClient:get_game() end
+
 ---Get name of location from ID.
 ---@param code integer ID of the location
----@param game string game the location ID is from (required for overlapping IDs)
+---@param game string? game the location ID is from; use nil for own location
 ---@return string name of the location
 function APClient:get_location_name(code, game) end
 
@@ -52,7 +56,7 @@ function APClient:get_location_id(name) end
 
 ---Get name of item from ID.
 ---@param code integer ID of the item
----@param game string game the item ID is from (required for overlapping IDs)
+---@param game string? game the item ID is from; use nil for own item
 ---@return string name of the item
 function APClient:get_item_name(code, game) end
 
