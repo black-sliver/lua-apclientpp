@@ -29,10 +29,22 @@ function connect(server, slot, password)
 
     function on_room_info()
         print("Room info")
-        ap:ConnectSlot(slot, password, items_handling, {"Lua-APClientPP"}, {0, 3, 9})
+        ap:ConnectSlot(slot, password, items_handling, {"Lua-APClientPP"}, {0, 4, 9})
     end
 
     function on_slot_connected(slot_data)
+        assert(not pcall(function() ap:get_item_name(64055) end)) -- not valid anymore, need 2nd arg
+        assert(ap:get_item_name(64055, nil) == ap:get_item_name(64055, ap:get_game()))
+        assert(not pcall(function() ap:get_location_name(64000) end)) -- not valid anymore, need 2nd arg
+        assert(ap:get_location_name(64000, nil) == ap:get_location_name(64000, ap:get_game()))
+
+        if ap:get_game() == "Secret of Evermore" then
+            assert(ap:get_item_name(64055, nil) == "Bronze Axe")
+            assert(ap:get_item_name(64055, "Timespinner") ~= "Bronze Axe")
+            assert(ap:get_location_name(64000, "Secret of Evermore") == "Acid Rain")
+            assert(ap:get_location_name(64000, "Timespinner") ~= "Acid Rain")
+        end
+
         print("Slot connected")
         print(slot_data)
         print("missing locations: " .. table.concat(ap.missing_locations, ", "))
