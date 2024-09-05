@@ -12,12 +12,14 @@ jobs:
       BUILD_CONFIGURATION: Release
       OPENSSL_BUILD_PLATFORM: VC-WIN32
       ARCH: win32
-    runs-on: windows-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        sln:
-          #- vs2017
-          - vs2015
+        include:
+          - os: windows-latest
+            sln: vs2015
+          - os: windows-2019
+            sln: vs2017
 
     steps:
       - name: Checkout code
