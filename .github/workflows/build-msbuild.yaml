@@ -16,7 +16,7 @@ jobs:
     strategy:
       matrix:
         sln:
-          - vs2017
+          #- vs2017
           - vs2015
 
     steps:
