@@ -1280,7 +1280,7 @@ static int apclient_LocationScouts(lua_State *L)
 {
     LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
 
-    bool create_as_hints = false;
+    int create_as_hints = 0;
     if (lua_gettop(L) >= 3) {
         if (lua_isboolean(L, 3))
             create_as_hints = lua_toboolean(L, 3) ? 1 : 0;
