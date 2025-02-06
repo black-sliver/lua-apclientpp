@@ -62,6 +62,16 @@ jobs:
           perl ..\Configure ${{env.OPENSSL_BUILD_PLATFORM}} no-shared
           nmake /S
 
+      - name: Build zlib
+        run: |
+          cd dep
+          git clone -b v1.3.1 --depth 1 https://github.com/madler/zlib.git
+          cd zlib
+          nmake -f win32/Makefile.msc
+          md ${{env.BUILD_PLATFORM}}
+          move *.dll ${{env.BUILD_PLATFORM}}
+          move *.lib ${{env.BUILD_PLATFORM}}
+
       - name: Add MSBuild to PATH
         if: |
           matrix.sln == 'vs2017'
