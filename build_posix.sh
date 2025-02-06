@@ -4,7 +4,7 @@
 source ./build_common.sh
 source ./extra_pkgconf.sh
 
-LIBS="$LIBS -pthread -lssl -lcrypto"
+LIBS="$LIBS -pthread -lssl -lcrypto -lz"
 
 if [ -z "$CC_IS_CLANG" ]; then
     if [[ "$OS_NAME" == "windows" ]]; then
