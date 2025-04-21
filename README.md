@@ -14,7 +14,7 @@ allowing to connect to an [Archipelago](https://archipelago.gg/) server with nat
   * On Windows: you can check with Dependency Walker or `python -m mingw_ldd path/to/exe --dll-lookup-dirs .`.
     * If you see `libgcc_*.dll` it's a mingw (`msvcrXX.dll`) or ucrt build (`msvcrt.dll`).
     * If you see `msvcrXX.dll` but no libgcc, you can try msvc (vs20xx) builds if available, clang otherwise.
-    * If you see `msvcrt.dll` or `api-ms-*.dll`, the clang build should work.
+    * If you see `msvcrt.dll` or `api-ms-*.dll`, the msvc and clang build should work.
   * On Linux and Mac: you can check with ldd - likely to just work as long as the build machine/target is old enough
 * If the DLL of the host application is not named lua5x.dll / liblua.so.5.x / liblua.5.x.dylib:
   * On Windows: the lua-apclient.dll will have to be modified to link to the correct name,
@@ -106,7 +106,7 @@ of a failed connect / connect timeout. Receiving a disconnect or error after bei
 * Full build matrix
   * Linux - Ubuntu 20.04 might be fine and has static libssl? Otherwise alma container.
   * Mac - using brew? Brew's libs target somewhat recent macos.
-  * MSVC builds - currently there is only a 32bit lua5.1 build
+  * MSVC builds - currently there is only 32bit and there is no static Lua5.1 build
 * Bundle CA certs
 * Tests
 * UUID helper - currently uuid is not being used, so you can just pass in an empty string
