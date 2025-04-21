@@ -5,13 +5,16 @@ on:
   workflow_call:
 
 jobs:
-  build-51-msbuild:
+  build-msbuild:
     # TODO: automated testing
     env:
       BUILD_PLATFORM: "x86"
       BUILD_CONFIGURATION: Release
       OPENSSL_BUILD_PLATFORM: VC-WIN32
       ARCH: win32
+      LUA52_VERSION: "5.2.4"
+      LUA53_VERSION: "5.3.6"
+      LUA54_VERSION: "5.4.7"
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -71,6 +74,34 @@ jobs:
           md ${{env.BUILD_PLATFORM}}
           move *.dll ${{env.BUILD_PLATFORM}}
           move *.lib ${{env.BUILD_PLATFORM}}
+
+      - name: Build Lua 5.2
+        id: build52
+        uses: black-sliver/lua-build@9a5cd4d6b10d1aa6d1e4b7ff6d6a1b6944278d3f
+        with:
+          name: "lua52"
+          version: "${{ env.LUA52_VERSION }}"
+
+      - name: Build Lua 5.3
+        id: build53
+        uses: black-sliver/lua-build@9a5cd4d6b10d1aa6d1e4b7ff6d6a1b6944278d3f
+        with:
+          name: "lua53"
+          version: "${{ env.LUA53_VERSION }}"
+
+      - name: Build Lua 5.4
+        id: build54
+        uses: black-sliver/lua-build@9a5cd4d6b10d1aa6d1e4b7ff6d6a1b6944278d3f
+        with:
+          name: "lua54"
+          version: "${{ env.LUA54_VERSION }}"
+
+      - name: Move Lua Builds
+        run: |
+          move ${{ steps.build52.outputs.path }} dep/lua52
+          move ${{ steps.build53.outputs.path }} dep/lua53
+          move ${{ steps.build54.outputs.path }} dep/lua54
+          dir dep
 
       - name: Add MSBuild to PATH
         if: |
