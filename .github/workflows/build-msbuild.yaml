@@ -19,7 +19,7 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: windows-latest
+          - os: windows-2019
             sln: vs2015
           - os: windows-2019
             sln: vs2017
