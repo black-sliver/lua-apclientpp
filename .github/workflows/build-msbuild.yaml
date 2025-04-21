@@ -77,14 +77,14 @@ jobs:
           matrix.sln == 'vs2017'
         uses: microsoft/setup-msbuild@v2
 
-      - name: Build Project
+      - name: Build for Lua 5.1 Dynamic
         run: |
-          msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} ${{matrix.sln}} /p:Platform=${{env.BUILD_PLATFORM}}
+          msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} ${{matrix.sln}}/lua-apclientpp-51-dynamic.sln /p:Platform=${{env.BUILD_PLATFORM}}
           md ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua51
-          move ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua-apclientpp-51.dll ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua51\lua-apclientpp.dll
+          move ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua-apclientpp-51-dynamic.dll ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua51\lua-apclientpp.dll
 
-      - name: Store
+      - name: Store Lua 5.1 Dynamic
         uses: actions/upload-artifact@v4
         with:
-          name: lua-apclientpp-lua51-${{matrix.sln}}
+          name: lua-apclientpp-lua51-${{matrix.sln}}-${{env.ARCH}}-dynamic
           path: ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua51\lua-apclientpp.dll
