@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.0.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{572EAD90-831A-4FB0-8341-9794CEFF7AEB}") = "lua-apclientpp-53", "lua-apclientpp-53-dynamic.vcxproj", "{6AA829D9-4846-4361-BE8B-8E6D33440F25}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6AA829D9-4846-4361-BE8B-8E6D33440F25}.Debug|x64.ActiveCfg = Debug|x64
+		{6AA829D9-4846-4361-BE8B-8E6D33440F25}.Debug|x64.Build.0 = Debug|x64
+		{6AA829D9-4846-4361-BE8B-8E6D33440F25}.Debug|x86.ActiveCfg = Debug|Win32
+		{6AA829D9-4846-4361-BE8B-8E6D33440F25}.Debug|x86.Build.0 = Debug|Win32
+		{6AA829D9-4846-4361-BE8B-8E6D33440F25}.Release|x64.ActiveCfg = Release|x64
+		{6AA829D9-4846-4361-BE8B-8E6D33440F25}.Release|x64.Build.0 = Release|x64
+		{6AA829D9-4846-4361-BE8B-8E6D33440F25}.Release|x86.ActiveCfg = Release|Win32
+		{6AA829D9-4846-4361-BE8B-8E6D33440F25}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {93F74FF6-F4DA-4D38-86C2-8B6E197E47DB}
+	EndGlobalSection
+EndGlobal
