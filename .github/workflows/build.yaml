@@ -30,22 +30,22 @@ jobs:
         run: |
           pip install --upgrade machomachomangler mingw_ldd
 
-      - name: Load lua53-clang32-dynamic
+      - name: Load lua53-vs2015-win32-dynamic
         uses: actions/download-artifact@v4
         with:
-          name: lua-apclientpp-lua53-clang32-dynamic
+          name: lua-apclientpp-lua53-vs2015-win32-dynamic
 
-      - name: Patch 5.3 -> 5.3.3r (clang32-dynamic)
+      - name: Patch 5.3 -> 5.3.3r (vs2015-win32-dynamic)
         # TODO: convert this to a reusable workflow
         run: |
           mv lua-apclientpp.dll _lua-apclientpp.dll
           python -m machomachomangler.cmd.redll _lua-apclientpp.dll lua-apclientpp.dll lua53.dll Lua5.3.3r.dll
           python -m mingw_ldd lua-apclientpp.dll --dll-lookup-dirs . | grep lua
 
-      - name: Store lua533r-clang32-dynamic
+      - name: Store lua533r-vs2015-win32-dynamic
         uses: actions/upload-artifact@v4
         with:
-          name: lua-apclientpp-lua533r-clang32-dynamic
+          name: lua-apclientpp-lua533r-vs2015-win32-dynamic
           path: lua-apclientpp.dll
 
       - name: Load lua51-vs2015-win32-dynamic
