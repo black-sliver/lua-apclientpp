@@ -134,6 +134,19 @@ jobs:
           path: ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua52\lua-apclientpp.dll
           if-no-files-found: error
 
+      - name: Build for Lua 5.2 Static
+        run: |
+          msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} ${{matrix.sln}}/lua-apclientpp-52-static.sln /p:Platform=${{env.BUILD_PLATFORM}}
+          md ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua52-static
+          move ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua-apclientpp-52-static.dll ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua52-static\lua-apclientpp.dll
+
+      - name: Store Lua 5.2 Static
+        uses: actions/upload-artifact@v4
+        with:
+          name: lua-apclientpp-lua52-${{matrix.sln}}-${{env.ARCH}}-static
+          path: ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua52-static\lua-apclientpp.dll
+          if-no-files-found: error
+
       - name: Build for Lua 5.3 Dynamic
         run: |
           msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} ${{matrix.sln}}/lua-apclientpp-53-dynamic.sln /p:Platform=${{env.BUILD_PLATFORM}}
@@ -147,6 +160,19 @@ jobs:
           path: ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua53\lua-apclientpp.dll
           if-no-files-found: error
 
+      - name: Build for Lua 5.3 Static
+        run: |
+          msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} ${{matrix.sln}}/lua-apclientpp-53-static.sln /p:Platform=${{env.BUILD_PLATFORM}}
+          md ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua53-static
+          move ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua-apclientpp-53-static.dll ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua53-static\lua-apclientpp.dll
+
+      - name: Store Lua 5.3 Static
+        uses: actions/upload-artifact@v4
+        with:
+          name: lua-apclientpp-lua53-${{matrix.sln}}-${{env.ARCH}}-static
+          path: ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua53-static\lua-apclientpp.dll
+          if-no-files-found: error
+
       - name: Build for Lua 5.4 Dynamic
         run: |
           msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} ${{matrix.sln}}/lua-apclientpp-54-dynamic.sln /p:Platform=${{env.BUILD_PLATFORM}}
@@ -158,4 +184,17 @@ jobs:
         with:
           name: lua-apclientpp-lua54-${{matrix.sln}}-${{env.ARCH}}-dynamic
           path: ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua54\lua-apclientpp.dll
+          if-no-files-found: error
+
+      - name: Build for Lua 5.4 Static
+        run: |
+          msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} ${{matrix.sln}}/lua-apclientpp-54-static.sln /p:Platform=${{env.BUILD_PLATFORM}}
+          md ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua54-static
+          move ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua-apclientpp-54-static.dll ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua54-static\lua-apclientpp.dll
+
+      - name: Store Lua 5.4 Static
+        uses: actions/upload-artifact@v4
+        with:
+          name: lua-apclientpp-lua54-${{matrix.sln}}-${{env.ARCH}}-static
+          path: ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua54-static\lua-apclientpp.dll
           if-no-files-found: error
