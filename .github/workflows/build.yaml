@@ -48,21 +48,21 @@ jobs:
           name: lua-apclientpp-lua533r-clang32-dynamic
           path: lua-apclientpp.dll
 
-      - name: Load lua51-vs2015
+      - name: Load lua51-vs2015-win32-dynamic
         uses: actions/download-artifact@v4
         with:
-          name: lua-apclientpp-lua51-vs2015
+          name: lua-apclientpp-lua51-vs2015-win32-dynamic
 
-      - name: Patch 5.1 -> 51 (msvc2015)
+      - name: Patch 5.1 -> 51 (vs2015-win32-dynamic)
         run: |
           mv lua-apclientpp.dll _lua-apclientpp.dll
           python -m machomachomangler.cmd.redll _lua-apclientpp.dll lua-apclientpp.dll lua5.1.dll lua51.dll
           python -m mingw_ldd lua-apclientpp.dll --dll-lookup-dirs . | grep lua
 
-      - name: Store lua51-51-vs2015
+      - name: Store lua51-51-vs2015-win32-dynamic
         uses: actions/upload-artifact@v4
         with:
-          name: lua-apclientpp-lua51-51-vs2015
+          name: lua-apclientpp-lua51-51-vs2015-win32-dynamic
           path: lua-apclientpp.dll
 
 

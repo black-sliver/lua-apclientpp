@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.0.0
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.757
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{26C8F010-35E1-4F15-8782-C74466361977}") = "lua-apclientpp-51", "lua-apclientpp-51.vcxproj", "{12B085BF-243A-4206-A487-63A1C44F0CC0}"
+Project("{26C8F010-35E1-4F15-8782-C74466361977}") = "lua-apclientpp-51", "lua-apclientpp-51-dynamic.vcxproj", "{12B085BF-243A-4206-A487-63A1C44F0CC0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
