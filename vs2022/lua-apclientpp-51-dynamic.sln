@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 17
+VisualStudioVersion = 17.14.36301.6
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{26C8F010-35E1-4F15-8782-C74466361977}") = "lua-apclientpp-51", "lua-apclientpp-51-dynamic.vcxproj", "{12B085BF-243A-4206-A487-63A1C44F0CC0}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{12B085BF-243A-4206-A487-63A1C44F0CC0}.Debug|x64.ActiveCfg = Debug|x64
+		{12B085BF-243A-4206-A487-63A1C44F0CC0}.Debug|x64.Build.0 = Debug|x64
+		{12B085BF-243A-4206-A487-63A1C44F0CC0}.Debug|x86.ActiveCfg = Debug|Win32
+		{12B085BF-243A-4206-A487-63A1C44F0CC0}.Debug|x86.Build.0 = Debug|Win32
+		{12B085BF-243A-4206-A487-63A1C44F0CC0}.Release|x64.ActiveCfg = Release|x64
+		{12B085BF-243A-4206-A487-63A1C44F0CC0}.Release|x64.Build.0 = Release|x64
+		{12B085BF-243A-4206-A487-63A1C44F0CC0}.Release|x86.ActiveCfg = Release|Win32
+		{12B085BF-243A-4206-A487-63A1C44F0CC0}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {93F74FF6-F4DA-4D38-86C2-8B6E197E47DB}
+	EndGlobalSection
+EndGlobal

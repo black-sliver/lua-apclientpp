@@ -19,10 +19,12 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: windows-2019
-            sln: vs2015
-          - os: windows-2019
-            sln: vs2017
+          #- os: windows-2019
+          #  sln: vs2015
+          #- os: windows-2019
+          #  sln: vs2017
+          - os: windows-2022
+            sln: vs2022
 
     steps:
       - name: Checkout code
@@ -34,34 +36,52 @@ jobs:
         if: |
           matrix.sln == 'vs2015'
         run: |
-          Invoke-WebRequest -Uri "https://aka.ms/vs/17/release/vs_buildtools.exe" -OutFile "vs_BuildTools.exe"
+          Invoke-WebRequest -Uri "https://aka.ms/vs/17/release/vs_BuildTools.exe" -OutFile "vs_BuildTools.exe"
           Start-Process -FilePath ./vs_BuildTools.exe -ArgumentList "--add", "Microsoft.VisualStudio.Component.VC.140", "--quiet", "--norestart", "--force", "--wait" -Wait -PassThru
 
-
-      - uses: ilammy/setup-nasm@v1
-
-      - uses: ilammy/msvc-dev-cmd@v1
+      - name: Install build tools v141
         if: |
           matrix.sln == 'vs2017'
-        with:
-          arch: ${{env.ARCH}}
+        run: |
+          Invoke-WebRequest -Uri "https://aka.ms/vs/17/release/vs_BuildTools.exe" -OutFile "vs_BuildTools.exe"
+          Start-Process -FilePath ./vs_BuildTools.exe -ArgumentList "--add", "Microsoft.VisualStudio.Component.VC.v141.x86.x64", "--add", "Microsoft.VisualStudio.Component.VC.v141.CLI.Support", "--quiet", "--norestart", "--force", "--wait" -Wait -PassThru
 
-      - uses: ilammy/msvc-dev-cmd@v1
+      - name: MSVC Dev Cmd 14.0
+        uses: ilammy/msvc-dev-cmd@v1
         if: |
           matrix.sln == 'vs2015'
         with:
           arch: ${{env.ARCH}}
           toolset: '14.0'
 
-      - uses: shogo82148/actions-setup-perl@v1
+      - name: MSVC Dev Cmd 14.1
+        uses: ilammy/msvc-dev-cmd@v1
+        if: |
+          matrix.sln == 'vs2017'
+        with:
+          arch: ${{env.ARCH}}
+          toolset: '14.1'
+
+      - name: MSVC Dev Cmd (Default)
+        uses: ilammy/msvc-dev-cmd@v1
+        if: |
+          matrix.sln == 'vs2022'
+        with:
+          arch: ${{env.ARCH}}
+
+      - name: Install NASM
+        uses: ilammy/setup-nasm@v1
+
+      - name: Install Perl
+        uses: shogo82148/actions-setup-perl@v1
 
       - name: Build OpenSSL
         run: |
           cd dep
           git clone -b OpenSSL_1_1_1-stable --depth 1 https://github.com/openssl/openssl.git
           cd openssl
-          md x86
-          cd x86
+          md ${{env.BUILD_PLATFORM}}
+          cd ${{env.BUILD_PLATFORM}}
           perl ..\Configure ${{env.OPENSSL_BUILD_PLATFORM}} no-shared
           nmake /S
 
