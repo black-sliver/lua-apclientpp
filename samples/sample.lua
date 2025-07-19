@@ -3,6 +3,7 @@ local AP = require "lua-apclientpp"
 -- global to this mod
 local game_name = "Secret of Evermore"
 local items_handling = 7  -- full remote
+local client_version = {0, 5, 1}  -- optional, defaults to lib version
 local message_format = AP.RenderFormat.TEXT
 ---@type APClient
 local ap = nil
@@ -29,7 +30,7 @@ function connect(server, slot, password)
 
     function on_room_info()
         print("Room info")
-        ap:ConnectSlot(slot, password, items_handling, {"Lua-APClientPP"}, {0, 4, 9})
+        ap:ConnectSlot(slot, password, items_handling, {"Lua-APClientPP"}, client_version)
     end
 
     function on_slot_connected(slot_data)
