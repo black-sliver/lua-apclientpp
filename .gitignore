@@ -1,7 +1,14 @@
-*.so
+*.so*
 *.dll
 a.out
 *.exe
 /nbproject
 /.test
 /dist/
+__pycache__/
+*.pyc
+*.pem
+cov*.json
+*.gcda
+*.gcno
+/coverage.*
