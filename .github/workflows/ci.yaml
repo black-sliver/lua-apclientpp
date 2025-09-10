@@ -1,24 +1,154 @@
-# build with GCC to see if source code is valid
+# build with GCC and run tests with python
 name: CI
 
 on:
   push:
+    paths:
+      - '**'
+      - '!**.lua'
+      - '!**.md'
+      - '!**.yaml'
+      - '.github/workflows/ci.yaml'
   pull_request:
+    paths:
+      - '**'
+      - '!**.lua'
+      - '!**.md'
+      - '!**.yaml'
+      - '.github/workflows/ci.yaml'
 
 jobs:
-  build-ubuntu:
-    runs-on: ubuntu-latest
+  test:
+    strategy:
+      matrix:
+        lua:
+          - 5.1
+          - 5.2
+          - 5.3
+          - 5.4
+        os:
+          - 'ubuntu-latest'
 
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Install dependencies
         run: |
           sudo apt-get update -y -qq
-          sudo apt-get install coreutils build-essential libssl-dev liblua5.4-dev
+          sudo apt-get install coreutils build-essential libssl-dev liblua${{ matrix.lua }}-dev lua${{ matrix.lua }}
 
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           submodules: recursive
 
+      - name: Set CFLAGS
+        run: |
+          # enable ASAN and UBSAN for testing
+          # TODO: -Wall -Wextra -Werror
+          echo "CFLAGS=-fsanitize=address -fsanitize=undefined -fprofile-arcs -ftest-coverage $CFLAGS" >> $GITHUB_ENV
+          echo "ASAN_OPTIONS=detect_leaks=0" >> $GITHUB_ENV
+
       - name: Build
-        run: ./build_posix.sh
+        run: |
+          ./build_posix.sh lua${{ matrix.lua }}
+
+      - name: Install test dependencies
+        run: >
+          pip install
+          -r test/requirements.txt
+          pytest
+          pytest-xdist
+          gcovr
+
+      - name: Generate Test Certs
+        run: |
+          openssl req -x509 -newkey ed25519 -days 1 \
+            -noenc -keyout trusted-key.pem -out trusted.pem -subj "/CN=localhost" \
+            -addext "subjectAltName=DNS:localhost,IP:127.0.0.1"
+          openssl req -x509 -newkey ed25519 -days 1 \
+            -noenc -keyout untrusted-key.pem -out untrusted.pem -subj "/CN=localhost" \
+            -addext "subjectAltName=DNS:localhost,IP:127.0.0.1"
+
+      - name: Test (no sanitizers)
+        if: "!contains(env.CFLAGS, '-fsanitize')"
+        run: >
+          SSL_CERT_FILE=trusted.pem
+          LUA_VERSION=${{ matrix.lua }}
+          pytest -n4
+
+      - name: Test with ASAN and UBSAN
+        if: contains(env.CFLAGS, '-fsanitize')
+        run: >
+          LD_PRELOAD=$(cc -print-file-name=libasan.so):$(cc -print-file-name=libubsan.so)
+          SSL_CERT_FILE=trusted.pem
+          LUA_VERSION=${{ matrix.lua }}
+          pytest -n4
+
+      - name: Install LuaJIT
+        if: matrix.lua == '5.1'
+        run: |
+          sudo apt install libluajit2-${{ matrix.lua }}-2 luajit2
+
+      - name: Test LuaJIT (no sanitizers)
+        if: "matrix.lua == '5.1' && !contains(env.CFLAGS, '-fsanitize')"
+        run: >
+          SSL_CERT_FILE=trusted.pem
+          LUA_VERSION=JIT2.1
+          pytest -n4
+
+      - name: Test LuaJIT with ASAN and UBSAN
+        if: matrix.lua == '5.1' && contains(env.CFLAGS, '-fsanitize')
+        run: >
+          LD_PRELOAD=$(cc -print-file-name=libasan.so):$(cc -print-file-name=libubsan.so)
+          SSL_CERT_FILE=trusted.pem
+          LUA_VERSION=JIT2.1
+          pytest -n4
+
+      - name: Generate Coverage Report
+        run: >
+          gcovr
+          --exclude subprojects
+          --json coverage-${{ matrix.lua }}.json
+
+      - name: Upload Coverage Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: 'coverage-${{ matrix.lua }}.json'
+          path: 'coverage-${{ matrix.lua }}.json'
+          compression-level: 9
+          if-no-files-found: 'error'
+
+  coverage-report:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install dependencies
+        run: |
+          pip install gcovr
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v5
+        with:
+          pattern: 'coverage-*.json'
+          merge-multiple: true
+
+      - name: Generate HTML Report
+        run: >
+          gcovr
+          --json-add-tracefile "coverage-*.json"
+          --html-details coverage.html
+
+      - name: Upload HTML Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: 'coverage'
+          path: 'coverage.*'
+          compression-level: 9
+          if-no-files-found: 'error'
+
+      - name: Print Text Report
+        run: >
+          gcovr
+          --json-add-tracefile "coverage-*.json"

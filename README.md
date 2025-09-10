@@ -111,6 +111,11 @@ of a failed connect / connect timeout. Receiving a disconnect or error after bei
 * Tests
 * UUID helper - currently uuid is not being used, so you can just pass in an empty string
 
+# Known Problems
+
+* Calling certain methods while not connected can lead to unhandled C++ exceptions (crash).
+
+See test/ for reproducers.
 
 ## Downloads
 
