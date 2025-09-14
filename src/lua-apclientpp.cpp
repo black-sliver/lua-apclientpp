@@ -530,7 +530,7 @@ public:
             lua_pushstring(L, self->errors.c_str());
             self->errors.clear();
             lua_error(L);
-            return 0;
+            return 0; // LCOV_EXCL_LINE // unreachable
         }
 
         lua_pushboolean(L, true);
@@ -819,7 +819,7 @@ static int apclient_get_location_name(lua_State *L)
         return 1;
     } else {
         luaL_error(L, "missing argument #2 to 'get_location_name' (string or nil expected)");
-        return 0;
+        return 0; // LCOV_EXCL_LINE // unreachable
     }
 }
 
@@ -853,7 +853,7 @@ static int apclient_get_item_name(lua_State *L)
         return 1;
     } else {
         luaL_error(L, "missing argument #2 to 'get_item_name' (string or nil expected)");
-        return 0;
+        return 0; // LCOV_EXCL_LINE // unreachable
     }
 }
 
@@ -1507,11 +1507,11 @@ DLL_EXPORT int luaopen_apclientpp(lua_State *L)
 {
     // register type
     int res = register_apclient(L);
-    if (res == 1) {
-        // return constructor
-        return 1;
-    } else {
+    if (res != 1) { // LCOV_EXCL_START
         errorf(L, "register_apclient returned %d (expected 1)", res);
         return 0;
-    }
+    } // LCOV_EXCL_STOP
+
+    // return constructor
+    return 1;
 }
