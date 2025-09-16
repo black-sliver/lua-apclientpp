@@ -627,15 +627,16 @@ private:
                 lua_pushvalue(L, -3); // original message
                 lua_pushinteger(L, 2); // don't show error_handler
                 if (lua_pcall(L, 2, 1, 0) == LUA_OK) {
-                    // stack: original error, debug, traceback, message
-                    lua_insert(L, -5);
-                    lua_pop(L, 1); // also remove original error
+                    // stack: original error, debug, message
+                    lua_replace(L, -3);
+                } else {
+                    lua_pop(L, 1); // pop error
                 }
-                lua_pop(L, 1);
+            } else {
+                lua_pop(L, 1); // pop traceback
             }
-            lua_pop(L, 1);
         }
-        lua_pop(L, 1);
+        lua_pop(L, 1); // pop debug
         return 1; // original error or traceback
     }
 
