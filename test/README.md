@@ -68,6 +68,5 @@ What's missing from tests:
 * Figure out why running ConnectSlot while not connected crashes
   * see `@skipIf(True, ...)`
 * Test more function calls while not connected
-* Crash in test_commands.py: TestGet: test_bad_extra
 * Fuzz/test behavior when server is sending garbage
 * call that triggers assign_set and contains
