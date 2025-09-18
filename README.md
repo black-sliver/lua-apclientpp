@@ -101,27 +101,31 @@ error might be generated even though the connection might succeed on the second 
 If a game needs to be connected at all times, not receiving SlotConnected within e.g. 10 seconds would be the indicator
 of a failed connect / connect timeout. Receiving a disconnect or error after being connected would be a lost connection.
 
-## To-Do
-
-* Full build matrix
-  * Linux - Ubuntu 20.04 might be fine and has static libssl? Otherwise alma container.
-  * Mac - using brew? Brew's libs target somewhat recent macos.
-  * MSVC builds - currently there is only 32bit and there is no static Lua5.1 build
-* Bundle CA certs
-* Tests
-* UUID helper - currently uuid is not being used, so you can just pass in an empty string
 
 # Known Problems
 
 * Calling certain methods while not connected can lead to unhandled C++ exceptions (crash).
+* Inconsistencies between errors and return false when supplying bad argument.
 
 See test/ for reproducers.
 
+
+## To-Do
+
+* Full build matrix
+  * Linux - Ubuntu 20.04 might be fine and has static libssl? Otherwise, alma container.
+  * Mac - using brew? Brew's libs target somewhat recent macOS.
+  * MSVC builds - currently there is only 32bit and there is no static Lua5.1 build
+* Bundle CA certs
+* UUID helper - currently uuid is not being used, so you can just pass in an empty string
+* Fix known problems.
+
+
 ## Downloads
 
-Until there is a proper
-[release](https://github.com/black-sliver/lua-apclientpp/releases),
-you can use the downloads from the latest build in the
+Head over to
+[Releases](https://github.com/black-sliver/lua-apclientpp/releases).
+Bleeding edge can be downloaded from the latest build in the
 [Actions tab](https://github.com/black-sliver/lua-apclientpp/actions).
 
 Not all possible variations are being built yet.
