@@ -1,5 +1,4 @@
 from typing import Any, Dict, Optional, cast
-from unittest import skipIf
 
 from .bases import E2ETestCase
 from .util import LuaError, LuaTable, TimeoutLoop
@@ -299,13 +298,12 @@ class TestGet(E2ETestCase):
             self.client["Get"](self.lua.table())
 
     def test_bad_keys(self) -> None:
-        res = self.call("Get", 1)
-        self.assertFalse(res)
+        with self.assertRaises(LuaError):
+            self.call("Get", 1)
 
-    @skipIf(True, "Crashes")
     def test_bad_extra(self) -> None:
-        res = self.call("Get", self.lua.table(*self.data.keys()), 1)
-        self.assertFalse(res)
+        with self.assertRaises(LuaError):
+            self.call("Get", self.lua.table(*self.data.keys()), 1)
 
 class TestSet(E2ETestCase):
     # also tests SetNotify and EmptyArray

@@ -106,6 +106,22 @@ static void from_json(const json& j, std::list<APClient::TextNode>& nodes) {
     }
 }
 
+class BadArgumentException : public std::exception
+{
+public:
+    BadArgumentException(int arg, const std::string& expected, const std::string& func="?")
+    {
+        message = "bad argument #" + std::to_string(arg) + " to '" + func + "' (" + expected + " expected)";
+    }
+
+    const char* what() const noexcept override
+    {
+        return message.c_str();
+    }
+
+private:
+    std::string message;
+};
 
 // subclass for extra fields
 // NOTE: we still need some C functions for variable arguments
@@ -472,15 +488,16 @@ public:
 
     bool Get(const json& j, const json& extra = json::value_t::null)
     {
+        APClient* parent = this;
+        if (!extra.is_null() && !extra.is_object()) {
+            throw BadArgumentException(3, "table or nil", "Get");
+        }
         std::list<std::string> keys;
         try {
             keys = j.get<std::list<std::string>>();
-        } catch (std::exception ex) {
-            print_error("Invalid argument for keys");
-            return false;
+        } catch (const std::exception&) {
+            throw BadArgumentException(2, "array of string", "Get");
         }
-
-        APClient* parent = this;
         return parent->Get(keys, extra);
     }
 
@@ -1310,14 +1327,20 @@ static int apclient_LocationScouts(lua_State *L)
 static int apclient_Get(lua_State *L)
 {
     LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
-    json keys = lua_to_json(L, 2);
-    json extra;
-    if (lua_gettop(L) >= 3)
-        extra = lua_to_json(L, 3);
+    try {
+        json keys = lua_to_json(L, 2);
+        json extra;
+        if (lua_gettop(L) >= 3)
+            extra = lua_to_json(L, 3);
 
-    bool res = self->Get(keys, extra);
-    lua_pushboolean(L, res);
-    return 1;
+        bool res = self->Get(keys, extra);
+        lua_pushboolean(L, res);
+        return 1;
+    } catch (const std::exception& e) {
+        lua_pushstring(L, e.what());
+    }
+    lua_error(L);
+    return 0; // LCOV_EXCL_LINE // unreachable
 }
 
 static int apclient_SetNotify(lua_State *L)
