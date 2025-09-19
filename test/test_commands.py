@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional, cast
 from unittest import skipIf
 
 from .bases import E2ETestCase
@@ -273,11 +273,11 @@ class TestGet(E2ETestCase):
                 self.assertTableEqualList(data[key], self.data[key])
             else:
                 self.assertEqual(data[key], self.data[key])
-        self.received_extra = {
+        self.received_extra = cast(Dict[str, Any], {
             k: v
             for k, v in command.items()
             if k not in ("cmd", "keys")
-        }
+        })
         self.done = True
 
     def test_get(self) -> None:
@@ -320,11 +320,11 @@ class TestSet(E2ETestCase):
     def on_set_reply(self, command: LuaTable) -> None:
         self.received_value = command["value"]
         self.received_original = command["original_value"]
-        self.received_extra = {
+        self.received_extra = cast(Dict[str, Any], {
             k: v
             for k, v in command.items()
             if k not in {"cmd", "key", "default", "value", "want_reply", "operations", "original_value", "slot"}
-        }
+        })
         self.done = True
 
     def data_as_table(self, data: Any) -> Any:
@@ -457,7 +457,7 @@ class TestSet(E2ETestCase):
         self.assertTrue(res)
         for _ in TimeoutLoop(lambda: not self.done):
             self.poll()
-        self.assertTableEqualList(self.received_value, [])
+        self.assertTableEqualList(cast(LuaTable, self.received_value), [])
         self.assertEqual(self.server.data_storage[key], [])
 
     def test_empty_dict(self) -> None:
@@ -472,7 +472,7 @@ class TestSet(E2ETestCase):
         self.assertTrue(res)
         for _ in TimeoutLoop(lambda: not self.done):
             self.poll()
-        self.assertTableEqualDict(self.received_value, {})
+        self.assertTableEqualDict(cast(LuaTable, self.received_value), {})
         self.assertEqual(self.server.data_storage[key], {})
 
     def test_bad_self(self) -> None:
