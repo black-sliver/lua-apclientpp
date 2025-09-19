@@ -125,6 +125,15 @@ class ClientTestCase(LuaTestCase):
             self.lua.gccollect()  # doesn't release the GIL? FIXME: explicit close() in the client?
 
 
+class NotConnectedTestCase(ClientTestCase):
+    def poll(self) -> None:
+        raise RuntimeError("Do not poll to stay disconnected")
+
+    def setUp(self) -> None:
+        super().setUp()
+        self.connect()
+
+
 class E2ETestCase(ClientTestCase):
     slot: str = "Player1"
     items_handling: int = 0
