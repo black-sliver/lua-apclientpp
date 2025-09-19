@@ -137,7 +137,79 @@ class TestProperties(E2ETestCase):
 class TestPropertiesNotConnected(ClientTestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.connect()
+        self.connect()  # create instance but never poll to actually connect
+
+    def test_player_alias(self) -> None:
+        self.assertEqual("Server", self.call("get_player_alias", 0))
+        self.assertEqual("Unknown", self.call("get_player_alias", 1))
+
+    def test_negative_player_alias(self) -> None:
+        self.assertEqual("Unknown", self.call("get_player_alias", -1))
+
+    def test_player_game(self) -> None:
+        self.assertEqual("Archipelago", self.call("get_player_game", 0))
+        self.assertEqual("", self.call("get_player_game", 1))
+
+    def test_negative_player_game(self) -> None:
+        self.assertEqual("", self.call("get_player_game", -1))
+
+    def test_game(self) -> None:
+        self.assertEqual("", self.call("get_game"))
+
+    def test_location_name_unknown(self) -> None:
+        self.assertEqual("Unknown", self.call("get_location_name", 999999, self.game))
+        self.assertEqual("Unknown", self.call("get_location_name", 999999, None))
+        self.assertEqual("Unknown", self.call("get_location_name", 999999.0, None))
+
+    def test_location_id_unknown(self) -> None:
+        invalid_id = -1 * 2**63
+        self.assertEqual(invalid_id, self.call("get_location_id", "Nothing"))
+
+    def test_item_name_unknown(self) -> None:
+        self.assertEqual("Unknown", self.call("get_item_name", 999999, self.game))
+        self.assertEqual("Unknown", self.call("get_item_name", 999999, None))
+        self.assertEqual("Unknown", self.call("get_item_name", 999999.0, None))
+
+    def test_item_id_unknown(self) -> None:
+        invalid_id = -1 * 2**63
+        self.assertEqual(invalid_id, self.call("get_item_id", "Nothing"))
+
+    def test_state(self) -> None:
+        self.assertEqual(self.call("get_state"), self.client["State"]["SOCKET_CONNECTING"])
+
+    def test_seed(self) -> None:
+        self.assertEqual("", self.call("get_seed"))
+
+    def test_slot(self) -> None:
+        self.assertEqual("", self.call("get_slot"))
+
+    def test_player_number(self) -> None:
+        self.assertEqual(-1, self.call("get_player_number"))
+
+    def test_team_number(self) -> None:
+        self.assertEqual(-1, self.call("get_team_number"))
+
+    def test_hint_points(self) -> None:
+        self.assertEqual(0, self.call("get_hint_points"))
+
+    def test_hint_cost(self) -> None:
+        self.assertEqual(0, self.call("get_hint_cost_percent"))
+        self.assertEqual(0, self.call("get_hint_cost_points"))
+
+    def test_data_package_valid(self) -> None:
+        self.assertFalse(self.call("is_data_package_valid"))
+
+    def test_server_time(self) -> None:
+        t = self.call("get_server_time")
+        self.assertIsInstance(t, (int, float))
 
     def test_players(self) -> None:
         self.assertEqual(0, len(list(self.call("get_players").values())))
+
+    def test_checked_locations(self) -> None:
+        checked_locations = self.client["checked_locations"]
+        self.assertEqual(0, len(list(checked_locations.values())))
+
+    def test_missing_locations(self) -> None:
+        missing_locations = self.client["missing_locations"]
+        self.assertEqual(0, len(list(missing_locations.values())))

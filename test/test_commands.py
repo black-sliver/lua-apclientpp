@@ -1,6 +1,6 @@
 from typing import Any, Dict, Optional, cast
 
-from .bases import E2ETestCase
+from .bases import E2ETestCase, NotConnectedTestCase
 from .util import LuaError, LuaTable, TimeoutLoop
 
 
@@ -22,6 +22,12 @@ class TestSay(E2ETestCase):
     def test_bad_self(self) -> None:
         with self.assertRaises(LuaError):
             self.client["Say"](self.lua.table())
+
+
+class TestSayNotConnected(NotConnectedTestCase):
+    def test_call(self) -> None:
+        res = self.call("Say", "Hello, World!")
+        self.assertFalse(res)
 
 
 class TestBounce(E2ETestCase):
@@ -104,6 +110,12 @@ class TestBounce(E2ETestCase):
             self.client["Bounce"](self.lua.table())
 
 
+class TestBounceNotConnected(NotConnectedTestCase):
+    def test_call(self) -> None:
+        res = self.call("Bounce")
+        self.assertFalse(res)
+
+
 class TestStatusUpdate(E2ETestCase):
     def get_status(self) -> int:
         return self.server._connections[0].status
@@ -134,6 +146,12 @@ class TestStatusUpdate(E2ETestCase):
             self.client["StatusUpdate"](self.lua.table())
 
 
+class TestStatusUpdateNotConnected(NotConnectedTestCase):
+    def test_call(self) -> None:
+        res = self.call("StatusUpdate", self.client["ClientStatus"]["READY"])
+        self.assertFalse(res)
+
+
 class TestSync(E2ETestCase):
     done = False
     items: LuaTable
@@ -154,13 +172,20 @@ class TestSync(E2ETestCase):
 
     def test_sync(self) -> None:
         self.done = False
-        self.call("Sync")
+        res = self.call("Sync")
+        self.assertTrue(res)
         for _ in TimeoutLoop(lambda: not self.done):
             self.poll()
 
     def test_bad_self(self) -> None:
         with self.assertRaises(LuaError):
             self.client["Sync"](self.lua.table())
+
+
+class TestSyncNotConnected(NotConnectedTestCase):
+    def test_call(self) -> None:
+        res = self.call("Sync")
+        self.assertFalse(res)
 
 
 class TestLocationChecks(E2ETestCase):
@@ -177,6 +202,7 @@ class TestLocationChecks(E2ETestCase):
     def on_location_checked(self, locations: LuaTable) -> None:
         # own location should be filtered out
         # TODO: test receiveOwnLocations once we update apclientpp
+        # TODO: also test duplicates
         if self.started:
             self.fail("Unexpected location checked")
 
@@ -194,6 +220,14 @@ class TestLocationChecks(E2ETestCase):
     def test_bad_locations(self) -> None:
         res = self.call("LocationChecks", 1)
         self.assertFalse(res)
+
+
+class TestLocationChecksNotConnected(NotConnectedTestCase):
+    def test_call(self) -> None:
+        # This will queue up the checks
+        res = self.call("LocationChecks", self.lua.table(1))
+        self.assertTrue(res)
+        # TODO: test if polling afterwards actually does the checks
 
 
 class TestLocationScout(E2ETestCase):
@@ -245,6 +279,14 @@ class TestLocationScout(E2ETestCase):
     def test_bad_locations(self) -> None:
         res = self.call("LocationScouts", 1)
         self.assertFalse(res)
+
+
+class TestLocationScoutNotConnected(NotConnectedTestCase):
+    def test_call(self) -> None:
+        # This will queue up the scout
+        res = self.call("LocationScouts", self.lua.table(1))
+        self.assertTrue(res)
+        # TODO: test if polling afterwards actually does the scout
 
 
 class TestGet(E2ETestCase):
@@ -304,6 +346,13 @@ class TestGet(E2ETestCase):
     def test_bad_extra(self) -> None:
         with self.assertRaises(LuaError):
             self.call("Get", self.lua.table(*self.data.keys()), 1)
+
+
+class TestGetNotConnected(NotConnectedTestCase):
+    def test_call(self) -> None:
+        res = self.call("Get", self.lua.table("a"))
+        self.assertFalse(res)
+
 
 class TestSet(E2ETestCase):
     # also tests SetNotify and EmptyArray
@@ -496,6 +545,7 @@ class TestSet(E2ETestCase):
             self.assertFalse(res)
 
     def test_bad_operations(self) -> None:
+        # FIXME: this should raise
         res = self.call(
             "Set",
             "a",
@@ -506,6 +556,7 @@ class TestSet(E2ETestCase):
         self.assertFalse(res)
 
     def test_bad_extra(self) -> None:
+        # FIXME: this should raise
         res = self.call(
             "Set",
             "a",
@@ -513,6 +564,18 @@ class TestSet(E2ETestCase):
             False,
             self.lua.table(),
             1,
+        )
+        self.assertFalse(res)
+
+
+class TestSetNotConnected(NotConnectedTestCase):
+    def test_call(self) -> None:
+        res = self.call(
+            "Set",
+            "a",
+            1,
+            False,
+            self.lua.table(),
         )
         self.assertFalse(res)
 
@@ -535,6 +598,15 @@ class TestSetNotify(E2ETestCase):
         res = self.call(
             "SetNotify",
             1,
+        )
+        self.assertFalse(res)
+
+
+class TestSetNotifyNotConnected(NotConnectedTestCase):
+    def test_call(self) -> None:
+        res = self.call(
+            "SetNotify",
+            self.lua.table("a"),
         )
         self.assertFalse(res)
 
