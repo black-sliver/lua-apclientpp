@@ -528,44 +528,40 @@ class TestSet(E2ETestCase):
 
     def test_missing_value(self) -> None:
         with self.assertRaises(LuaError):
-            res = self.call(
+            self.call(
                 "Set",
                 "a",
             )
-            self.assertFalse(res)
 
     def test_bad_key(self) -> None:
         with self.assertRaises(LuaError):
-            res = self.call(
+            self.call(
                 "Set",
                 self.lua.table(),
                 1,
                 False
             )
-            self.assertFalse(res)
 
     def test_bad_operations(self) -> None:
-        # FIXME: this should raise
-        res = self.call(
-            "Set",
-            "a",
-            1,
-            False,
-            1,
-        )
-        self.assertFalse(res)
+        with self.assertRaises(LuaError):
+            self.call(
+                "Set",
+                "a",
+                1,
+                False,
+                1,
+            )
 
     def test_bad_extra(self) -> None:
-        # FIXME: this should raise
-        res = self.call(
-            "Set",
-            "a",
-            1,
-            False,
-            self.lua.table(),
-            1,
-        )
-        self.assertFalse(res)
+        with self.assertRaises(LuaError):
+            self.call(
+                "Set",
+                "a",
+                1,
+                False,
+                self.lua.table(),
+                1,
+            )
 
 
 class TestSetNotConnected(NotConnectedTestCase):
@@ -575,7 +571,7 @@ class TestSetNotConnected(NotConnectedTestCase):
             "a",
             1,
             False,
-            self.lua.table(),
+            self.client["EMPTY_ARRAY"],
         )
         self.assertFalse(res)
 
