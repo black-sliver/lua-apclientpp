@@ -1,8 +1,8 @@
-from test.bases import E2ETestCase
+from test.bases import E2ETestCase, ClientTestCase
 from test.util import LuaError, TimeoutLoop
 
 
-class ResetTest(E2ETestCase):
+class TestReset(E2ETestCase):
     done = False
 
     def on_room_info(self) -> None:
@@ -18,3 +18,14 @@ class ResetTest(E2ETestCase):
     def test_bad_call(self) -> None:
         with self.assertRaises(LuaError):
             self.client["reset"](self.lua.table())
+
+
+class TestResetNotConnected(ClientTestCase):
+    def setUp(self) -> None:
+        super().setUp()
+        self.connect()
+        # don't poll, so never actually connect
+
+    def test_reset(self) -> None:
+        res = self.call("reset")
+        self.assertFalse(res)  # nil
