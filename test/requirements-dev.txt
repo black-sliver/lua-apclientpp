@@ -1,0 +1,4 @@
+# additional requirements recommended during development and used in CI
+pytest==8.4.2
+pytest-xdist==3.8.0
+gcovr==8.3
