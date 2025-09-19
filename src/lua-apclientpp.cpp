@@ -1368,31 +1368,31 @@ static int apclient_Set(lua_State *L)
 {
     LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
     const char* key = luaL_checkstring(L, 2);
-    json dflt = lua_to_json(L, 3);
     luaL_checkany(L, 4);
-    bool want_reply = lua_toboolean(L, 4);
-
-    std::list<APClient::DataStorageOperation> operations;
     try {
-        lua_to_json(L, 5).get_to(operations);
-    } catch (std::exception) {
-        errorf(L, "Invalid argument for operations");
-        return 0;
-    }
+        json dflt = lua_to_json(L, 3);
+        bool want_reply = lua_toboolean(L, 4);
 
-    json extras;
-    if (lua_gettop(L) >= 6) {
-        extras = lua_to_json(L, 6);
-    }
+        std::list<APClient::DataStorageOperation> operations;
+        try {
+            lua_to_json(L, 5).get_to(operations);
+        } catch (const std::exception&) {
+            throw BadArgumentException(5, "array of operations", "Set");
+        }
 
-    try {
+        json extras;
+        if (lua_gettop(L) >= 6) {
+            extras = lua_to_json(L, 6);
+        }
+
         bool res = self->Set(key, dflt, want_reply, operations, extras);
         lua_pushboolean(L, res);
         return 1;
-    } catch (std::exception ex) {
-        errorf(L, "Set failed: %s", ex.what());
-        return 0;
+    } catch (const std::exception& ex) {
+        lua_pushstring(L, ex.what());
     }
+    lua_error(L);
+    return 0; // LCOV_EXCL_LINE // unreachable
 }
 
 static int apclient_poll(lua_State *L)
