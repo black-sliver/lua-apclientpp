@@ -65,6 +65,5 @@ What's missing from tests:
 * See TODOs in test_properties.py
 * Isolated tests for GetDataPackage. See server.py for a current bug.
 * All the things in render_json
-* Test more function calls while not connected
 * Fuzz/test behavior when server is sending garbage
 * call that triggers assign_set and contains
