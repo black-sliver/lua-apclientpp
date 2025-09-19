@@ -583,19 +583,17 @@ class TestSetNotify(E2ETestCase):
             self.client["SetNotify"](self.lua.table())
 
     def test_missing_keys(self) -> None:
-        # FIXME: should this raise?
-        res = self.call(
-            "SetNotify",
-        )
-        self.assertFalse(res)
+        with self.assertRaises(LuaError):
+            self.call(
+                "SetNotify",
+            )
 
     def test_bad_keys(self) -> None:
-        # FIXME: should this raise?
-        res = self.call(
-            "SetNotify",
-            1,
-        )
-        self.assertFalse(res)
+        with self.assertRaises(LuaError):
+            self.call(
+                "SetNotify",
+                1,
+            )
 
 
 class TestSetNotifyNotConnected(NotConnectedTestCase):

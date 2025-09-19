@@ -506,9 +506,8 @@ public:
         std::list<std::string> keys;
         try {
             keys = j.get<std::list<std::string>>();
-        } catch (std::exception ex) {
-            print_error("Invalid argument for keys");
-            return false;
+        } catch (const std::exception&) {
+            throw BadArgumentException(2, "array of string", "SetNotify");
         }
 
         APClient* parent = this;
@@ -1358,10 +1357,11 @@ static int apclient_SetNotify(lua_State *L)
     try {
         lua_pushboolean(L, self->SetNotify(lua_to_json(L, 2)));
         return 1;
-    } catch (std::exception ex) {
-        errorf(L, "SetNotify failed: %s", ex.what());
-        return 0;
+    } catch (const std::exception& ex) {
+        lua_pushstring(L, ex.what());
     }
+    lua_error(L);
+    return 0; // LCOV_EXCL_LINE // unreachable
 }
 
 static int apclient_Set(lua_State *L)
