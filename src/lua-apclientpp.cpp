@@ -1184,39 +1184,48 @@ static int apclient_ConnectUpdate(lua_State *L)
 {
     LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
 
-    if (lua_isnil(L, 3)) {
-        if (lua_isnil(L, 2)) {
-            // invalid arguments
-            errorf(L, "Either items_handling or tags required");
-            return 0;
+    bool has_items_handling = !lua_isnil(L, 2);
+    bool has_tags = !lua_isnil(L, 3);
+    int items_handling = has_items_handling ? luaL_checkinteger(L, 2) : 0;
+
+    try {
+        if (!has_tags) {
+            if (!has_items_handling) {
+                // invalid arguments
+                throw BadArgumentException(3, "items_handling or tags not nil", "ConnectUpdate");
+            } else {
+                // update items_handling
+                lua_pushboolean(L, self->ConnectUpdate(true, items_handling, false, {}));
+            }
         } else {
-            // update items_handling
-            int items_handling = luaL_checkinteger(L, 2);
-            self->ConnectUpdate(true, items_handling, false, {});
-        }
-    } else {
-        std::list<std::string> tags;
-        try {
-            auto j = lua_to_json(L, 3);
-            if (j.size() > 0)
-                tags = j.get<std::list<std::string>>();
-        } catch (std::exception ex) {
-            errorf(L, "Invalid tags argument");
-            return 0;
+            std::list<std::string> tags;
+            try {
+                auto j = lua_to_json(L, 3);
+                if (j.size() > 0)
+                    tags = j.get<std::list<std::string>>();
+            } catch (const std::exception&) {
+                throw BadArgumentException(3, "array of string", "ConnectUpdate");
+            }
+
+            if (has_items_handling) {
+                // update both
+                lua_pushboolean(L, self->ConnectUpdate(true, items_handling, true, tags));
+            } else {
+                // update tags
+                lua_pushboolean(L, self->ConnectUpdate(false, 0, true, tags));
+            }
         }
 
-        if (lua_isnil(L, 2)) {
-            // update tags
-            self->ConnectUpdate(false, 0, true, tags);
-        } else {
-            // update both
-            int items_handling = luaL_checkinteger(L, 2);
-            self->ConnectUpdate(true, items_handling, true, tags);
-        }
+        return 1;
+    } catch (const websocketpp::exception&) {
+        // network error -> false; TODO: this should be handled in apclientpp with NO_EXCEPTION
+        lua_pushboolean(L, false);
+        return 1;
+    } catch (const std::exception& ex) {
+        lua_pushstring(L, ex.what());
     }
-
-    lua_pushboolean(L, true);
-    return 1;
+    lua_error(L);
+    return 0; // LCOV_EXCL_LINE // unreachable
 }
 
 static int apclient_Bounce(lua_State *L)

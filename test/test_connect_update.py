@@ -1,8 +1,7 @@
 """Test all variations of ConnectUpdate command"""
 from typing import List
-from unittest import skipIf
 
-from .bases import E2ETestCase, ClientTestCase
+from .bases import E2ETestCase, NotConnectedTestCase
 from .util import LuaError, TimeoutLoop
 
 
@@ -14,8 +13,8 @@ class TestConnectUpdate(E2ETestCase):
         return self.server._connections[0].tags
 
     def test_update_nothing(self) -> None:
-        res = self.call("ConnectUpdate", None, None)
-        self.assertFalse(res)
+        with self.assertRaises(LuaError):
+            self.call("ConnectUpdate", None, None)
 
     def test_missing_arg1(self) -> None:
         with self.assertRaises(LuaError):
@@ -60,17 +59,11 @@ class TestConnectUpdate(E2ETestCase):
             self.call("ConnectUpdate", "a")
 
     def test_bad_tags(self) -> None:
-        res = self.call("ConnectUpdate", None, 1)
-        self.assertFalse(res)
+        with self.assertRaises(LuaError):
+            self.call("ConnectUpdate", None, 1)
 
 
-@skipIf(True, "FIXME: this currently crashes")
-class TestConnectUpdateNotConnected(ClientTestCase):
-    def setUp(self) -> None:
-        super().setUp()
-        self.connect()
-
+class TestConnectUpdateNotConnected(NotConnectedTestCase):
     def test_update(self) -> None:
-        # FIXME: this throws an error but should just return false
         res = self.call("ConnectUpdate", 1, None)
         self.assertFalse(res)
