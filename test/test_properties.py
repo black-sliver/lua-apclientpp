@@ -7,11 +7,29 @@ class TestProperties(E2ETestCase):
         self.assertEqual("Server", self.call("get_player_alias", 0))
         self.assertEqual(self.slot, self.call("get_player_alias", 1))
         self.assertEqual("Unknown", self.call("get_player_alias", 999))
+        try:
+            self.assertEqual("Unknown", self.call("get_player_alias", 2**63 - 1))
+        except (OverflowError, LuaError):
+            pass  # might not work if lua_Integer isn't 64bit
+        try:
+            # TODO: assertRaises? currently doesn't raise on Lua < 5.4, but we get the correct result
+            self.assertEqual("Unknown", self.call("get_player_alias", float(2**63 - 1)))
+        except LuaError:
+            pass  # int -> float -> int is lossy, Lua 5.4 properly detects that
 
     def test_player_game(self) -> None:
         self.assertEqual("Archipelago", self.call("get_player_game", 0))
         self.assertEqual(self.game, self.call("get_player_game", 1))
         self.assertEqual("", self.call("get_player_game", 999), "Unknown game should be empty")
+        try:
+            self.assertEqual("", self.call("get_player_game", 2**63 - 1))
+        except (OverflowError, LuaError):
+            pass  # might not work if lua_Integer isn't 64bit
+        try:
+            # TODO: assertRaises? currently doesn't raise on Lua < 5.4, but we get the correct result
+            self.assertEqual("", self.call("get_player_game", float(2**63 - 1)))
+        except LuaError:
+            pass  # int -> float -> int is lossy, Lua 5.4 properly detects that
 
     def test_game(self) -> None:
         self.assertEqual(self.game, self.call("get_game"))
