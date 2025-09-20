@@ -122,7 +122,7 @@ class TestProperties(E2ETestCase):
 
     def test_missing_locations(self) -> None:
         # FIXME: this is currently empty
-        for k, v in self.client["checked_locations"].items():
+        for k, v in self.client["missing_locations"].items():
             self.assertIsInstance(k, int)
             self.assertIsInstance(v, int)
 
