@@ -1,7 +1,8 @@
 -- try to connect and disconnect (via GC) socket
 
+uri = arg[1] or "ws://localhost:38281"
 AP = require "lua-apclientpp"
-client = AP("", "", "ws://localhost:38281")  -- expect socket connected handler ...
+client = AP("", "", uri)  -- expect socket connected handler ...
 done = false
 
 function on_socket_connected()
@@ -25,6 +26,6 @@ if done then
     print("OK")
     os.exit(0)
 else
-    print("Timeout waiting for connect - is AP running on 38281?")
+    print("Timeout waiting for connect - is AP running on " .. uri .. " ?")
     os.exit(1)
 end

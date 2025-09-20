@@ -59,13 +59,16 @@ static void print(lua_State *L, const std::string& line)
         fprintf(stderr, "Could not call Lua print!\n");
     }
 }
+
 static void errorf(lua_State *L, const char* fmt, ...)
 {
     char buf[1024];
     va_list args;
     va_start (args, fmt);
     auto res = vsnprintf(buf, sizeof(buf), fmt, args);
-    if (res >= sizeof(buf))
+    if (res < 0)
+        strcpy(buf, "Error formatting error");
+    else if ((size_t)res >= sizeof(buf))
         memcpy(buf + sizeof(buf) - 4, "...", 4);
     print(L, buf);
     va_end (args);
@@ -106,6 +109,22 @@ static void from_json(const json& j, std::list<APClient::TextNode>& nodes) {
     }
 }
 
+class BadArgumentException : public std::exception
+{
+public:
+    BadArgumentException(int arg, const std::string& expected, const std::string& func="?")
+    {
+        message = "bad argument #" + std::to_string(arg) + " to '" + func + "' (" + expected + " expected)";
+    }
+
+    const char* what() const noexcept override
+    {
+        return message.c_str();
+    }
+
+private:
+    std::string message;
+};
 
 // subclass for extra fields
 // NOTE: we still need some C functions for variable arguments
@@ -452,10 +471,9 @@ public:
         std::list<int64_t> locations;
         try {
             locations = j.get<std::list<int64_t>>();
-        } catch (std::exception ex) {
+        } catch (const std::exception& ex) {
             if (!j.is_object() || !j.empty()) {
-                print_error("Invalid argument for locations");
-                return false;
+                throw BadArgumentException(2, "array of integer", "LocationChecks");
             }
         }
 
@@ -472,15 +490,16 @@ public:
 
     bool Get(const json& j, const json& extra = json::value_t::null)
     {
+        APClient* parent = this;
+        if (!extra.is_null() && !extra.is_object()) {
+            throw BadArgumentException(3, "table or nil", "Get");
+        }
         std::list<std::string> keys;
         try {
             keys = j.get<std::list<std::string>>();
-        } catch (std::exception ex) {
-            print_error("Invalid argument for keys");
-            return false;
+        } catch (const std::exception& ex) {
+            throw BadArgumentException(2, "array of string", "Get");
         }
-
-        APClient* parent = this;
         return parent->Get(keys, extra);
     }
 
@@ -489,9 +508,8 @@ public:
         std::list<std::string> keys;
         try {
             keys = j.get<std::list<std::string>>();
-        } catch (std::exception ex) {
-            print_error("Invalid argument for keys");
-            return false;
+        } catch (const std::exception& ex) {
+            throw BadArgumentException(2, "array of string", "SetNotify");
         }
 
         APClient* parent = this;
@@ -522,7 +540,7 @@ public:
             }
             APClient* parent = self;
             parent->poll();
-        } catch (std::exception ex) {
+        } catch (const std::exception& ex) {
             self->push_error(ex.what());
         }
 
@@ -874,66 +892,84 @@ static int apclient_ConnectSlot(lua_State *L)
     const char* slot = luaL_checkstring(L, 2);
     const char* password = luaL_checkstring(L, 3);
     int items_handling = luaL_checkinteger(L, 4);
-    std::list<std::string> tags;
-    APClient::Version version = {0, 0, 0};
+    try {
+        std::list<std::string> tags;
+        APClient::Version version = {0, 0, 0};
 
-    if (lua_gettop(L) >= 5) {
-        try {
-            auto j = lua_to_json(L, 5);
-            if (j.size() > 0)
-                tags = j.get<std::list<std::string>>();
-        } catch (std::exception ex) {
-            errorf(L, "Invalid tags argument");
-            return 0;
-        }
-    }
-    if (lua_gettop(L) >= 6) {
-        try {
-            json jversion = lua_to_json(L, 6);
-            if (jversion.is_object()) {
-                version = APClient::Version::from_json(jversion);
-            } else if (jversion.is_array()) {
-                if (jversion.size() > 0)
-                    version.ma = jversion[0].get<int>();
-                if (jversion.size() > 1)
-                    version.mi = jversion[1].get<int>();
-                if (jversion.size() > 2)
-                    version.build = jversion[2].get<int>();
+        if (lua_gettop(L) >= 5) {
+            try {
+                auto j = lua_to_json(L, 5);
+                if (j.size() > 0)
+                    tags = j.get<std::list<std::string>>();
+            } catch (const std::exception& ex) {
+                throw BadArgumentException(5, "optional array of string", "ConnectSlot");
             }
-        } catch (std::exception ex) {
-            errorf(L, "Invalid version argument");
-            return 0;
         }
+        if (lua_gettop(L) >= 6) {
+            try {
+                json jversion = lua_to_json(L, 6);
+                if (jversion.is_object()) {
+                    version = APClient::Version::from_json(jversion);
+                } else if (jversion.is_array()) {
+                    if (jversion.size() > 0)
+                        version.ma = jversion[0].get<int>();
+                    if (jversion.size() > 1)
+                        version.mi = jversion[1].get<int>();
+                    if (jversion.size() > 2)
+                        version.build = jversion[2].get<int>();
+                }
+            } catch (const std::exception& ex) {
+                throw BadArgumentException(6, "optional version table or array of integer", "ConnectSlot");
+            }
+        }
+
+        bool res;
+        if (version.ma > 0 || version.mi > 0 || version.build > 0)
+            res = self->ConnectSlot(slot, password, items_handling, tags, version);
+        else
+            res = self->ConnectSlot(slot, password, items_handling, tags);
+
+        lua_pushboolean(L, res);
+        return 1;
+    } catch (const std::exception& ex) {
+        lua_pushstring(L, ex.what());
     }
-
-    bool res;
-    if (version.ma > 0 || version.mi > 0 || version.build > 0)
-        res = self->ConnectSlot(slot, password, items_handling, tags, version);
-    else
-        res = self->ConnectSlot(slot, password, items_handling, tags);
-
-    lua_pushboolean(L, res);
-    return 1;
+    lua_error(L);
+    return 0; // LCOV_EXCL_LINE // unreachable
 }
 
 static int apclient_render_json(lua_State *L)
 {
     LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
-    std::list<APClient::TextNode> msg;
-    try {
-        from_json(lua_to_json(L, 2), msg);
-    } catch (std::exception ex) {
-        errorf(L, "Invalid argument for msg: %s", ex.what());
-        return 0;
-    }
     APClient::RenderFormat fmt = APClient::RenderFormat::TEXT;
     if (lua_gettop(L) >= 3) {
         fmt = (APClient::RenderFormat)luaL_checkinteger(L, 3);
     }
 
-    std::string res = self->render_json(msg, fmt);
-    lua_pushstring(L, res.c_str());
-    return 1;
+    try {
+        std::list<APClient::TextNode> msg;
+        try {
+            from_json(lua_to_json(L, 2), msg);
+        } catch (const std::exception& ex) {
+            throw BadArgumentException(2, "array of TextNode", "render_json");
+        }
+
+        try {
+            std::string res = self->render_json(msg, fmt);
+            lua_pushstring(L, res.c_str());
+            return 1;
+        } catch (const std::invalid_argument&) {
+            throw; // rethrow
+        } catch (...) { // LCOV_EXCL_START
+            // this is probably unreachable; if the content of a text node was somehow invalid, still return string
+            lua_pushstring(L, "(Invalid chat message)");
+            return 1;
+        }  // LCOV_EXCL_STOP
+    } catch (const std::exception& ex) {
+        lua_pushstring(L, ex.what());
+    }
+    lua_error(L);
+    return 0; // LCOV_EXCL_LINE // unreachable
 }
 
 static int apclient_get_state(lua_State *L)
@@ -1167,85 +1203,97 @@ static int apclient_ConnectUpdate(lua_State *L)
 {
     LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
 
-    if (lua_isnil(L, 3)) {
-        if (lua_isnil(L, 2)) {
-            // invalid arguments
-            errorf(L, "Either items_handling or tags required");
-            return 0;
+    bool has_items_handling = !lua_isnil(L, 2);
+    bool has_tags = !lua_isnil(L, 3);
+    int items_handling = has_items_handling ? luaL_checkinteger(L, 2) : 0;
+
+    try {
+        if (!has_tags) {
+            if (!has_items_handling) {
+                // invalid arguments
+                throw BadArgumentException(3, "items_handling or tags not nil", "ConnectUpdate");
+            } else {
+                // update items_handling
+                lua_pushboolean(L, self->ConnectUpdate(true, items_handling, false, {}));
+            }
         } else {
-            // update items_handling
-            int items_handling = luaL_checkinteger(L, 2);
-            self->ConnectUpdate(true, items_handling, false, {});
-        }
-    } else {
-        std::list<std::string> tags;
-        try {
-            auto j = lua_to_json(L, 3);
-            if (j.size() > 0)
-                tags = j.get<std::list<std::string>>();
-        } catch (std::exception ex) {
-            errorf(L, "Invalid tags argument");
-            return 0;
+            std::list<std::string> tags;
+            try {
+                auto j = lua_to_json(L, 3);
+                if (j.size() > 0)
+                    tags = j.get<std::list<std::string>>();
+            } catch (const std::exception& ex) {
+                throw BadArgumentException(3, "array of string", "ConnectUpdate");
+            }
+
+            if (has_items_handling) {
+                // update both
+                lua_pushboolean(L, self->ConnectUpdate(true, items_handling, true, tags));
+            } else {
+                // update tags
+                lua_pushboolean(L, self->ConnectUpdate(false, 0, true, tags));
+            }
         }
 
-        if (lua_isnil(L, 2)) {
-            // update tags
-            self->ConnectUpdate(false, 0, true, tags);
-        } else {
-            // update both
-            int items_handling = luaL_checkinteger(L, 2);
-            self->ConnectUpdate(true, items_handling, true, tags);
-        }
+        return 1;
+    } catch (const websocketpp::exception& e) {
+        // network error -> false; TODO: this should be handled in apclientpp with NO_EXCEPTION
+        lua_pushboolean(L, false);
+        return 1;
+    } catch (const std::exception& ex) {
+        lua_pushstring(L, ex.what());
     }
-
-    lua_pushboolean(L, true);
-    return 1;
+    lua_error(L);
+    return 0; // LCOV_EXCL_LINE // unreachable
 }
 
 static int apclient_Bounce(lua_State *L)
 {
     LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
-    json data = lua_to_json(L, 2);
-    std::list<std::string> games;
-    std::list<int> slots;
-    std::list<std::string> tags;
+    try {
+        json data = lua_to_json(L, 2);
+        std::list<std::string> games;
+        std::list<int> slots;
+        std::list<std::string> tags;
 
-    if (lua_gettop(L) >= 3) {
-        try {
-            auto j = lua_to_json(L, 3);
-            if (j.size() > 0)
-                games = j.get<std::list<std::string>>();
-        } catch (std::exception) {
-            errorf(L, "Invalid games argument");
-            return 0;
+        if (lua_gettop(L) >= 3) {
+            try {
+                auto j = lua_to_json(L, 3);
+                if (j.size() > 0)
+                    games = j.get<std::list<std::string>>();
+            } catch (const std::exception&) {
+                throw BadArgumentException(3, "optional array of string", "Bounce");
+            }
         }
-    }
 
-    if (lua_gettop(L) >= 4) {
-        try {
-            auto j = lua_to_json(L, 4);
-            if (j.size() > 0)
-                slots = j.get<std::list<int>>();
-        } catch (std::exception) {
-            errorf(L, "Invalid slots argument");
-            return 0;
+        if (lua_gettop(L) >= 4) {
+            try {
+                auto j = lua_to_json(L, 4);
+                if (j.size() > 0)
+                    slots = j.get<std::list<int>>();
+            } catch (const std::exception&) {
+                throw BadArgumentException(4, "optional array of integer", "Bounce");
+            }
         }
-    }
 
-    if (lua_gettop(L) >= 5) {
-        try {
-            auto j = lua_to_json(L, 5);
-            if (j.size() > 0)
-                tags = j.get<std::list<std::string>>();
-        } catch (std::exception) {
-            errorf(L, "Invalid tags argument");
-            return 0;
+        if (lua_gettop(L) >= 5) {
+            try {
+                auto j = lua_to_json(L, 5);
+                if (j.size() > 0)
+                    tags = j.get<std::list<std::string>>();
+            } catch (const std::exception&) {
+                throw BadArgumentException(5, "optional array of string", "Bounce");
+            }
         }
-    }
 
-    bool res = self->Bounce(data, games, slots, tags);
-    lua_pushboolean(L, res);
-    return 1;
+        bool res = self->Bounce(data, games, slots, tags);
+        lua_pushboolean(L, res);
+        return 1;
+    } catch (const std::exception& ex) {
+        lua_pushstring(L, ex.what());
+    }
+    lua_error(L);
+    return 0; // LCOV_EXCL_LINE // unreachable
 }
 
 static int apclient_Say(lua_State *L)
@@ -1273,8 +1321,14 @@ static int apclient_StatusUpdate(lua_State *L)
 static int apclient_LocationChecks(lua_State *L)
 {
     LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
-    lua_pushboolean(L, self->LocationChecks(lua_to_json(L, 2)));
-    return 1;
+    try {
+        lua_pushboolean(L, self->LocationChecks(lua_to_json(L, 2)));
+        return 1;
+    } catch (const std::exception& ex) {
+        lua_pushstring(L, ex.what());
+    }
+    lua_error(L);
+    return 0; // LCOV_EXCL_LINE // unreachable
 }
 
 static int apclient_LocationScouts(lua_State *L)
@@ -1289,35 +1343,44 @@ static int apclient_LocationScouts(lua_State *L)
             create_as_hints = (int)luaL_checkinteger(L, 3);
     }
 
-    {
+    try {
         std::list<int64_t> locations;
         {
             json j = lua_to_json(L, 2);
             try {
                 locations = j.get<std::list<int64_t>>();
-            } catch (std::exception ex) {
+            } catch (const std::exception& ex) {
                 if (!j.is_object() || !j.empty()) {
-                    errorf(L, "Invalid argument for locations");
-                    return 0;
+                    throw BadArgumentException(2, "array of integer", "LocationScouts");
                 }
             }
         }
         lua_pushboolean(L, self->LocationScouts(locations, create_as_hints));
         return 1;
+    } catch (const std::exception& ex) {
+        lua_pushstring(L, ex.what());
     }
+    lua_error(L);
+    return 0; // LCOV_EXCL_LINE // unreachable
 }
 
 static int apclient_Get(lua_State *L)
 {
     LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
-    json keys = lua_to_json(L, 2);
-    json extra;
-    if (lua_gettop(L) >= 3)
-        extra = lua_to_json(L, 3);
+    try {
+        json keys = lua_to_json(L, 2);
+        json extra;
+        if (lua_gettop(L) >= 3)
+            extra = lua_to_json(L, 3);
 
-    bool res = self->Get(keys, extra);
-    lua_pushboolean(L, res);
-    return 1;
+        bool res = self->Get(keys, extra);
+        lua_pushboolean(L, res);
+        return 1;
+    } catch (const std::exception& e) {
+        lua_pushstring(L, e.what());
+    }
+    lua_error(L);
+    return 0; // LCOV_EXCL_LINE // unreachable
 }
 
 static int apclient_SetNotify(lua_State *L)
@@ -1326,41 +1389,42 @@ static int apclient_SetNotify(lua_State *L)
     try {
         lua_pushboolean(L, self->SetNotify(lua_to_json(L, 2)));
         return 1;
-    } catch (std::exception ex) {
-        errorf(L, "SetNotify failed: %s", ex.what());
-        return 0;
+    } catch (const std::exception& ex) {
+        lua_pushstring(L, ex.what());
     }
+    lua_error(L);
+    return 0; // LCOV_EXCL_LINE // unreachable
 }
 
 static int apclient_Set(lua_State *L)
 {
     LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
     const char* key = luaL_checkstring(L, 2);
-    json dflt = lua_to_json(L, 3);
     luaL_checkany(L, 4);
-    bool want_reply = lua_toboolean(L, 4);
-
-    std::list<APClient::DataStorageOperation> operations;
     try {
-        lua_to_json(L, 5).get_to(operations);
-    } catch (std::exception) {
-        errorf(L, "Invalid argument for operations");
-        return 0;
-    }
+        json dflt = lua_to_json(L, 3);
+        bool want_reply = lua_toboolean(L, 4);
 
-    json extras;
-    if (lua_gettop(L) >= 6) {
-        extras = lua_to_json(L, 6);
-    }
+        std::list<APClient::DataStorageOperation> operations;
+        try {
+            lua_to_json(L, 5).get_to(operations);
+        } catch (const std::exception&) {
+            throw BadArgumentException(5, "array of operations", "Set");
+        }
 
-    try {
+        json extras;
+        if (lua_gettop(L) >= 6) {
+            extras = lua_to_json(L, 6);
+        }
+
         bool res = self->Set(key, dflt, want_reply, operations, extras);
         lua_pushboolean(L, res);
         return 1;
-    } catch (std::exception ex) {
-        errorf(L, "Set failed: %s", ex.what());
-        return 0;
+    } catch (const std::exception& ex) {
+        lua_pushstring(L, ex.what());
     }
+    lua_error(L);
+    return 0; // LCOV_EXCL_LINE // unreachable
 }
 
 static int apclient_poll(lua_State *L)

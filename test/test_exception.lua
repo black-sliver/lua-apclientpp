@@ -4,7 +4,13 @@
 -- - debug.stacktrace missing
 -- - debug missing
 
+uri = "ws://localhost:38289" -- nothing should be listening there
 AP = require "lua-apclientpp"
+
+function on_socket_connected()
+    print("Expected socket error")
+    os.exit(1)
+end
 
 function on_socket_error(reason)
     error("Test") -- return error ...
@@ -15,7 +21,8 @@ function bad_traceback()
 end
 
 for i = 1, 4 do
-    client = AP("", "", "ws://localhost:38289")
+    client = AP("", "", uri)
+    client:set_socket_connected_handler(on_socket_connected)
     client:set_socket_error_handler(on_socket_error)
 
     local t0 = os.clock()

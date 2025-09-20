@@ -116,6 +116,22 @@ jobs:
           compression-level: 9
           if-no-files-found: 'error'
 
+  type-check-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: >
+          pip install
+          -r test/requirements.txt
+          -r test/requirements-dev.txt
+
+      - name: Type-check
+        run: >
+          mypy --strict test/
+
   coverage-report:
     needs: test
     runs-on: ubuntu-latest

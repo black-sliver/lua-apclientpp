@@ -6,7 +6,7 @@ from typing import Callable
 from unittest import TestCase, skipUnless
 
 from .server import APServer
-from .util import lua_exe
+from .util import lua_exe, TimeoutLoop
 
 
 @skipUnless(lua_exe, "Lua is not installed")
@@ -16,11 +16,9 @@ class TestExe(TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls.server = APServer()
-        cls.server.port = 38281
-        try:
-            cls.server.start()
-        except OSError:
-            pass  # any server on 38281 will suffice
+        cls.server.start()
+        for _ in TimeoutLoop(lambda: cls.server.port == 0):
+            pass
 
     @classmethod
     def tearDownClass(cls) -> None:
@@ -34,7 +32,7 @@ for filename in glob("test/test_*.lua"):
     def make(test_fn: str) -> Callable[[TestExe], None]:
         def f(self: TestExe) -> None:
             assert lua_exe
-            res = run([lua_exe, test_fn])
+            res = run([lua_exe, test_fn, f"ws://localhost:{self.server.port}"])
             self.assertEqual(res.returncode, 0, f"{test_fn} failed")
         return f
 
