@@ -14,11 +14,15 @@
 
 #ifndef _MSC_VER
 #pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpragmas" // gcc doesn't know -Wunknown-warning-option
 #pragma GCC diagnostic ignored "-Wunknown-warning-option" // clang doesn't know -Wtemplate-id-cdtor
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma GCC diagnostic ignored "-Wtemplate-id-cdtor"
 #pragma GCC diagnostic ignored "-Wnull-pointer-subtraction"
 #pragma GCC diagnostic ignored "-Wdeprecated-literal-operator"
+#ifdef _WIN32
+#pragma GCC diagnostic ignored "-Wcast-function-type"
+#endif
 #endif
 
 extern "C" {
