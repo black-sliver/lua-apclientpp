@@ -1322,22 +1322,25 @@ static int apclient_LocationScouts(lua_State *L)
             create_as_hints = (int)luaL_checkinteger(L, 3);
     }
 
-    {
+    try {
         std::list<int64_t> locations;
         {
             json j = lua_to_json(L, 2);
             try {
                 locations = j.get<std::list<int64_t>>();
-            } catch (std::exception ex) {
+            } catch (const std::exception&) {
                 if (!j.is_object() || !j.empty()) {
-                    errorf(L, "Invalid argument for locations");
-                    return 0;
+                    throw BadArgumentException(2, "array of integer", "LocationScouts");
                 }
             }
         }
         lua_pushboolean(L, self->LocationScouts(locations, create_as_hints));
         return 1;
+    } catch (const std::exception& ex) {
+        lua_pushstring(L, ex.what());
     }
+    lua_error(L);
+    return 0; // LCOV_EXCL_LINE // unreachable
 }
 
 static int apclient_Get(lua_State *L)
