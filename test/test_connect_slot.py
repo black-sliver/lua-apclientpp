@@ -1,11 +1,12 @@
 """Test all variations of ConnectSlot command"""
 from .bases import E2ETestCase, ClientTestCase
+from .util import LuaError
 
 
 class Bases:
     class FailedConnect(E2ETestCase):
         def setUp(self) -> None:
-            with self.assertRaises(Exception):
+            with self.assertRaises(LuaError):
                 super().setUp()
 
         def tearDown(self) -> None:
@@ -89,7 +90,7 @@ class TestConnectVersionObject(E2ETestCase):
 
 class TestConnectInvalidVersion(Bases.FailedConnect):
     def _connect_slot(self) -> None:
-        res = self.call(
+        self.call(
             "ConnectSlot",
             self.slot,
             "",
@@ -97,57 +98,63 @@ class TestConnectInvalidVersion(Bases.FailedConnect):
             self.lua.table("Test"),
             self.lua.table(major="string"),
         )
-        # bad arg will just have ConnectSlot return non-true
-        self.assertFalse(res)
+        self.fail("call did not error")
 
 
 class TestConnectInvalidTags(Bases.FailedConnect):
     def _connect_slot(self) -> None:
-        res = self.call(
+        self.call(
             "ConnectSlot",
             self.slot,
             "",
             self.items_handling,
             self.lua.table(key="value"),
         )
-        # bad arg will just have ConnectSlot return non-true
-        self.assertFalse(res)
+        self.fail("call did not error")
 
 
 class TestConnectInvalidSlot(Bases.FailedConnect):
     def _connect_slot(self) -> None:
-        res = self.call(
+        self.call(
             "ConnectSlot",
             self.lua.table(bad="slot"),
             "",
             self.items_handling,
         )
-        # bad arg will just have ConnectSlot return non-true
-        self.assertFalse(res)
+        self.fail("call did not error")
 
 
 class TestConnectInvalidPassword(Bases.FailedConnect):
     def _connect_slot(self) -> None:
-        res = self.call(
+        self.call(
             "ConnectSlot",
             self.slot,
             self.lua.table(bad="password"),
             self.items_handling,
         )
-        # bad arg will just have ConnectSlot return non-true
-        self.assertFalse(res)
+        self.fail("call did not error")
 
 
 class TestConnectInvalidItemsHandling(Bases.FailedConnect):
     def _connect_slot(self) -> None:
-        res = self.call(
+        self.call(
             "ConnectSlot",
             self.slot,
             "",
             "bad items handling",
         )
-        # bad arg will just have ConnectSlot return non-true
-        self.assertFalse(res)
+        self.fail("call did not error")
+
+
+class TestConnectInvalidSelf(Bases.FailedConnect):
+    def _connect_slot(self) -> None:
+        self.client["ConnectSlot"](
+            self.lua.table(),
+            self.slot,
+            "",
+            self.items_handling,
+        )
+        self.fail("call did not error")
 
 
 class TestConnectUnconnected(ClientTestCase):
