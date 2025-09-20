@@ -889,46 +889,50 @@ static int apclient_ConnectSlot(lua_State *L)
     const char* slot = luaL_checkstring(L, 2);
     const char* password = luaL_checkstring(L, 3);
     int items_handling = luaL_checkinteger(L, 4);
-    std::list<std::string> tags;
-    APClient::Version version = {0, 0, 0};
+    try {
+        std::list<std::string> tags;
+        APClient::Version version = {0, 0, 0};
 
-    if (lua_gettop(L) >= 5) {
-        try {
-            auto j = lua_to_json(L, 5);
-            if (j.size() > 0)
-                tags = j.get<std::list<std::string>>();
-        } catch (std::exception ex) {
-            errorf(L, "Invalid tags argument");
-            return 0;
-        }
-    }
-    if (lua_gettop(L) >= 6) {
-        try {
-            json jversion = lua_to_json(L, 6);
-            if (jversion.is_object()) {
-                version = APClient::Version::from_json(jversion);
-            } else if (jversion.is_array()) {
-                if (jversion.size() > 0)
-                    version.ma = jversion[0].get<int>();
-                if (jversion.size() > 1)
-                    version.mi = jversion[1].get<int>();
-                if (jversion.size() > 2)
-                    version.build = jversion[2].get<int>();
+        if (lua_gettop(L) >= 5) {
+            try {
+                auto j = lua_to_json(L, 5);
+                if (j.size() > 0)
+                    tags = j.get<std::list<std::string>>();
+            } catch (const std::exception&) {
+                throw BadArgumentException(5, "optional array of string", "ConnectSlot");
             }
-        } catch (std::exception ex) {
-            errorf(L, "Invalid version argument");
-            return 0;
         }
+        if (lua_gettop(L) >= 6) {
+            try {
+                json jversion = lua_to_json(L, 6);
+                if (jversion.is_object()) {
+                    version = APClient::Version::from_json(jversion);
+                } else if (jversion.is_array()) {
+                    if (jversion.size() > 0)
+                        version.ma = jversion[0].get<int>();
+                    if (jversion.size() > 1)
+                        version.mi = jversion[1].get<int>();
+                    if (jversion.size() > 2)
+                        version.build = jversion[2].get<int>();
+                }
+            } catch (const std::exception&) {
+                throw BadArgumentException(6, "optional version table or array of integer", "ConnectSlot");
+            }
+        }
+
+        bool res;
+        if (version.ma > 0 || version.mi > 0 || version.build > 0)
+            res = self->ConnectSlot(slot, password, items_handling, tags, version);
+        else
+            res = self->ConnectSlot(slot, password, items_handling, tags);
+
+        lua_pushboolean(L, res);
+        return 1;
+    } catch (const std::exception& ex) {
+        lua_pushstring(L, ex.what());
     }
-
-    bool res;
-    if (version.ma > 0 || version.mi > 0 || version.build > 0)
-        res = self->ConnectSlot(slot, password, items_handling, tags, version);
-    else
-        res = self->ConnectSlot(slot, password, items_handling, tags);
-
-    lua_pushboolean(L, res);
-    return 1;
+    lua_error(L);
+    return 0; // LCOV_EXCL_LINE // unreachable
 }
 
 static int apclient_render_json(lua_State *L)
