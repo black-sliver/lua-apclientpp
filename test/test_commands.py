@@ -23,6 +23,10 @@ class TestSay(E2ETestCase):
         with self.assertRaises(LuaError):
             self.client["Say"](self.lua.table())
 
+    def test_bad_text(self) -> None:
+        with self.assertRaises(LuaError):
+            self.call("Say", self.lua.table())
+
 
 class TestSayNotConnected(NotConnectedTestCase):
     def test_call(self) -> None:
