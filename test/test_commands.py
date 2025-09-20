@@ -149,6 +149,10 @@ class TestStatusUpdate(E2ETestCase):
         with self.assertRaises(LuaError):
             self.client["StatusUpdate"](self.lua.table())
 
+    def test_bad_status(self) -> None:
+        with self.assertRaises(LuaError):
+            self.call("StatusUpdate", self.lua.table())
+
 
 class TestStatusUpdateNotConnected(NotConnectedTestCase):
     def test_call(self) -> None:
