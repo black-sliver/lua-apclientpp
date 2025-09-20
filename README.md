@@ -102,14 +102,6 @@ If a game needs to be connected at all times, not receiving SlotConnected within
 of a failed connect / connect timeout. Receiving a disconnect or error after being connected would be a lost connection.
 
 
-# Known Problems
-
-* Calling certain methods while not connected can lead to unhandled C++ exceptions (crash).
-* Inconsistencies between errors and return false when supplying bad argument.
-
-See test/ for reproducers.
-
-
 ## To-Do
 
 * Full build matrix
@@ -118,7 +110,6 @@ See test/ for reproducers.
   * MSVC builds - currently there is only 32bit and there is no static Lua5.1 build
 * Bundle CA certs
 * UUID helper - currently uuid is not being used, so you can just pass in an empty string
-* Fix known problems.
 
 
 ## Downloads
