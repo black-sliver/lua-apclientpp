@@ -218,8 +218,8 @@ class TestLocationChecks(E2ETestCase):
             self.client["LocationChecks"](self.lua.table())
 
     def test_bad_locations(self) -> None:
-        res = self.call("LocationChecks", 1)
-        self.assertFalse(res)
+        with self.assertRaises(LuaError):
+            self.call("LocationChecks", 1)
 
 
 class TestLocationChecksNotConnected(NotConnectedTestCase):

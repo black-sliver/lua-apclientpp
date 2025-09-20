@@ -468,10 +468,9 @@ public:
         std::list<int64_t> locations;
         try {
             locations = j.get<std::list<int64_t>>();
-        } catch (std::exception ex) {
+        } catch (const std::exception&) {
             if (!j.is_object() || !j.empty()) {
-                print_error("Invalid argument for locations");
-                return false;
+                throw BadArgumentException(2, "array of integer", "LocationChecks");
             }
         }
 
@@ -1301,8 +1300,14 @@ static int apclient_StatusUpdate(lua_State *L)
 static int apclient_LocationChecks(lua_State *L)
 {
     LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
-    lua_pushboolean(L, self->LocationChecks(lua_to_json(L, 2)));
-    return 1;
+    try {
+        lua_pushboolean(L, self->LocationChecks(lua_to_json(L, 2)));
+        return 1;
+    } catch (const std::exception& ex) {
+        lua_pushstring(L, ex.what());
+    }
+    lua_error(L);
+    return 0; // LCOV_EXCL_LINE // unreachable
 }
 
 static int apclient_LocationScouts(lua_State *L)
