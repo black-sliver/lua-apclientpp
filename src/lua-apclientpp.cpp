@@ -938,21 +938,35 @@ static int apclient_ConnectSlot(lua_State *L)
 static int apclient_render_json(lua_State *L)
 {
     LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
-    std::list<APClient::TextNode> msg;
-    try {
-        from_json(lua_to_json(L, 2), msg);
-    } catch (std::exception ex) {
-        errorf(L, "Invalid argument for msg: %s", ex.what());
-        return 0;
-    }
     APClient::RenderFormat fmt = APClient::RenderFormat::TEXT;
     if (lua_gettop(L) >= 3) {
         fmt = (APClient::RenderFormat)luaL_checkinteger(L, 3);
     }
 
-    std::string res = self->render_json(msg, fmt);
-    lua_pushstring(L, res.c_str());
-    return 1;
+    try {
+        std::list<APClient::TextNode> msg;
+        try {
+            from_json(lua_to_json(L, 2), msg);
+        } catch (const std::exception&) {
+            throw BadArgumentException(2, "array of TextNode", "render_json");
+        }
+
+        try {
+            std::string res = self->render_json(msg, fmt);
+            lua_pushstring(L, res.c_str());
+            return 1;
+        } catch (const std::invalid_argument&) {
+            throw; // rethrow
+        } catch (...) { // LCOV_EXCL_START
+            // this is probably unreachable; if the content of a text node was somehow invalid, still return string
+            lua_pushstring(L, "(Invalid chat message)");
+            return 1;
+        }  // LCOV_EXCL_STOP
+    } catch (const std::exception& ex) {
+        lua_pushstring(L, ex.what());
+    }
+    lua_error(L);
+    return 0; // LCOV_EXCL_LINE // unreachable
 }
 
 static int apclient_get_state(lua_State *L)
