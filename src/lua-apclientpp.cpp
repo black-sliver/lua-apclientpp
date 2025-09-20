@@ -59,13 +59,16 @@ static void print(lua_State *L, const std::string& line)
         fprintf(stderr, "Could not call Lua print!\n");
     }
 }
+
 static void errorf(lua_State *L, const char* fmt, ...)
 {
     char buf[1024];
     va_list args;
     va_start (args, fmt);
     auto res = vsnprintf(buf, sizeof(buf), fmt, args);
-    if (res >= sizeof(buf))
+    if (res < 0)
+        strcpy(buf, "Error formatting error");
+    else if ((size_t)res >= sizeof(buf))
         memcpy(buf + sizeof(buf) - 4, "...", 4);
     print(L, buf);
     va_end (args);
@@ -537,7 +540,7 @@ public:
             }
             APClient* parent = self;
             parent->poll();
-        } catch (std::exception ex) {
+        } catch (const std::exception& ex) {
             self->push_error(ex.what());
         }
 
