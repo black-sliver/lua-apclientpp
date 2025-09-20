@@ -1230,47 +1230,50 @@ static int apclient_ConnectUpdate(lua_State *L)
 static int apclient_Bounce(lua_State *L)
 {
     LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
-    json data = lua_to_json(L, 2);
-    std::list<std::string> games;
-    std::list<int> slots;
-    std::list<std::string> tags;
+    try {
+        json data = lua_to_json(L, 2);
+        std::list<std::string> games;
+        std::list<int> slots;
+        std::list<std::string> tags;
 
-    if (lua_gettop(L) >= 3) {
-        try {
-            auto j = lua_to_json(L, 3);
-            if (j.size() > 0)
-                games = j.get<std::list<std::string>>();
-        } catch (std::exception) {
-            errorf(L, "Invalid games argument");
-            return 0;
+        if (lua_gettop(L) >= 3) {
+            try {
+                auto j = lua_to_json(L, 3);
+                if (j.size() > 0)
+                    games = j.get<std::list<std::string>>();
+            } catch (const std::exception&) {
+                throw BadArgumentException(3, "optional array of string", "Bounce");
+            }
         }
-    }
 
-    if (lua_gettop(L) >= 4) {
-        try {
-            auto j = lua_to_json(L, 4);
-            if (j.size() > 0)
-                slots = j.get<std::list<int>>();
-        } catch (std::exception) {
-            errorf(L, "Invalid slots argument");
-            return 0;
+        if (lua_gettop(L) >= 4) {
+            try {
+                auto j = lua_to_json(L, 4);
+                if (j.size() > 0)
+                    slots = j.get<std::list<int>>();
+            } catch (const std::exception&) {
+                throw BadArgumentException(4, "optional array of integer", "Bounce");
+            }
         }
-    }
 
-    if (lua_gettop(L) >= 5) {
-        try {
-            auto j = lua_to_json(L, 5);
-            if (j.size() > 0)
-                tags = j.get<std::list<std::string>>();
-        } catch (std::exception) {
-            errorf(L, "Invalid tags argument");
-            return 0;
+        if (lua_gettop(L) >= 5) {
+            try {
+                auto j = lua_to_json(L, 5);
+                if (j.size() > 0)
+                    tags = j.get<std::list<std::string>>();
+            } catch (const std::exception&) {
+                throw BadArgumentException(5, "optional array of string", "Bounce");
+            }
         }
-    }
 
-    bool res = self->Bounce(data, games, slots, tags);
-    lua_pushboolean(L, res);
-    return 1;
+        bool res = self->Bounce(data, games, slots, tags);
+        lua_pushboolean(L, res);
+        return 1;
+    } catch (const std::exception& ex) {
+        lua_pushstring(L, ex.what());
+    }
+    lua_error(L);
+    return 0; // LCOV_EXCL_LINE // unreachable
 }
 
 static int apclient_Say(lua_State *L)

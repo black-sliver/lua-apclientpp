@@ -76,34 +76,34 @@ class TestBounce(E2ETestCase):
             self.poll()
 
     def test_bad_game(self) -> None:
-        ok = self.call(
-            "Bounce",
-            self.lua.table(nonce = self.nonce),
-            1,
-            None,
-            None,
-        )
-        self.assertFalse(ok)
+        with self.assertRaises(LuaError):
+            self.call(
+                "Bounce",
+                self.lua.table(nonce = self.nonce),
+                1,
+                None,
+                None,
+            )
 
     def test_bad_slot(self) -> None:
-        ok = self.call(
-            "Bounce",
-            self.lua.table(nonce = self.nonce),
-            None,
-            1,
-            None,
-        )
-        self.assertFalse(ok)
+        with self.assertRaises(LuaError):
+            self.call(
+                "Bounce",
+                self.lua.table(nonce = self.nonce),
+                None,
+                1,
+                None,
+            )
 
     def test_bad_tag(self) -> None:
-        ok = self.call(
-            "Bounce",
-            self.lua.table(nonce = self.nonce),
-            None,
-            None,
-            1,
-        )
-        self.assertFalse(ok)
+        with self.assertRaises(LuaError):
+            self.call(
+                "Bounce",
+                self.lua.table(nonce = self.nonce),
+                None,
+                None,
+                1,
+            )
 
     def test_bad_self(self) -> None:
         with self.assertRaises(LuaError):
