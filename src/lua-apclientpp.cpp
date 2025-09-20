@@ -8,18 +8,35 @@
 #endif
 #endif
 
+
+//#define APCLIENT_DEBUG // to get debug output
+
+
+#ifndef _MSC_VER
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunknown-warning-option" // clang doesn't know -Wtemplate-id-cdtor
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wtemplate-id-cdtor"
+#pragma GCC diagnostic ignored "-Wnull-pointer-subtraction"
+#pragma GCC diagnostic ignored "-Wdeprecated-literal-operator"
+#endif
+
 extern "C" {
 #include <lua.h>
 #include <lualib.h>
 #include <lauxlib.h>
 }
 
-//#define APCLIENT_DEBUG // to get debug output
 #include <apclient.hpp>
 #include <luaglue/luacompat.h>
 #include <luaglue/luapp.h>
 #include <luaglue/luaref.h>
 #include <luaglue/lua_json.h>
+
+#ifndef _MSC_VER
+#pragma GCC diagnostic pop
+#pragma GCC diagnostic error "-Wconversion"
+#endif
 
 
 // IMPORTANT: apclientpp can't be used across threads, so capturing L is kind of ok
@@ -125,6 +142,24 @@ public:
 private:
     std::string message;
 };
+
+/// Helper function to get integer from Lua stack and check bounds to fit c int
+static int checkcint(lua_State *L, int arg)
+{
+    lua_Integer val = luaL_checkinteger(L, arg);
+    if (sizeof(lua_Integer) != sizeof(int)) {
+        constexpr int lower = std::numeric_limits<int>::min();
+        constexpr int upper = std::numeric_limits<int>::max();
+        if (val < lower || val > upper) {
+            {
+                BadArgumentException ex(arg, std::to_string(lower) + " <= integer <= " + std::to_string(upper));
+                lua_pushstring(L, ex.what());
+            }
+            lua_error(L);
+        }
+    }
+    return static_cast<int>(val);
+}
 
 // subclass for extra fields
 // NOTE: we still need some C functions for variable arguments
@@ -664,9 +699,9 @@ private:
         // get table by name
         lua_getfield(_L, table, key);
         // assign values
-        size_t n = 0;
+        lua_Integer n = 0;
         for (const auto& v: set) {
-            lua_pushinteger(_L, (lua_Integer)++n);
+            lua_pushinteger(_L, ++n);
             Lua(_L).Push(v);
             lua_rawset(_L, -3);
         }
@@ -706,10 +741,10 @@ private:
         // get table by name
         lua_getfield(_L, table, key);
         // append items if they don't exist already
-        size_t n = luaL_len(_L, -1);
+        lua_Integer n = luaL_len(_L, -1);
         for (const auto& v: lst) {
             if (!contains(v)) {
-                lua_pushinteger(_L, (lua_Integer)++n);
+                lua_pushinteger(_L, ++n);
                 Lua(_L).Push(v);
                 lua_rawset(_L, -3);
             }
@@ -798,16 +833,26 @@ static int apclient_reset(lua_State *L)
 static int apclient_get_player_alias(lua_State *L)
 {
     LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
-    int slot = luaL_checkinteger(L, 2);
-    lua_pushstring(L, self->get_player_alias(slot).c_str());
+    lua_Integer slot = luaL_checkinteger(L, 2);
+    if (sizeof(lua_Integer) > sizeof(int)) {
+        if (slot < std::numeric_limits<int>::min() || slot > std::numeric_limits<int>::max()) {
+            slot = std::numeric_limits<int>::min(); // non-existent
+        }
+    }
+    lua_pushstring(L, self->get_player_alias(static_cast<int>(slot)).c_str());
     return 1;
 }
 
 static int apclient_get_player_game(lua_State *L)
 {
     LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
-    int slot = luaL_checkinteger(L, 2);
-    lua_pushstring(L, self->get_player_game(slot).c_str());
+    lua_Integer slot = luaL_checkinteger(L, 2);
+    if (sizeof(lua_Integer) > sizeof(int)) {
+        if (slot < std::numeric_limits<int>::min() || slot > std::numeric_limits<int>::max()) {
+            slot = std::numeric_limits<int>::min(); // non-existent
+        }
+    }
+    lua_pushstring(L, self->get_player_game(static_cast<int>(slot)).c_str());
     return 1;
 }
 
@@ -845,10 +890,11 @@ static int apclient_get_location_id(lua_State *L)
 {
     LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
     int64_t id = self->get_location_id(luaL_checkstring(L, 2));
+    static_assert(sizeof(lua_Integer) >= 7 || sizeof(lua_Number) >= 8, "Can't fit valid ID range in Lua number");
     if (id >= std::numeric_limits<lua_Integer>::min() && id <= std::numeric_limits<lua_Integer>::max())
-        lua_pushinteger(L, (lua_Integer)id);
+        lua_pushinteger(L, static_cast<lua_Integer>(id));
     else
-        lua_pushnumber(L, id);
+        lua_pushnumber(L, static_cast<lua_Number>(id)); // ignores loss of precision if server gives invalid ID
     return 1;
 }
 
@@ -879,10 +925,11 @@ static int apclient_get_item_id(lua_State *L)
 {
     LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
     int64_t id = self->get_item_id(luaL_checkstring(L, 2));
+    static_assert(sizeof(lua_Integer) >= 7 || sizeof(lua_Number) >= 8, "Can't fit valid ID range in Lua number");
     if (id >= std::numeric_limits<lua_Integer>::min() && id <= std::numeric_limits<lua_Integer>::max())
-        lua_pushinteger(L, (lua_Integer)id);
+        lua_pushinteger(L, static_cast<lua_Integer>(id));
     else
-        lua_pushnumber(L, id);
+        lua_pushnumber(L, static_cast<lua_Number>(id)); // ignores loss of precision if server gives invalid ID
     return 1;
 }
 
@@ -891,7 +938,8 @@ static int apclient_ConnectSlot(lua_State *L)
     LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
     const char* slot = luaL_checkstring(L, 2);
     const char* password = luaL_checkstring(L, 3);
-    int items_handling = luaL_checkinteger(L, 4);
+    int items_handling = checkcint(L, 4);
+
     try {
         std::list<std::string> tags;
         APClient::Version version = {0, 0, 0};
@@ -1205,7 +1253,7 @@ static int apclient_ConnectUpdate(lua_State *L)
 
     bool has_items_handling = !lua_isnil(L, 2);
     bool has_tags = !lua_isnil(L, 3);
-    int items_handling = has_items_handling ? luaL_checkinteger(L, 2) : 0;
+    int items_handling = has_items_handling ? checkcint(L, 2) : 0;
 
     try {
         if (!has_tags) {
@@ -1314,7 +1362,7 @@ static int apclient_Sync(lua_State *L)
 static int apclient_StatusUpdate(lua_State *L)
 {
     LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
-    lua_pushboolean(L, self->StatusUpdate(luaL_checkinteger(L, 2)));
+    lua_pushboolean(L, self->StatusUpdate(checkcint(L, 2)));
     return 1;
 }
 

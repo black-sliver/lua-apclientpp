@@ -153,6 +153,20 @@ class TestStatusUpdate(E2ETestCase):
         with self.assertRaises(LuaError):
             self.call("StatusUpdate", self.lua.table())
 
+    def test_too_small(self) -> None:
+        with self.assertRaises(LuaError):
+            self.call("StatusUpdate", -2**63)
+
+    def test_too_big(self) -> None:
+        # fits lua_Integer but not int
+        with self.assertRaises(LuaError):
+            self.call("StatusUpdate", 2**63 - 1)
+
+    def test_way_too_big(self) -> None:
+        # won't fit lua_Integer
+        with self.assertRaises(LuaError):
+            self.call("StatusUpdate", float(2**64))
+
 
 class TestStatusUpdateNotConnected(NotConnectedTestCase):
     def test_call(self) -> None:
