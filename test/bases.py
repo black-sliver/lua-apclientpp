@@ -41,7 +41,7 @@ class APITestCase(LuaTestCase):
 
 
 class ClientTestCase(LuaTestCase):
-    uri: str = "ws://localhost"
+    uri: str = "ws://127.0.0.1"
     uuid: str = ""
     game: str = "Game"
 
@@ -185,7 +185,7 @@ class E2ETestCase(ClientTestCase):
             for _ in TimeoutLoop(lambda: self.server.port == 0):
                 pass
 
-            self.uri = f"ws://localhost:{self.server.port}"
+            self.uri = f"ws://127.0.0.1:{self.server.port}"
             self.connect()
 
             self.wait_room_info()

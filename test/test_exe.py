@@ -32,7 +32,7 @@ for filename in glob("test/test_*.lua"):
     def make(test_fn: str) -> Callable[[TestExe], None]:
         def f(self: TestExe) -> None:
             assert lua_exe
-            res = run([lua_exe, test_fn, f"ws://localhost:{self.server.port}"])
+            res = run([lua_exe, test_fn, f"ws://127.0.0.1:{self.server.port}"])
             self.assertEqual(res.returncode, 0, f"{test_fn} failed")
         return f
 

@@ -196,7 +196,7 @@ class TestBadSocketError(ClientTestCase):
 
     def test_error(self) -> None:
         unused_port = 38289
-        self.uri = f"ws://localhost:{unused_port}"
+        self.uri = f"ws://127.0.0.1:{unused_port}"
         self.connect()
         with self.assertRaises(LuaError):
             for _ in TimeoutLoop(lambda: True):

@@ -67,7 +67,7 @@ class ConnectionTest(ClientTestCase):
     # Test connection behavior when server is not running
     def test_auto_connect_error_when_not_running(self) -> None:
         unused_port = 38289
-        self.uri = f"localhost:{unused_port}"
+        self.uri = f"127.0.0.1:{unused_port}"
         self.connect()
         with self.assertRaises(TimeoutError):
             # NOTE: needs a long timeout because this may test both WS and WSS
@@ -77,14 +77,14 @@ class ConnectionTest(ClientTestCase):
 
     def test_ws_connect_error_when_not_running(self) -> None:
         unused_port = 38289
-        self.uri = f"ws://localhost:{unused_port}"
+        self.uri = f"ws://127.0.0.1:{unused_port}"
         self.connect()
         for _ in TimeoutLoop(lambda: self.socket_state != SocketState.ERROR):
             self.poll()
 
     def test_wss_connect_error_when_not_running(self) -> None:
         unused_port = 38289
-        self.uri = f"wss://localhost:{unused_port}"
+        self.uri = f"wss://127.0.0.1:{unused_port}"
         self.connect()
         for _ in TimeoutLoop(lambda: self.socket_state != SocketState.ERROR):
             self.poll()
@@ -92,7 +92,7 @@ class ConnectionTest(ClientTestCase):
     # Test connection behavior for server not using TLS
     def test_auto_connect_ok_when_plain(self) -> None:
         port = self.start_server()
-        self.uri = f"localhost:{port}"
+        self.uri = f"127.0.0.1:{port}"
         self.connect()
         # NOTE: needs a long timeout because this may test both WS and WSS
         for _ in TimeoutLoop(lambda: self.socket_state != SocketState.CONNECTED, timeout=3.5):
@@ -100,14 +100,14 @@ class ConnectionTest(ClientTestCase):
 
     def test_ws_connect_ok_when_plain(self) -> None:
         port = self.start_server()
-        self.uri = f"ws://localhost:{port}"
+        self.uri = f"ws://127.0.0.1:{port}"
         self.connect()
         for _ in TimeoutLoop(lambda: self.socket_state != SocketState.CONNECTED):
             self.poll()
 
     def test_wss_connect_error_when_plain(self) -> None:
         port = self.start_server()
-        self.uri = f"wss://localhost:{port}"
+        self.uri = f"wss://127.0.0.1:{port}"
         self.connect()
         for _ in TimeoutLoop(lambda: self.socket_state != SocketState.ERROR):
             self.poll()
@@ -116,7 +116,7 @@ class ConnectionTest(ClientTestCase):
     @skipIf(not os.path.exists("untrusted.pem"), "Please generate untrusted.pem")
     def test_wss_connect_localhost_even_if_untrusted(self) -> None:
         port = self.start_server("untrusted.pem", "untrusted-key.pem")
-        self.uri = f"wss://localhost:{port}"
+        self.uri = f"wss://127.0.0.1:{port}"
         self.connect()
         for _ in TimeoutLoop(lambda: self.socket_state != SocketState.CONNECTED):
             self.poll()
@@ -137,7 +137,7 @@ class ConnectionTest(ClientTestCase):
     @skipIf(not os.path.exists("untrusted.pem"), "Please generate untrusted.pem")
     def test_ws_connect_error_when_untrusted(self) -> None:
         port = self.start_server("untrusted.pem", "untrusted-key.pem")
-        self.uri = f"ws://localhost:{port}"
+        self.uri = f"ws://127.0.0.1:{port}"
         self.connect()
         for _ in TimeoutLoop(lambda: self.socket_state != SocketState.ERROR, timeout=1):
             self.poll()
