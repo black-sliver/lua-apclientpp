@@ -13,6 +13,7 @@ function on_socket_connected()
 end
 
 function on_socket_error(reason)
+    print("on_socket_error")
     error("Test") -- return error ...
 end
 
@@ -21,12 +22,17 @@ function bad_traceback()
 end
 
 for i = 1, 4 do
+    print("starting pass " .. tostring(i))
     client = AP("", "", uri)
     client:set_socket_connected_handler(on_socket_connected)
     client:set_socket_error_handler(on_socket_error)
 
     local t0 = os.clock()
-    while os.clock() - t0 < 2 do
+    while true do
+        if os.clock() - t0 > 2 then
+            print("Timeout")
+            break
+        end
         -- ... and check if it's properly forwarded ...
         status, err = pcall(function() client:poll() end)
         if err then
