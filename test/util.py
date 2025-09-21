@@ -19,8 +19,11 @@ __all__ = [
 ]
 
 lua_version = os.environ.get("LUA_VERSION", None)
-_orig_dlflags = sys.getdlopenflags()
-sys.setdlopenflags(258)
+try:
+    _orig_dlflags = sys.getdlopenflags()
+    sys.setdlopenflags(258)
+except AttributeError:
+    pass
 
 is_jit = False
 lua_exe: Optional[str] = None
@@ -45,7 +48,10 @@ else:  # default to 5.4
     from lupa.lua54 import LuaError, LuaRuntime
     lua_exe = which("lua5.4")
 
-sys.setdlopenflags(_orig_dlflags)
+try:
+    sys.setdlopenflags(_orig_dlflags)  # noqa
+except (AttributeError, NameError):
+    pass
 
 try:
     from .server import APServer
@@ -66,7 +72,8 @@ class TimeoutLoop:
     timeout: float
     start: float
 
-    def __init__(self, f: Callable[[], bool], timeout: float = .1) -> None:
+    def __init__(self, f: Callable[[], bool], timeout: float = .5) -> None:
+        # NOTE: on Windows server we seem to need >100ms everywhere
         self.f = f
         self.timeout = timeout
 
@@ -82,3 +89,4 @@ class TimeoutLoop:
         elapsed = now - self.start
         if elapsed >= self.timeout:
             raise TimeoutError()
+        time.sleep(0.001)  # release the GIL

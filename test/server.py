@@ -32,6 +32,7 @@ class WSServer(Thread):
         from websockets.sync.server import serve
         with serve(self.handler, host="0.0.0.0", port=self.port, ssl=self._ssl) as self._server:
             self.port = self._server.socket.getsockname()[1]
+            assert self.port, "Could not get automatic port"
             # print(f"Listening on {self.port}")
             self._server.serve_forever()
         self._server = None
