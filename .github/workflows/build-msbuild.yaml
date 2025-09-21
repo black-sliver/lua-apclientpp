@@ -218,3 +218,25 @@ jobs:
           name: lua-apclientpp-lua54-${{matrix.sln}}-${{env.ARCH}}-static
           path: ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua54-static\lua-apclientpp.dll
           if-no-files-found: error
+
+      - name: Install 32bit Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+          architecture: 'x86'
+          cache: 'pip'
+
+      - name: Install test dependencies
+        run: >
+          pip install
+          -r test/requirements.txt
+          -r test/requirements-dev.txt
+
+      - name: Setup test
+        run: |
+          copy ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua54-static\lua-apclientpp.dll .
+
+      - name: Run tests
+        run: >
+          pytest
+        # -n4
