@@ -121,3 +121,28 @@ jobs:
         with:
           name: lua-apclientpp-${{env.LUA_NAME}}-${{matrix.sys}}-static
           path: lua-apclientpp.dll
+
+      - name: Install Python
+        if: matrix.sys == 'clang64'
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+          cache: 'pip'
+
+      - name: Install test dependencies
+        if: matrix.sys == 'clang64'
+        shell: bash
+        run: >
+          pip install
+          -r test/requirements.txt
+          -r test/requirements-dev.txt
+
+      - name: Run tests
+        if: matrix.sys == 'clang64'
+        shell: bash
+        # NOTE: on windows, only a small subset of lupa tests work at the moment
+        run: >
+          LUA_VERSION=${{ matrix.lua }}
+          pytest
+          "@test/windows-tests.txt"
+        # -n4
