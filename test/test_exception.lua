@@ -4,7 +4,7 @@
 -- - debug.stacktrace missing
 -- - debug missing
 
-uri = "ws://localhost:38289" -- nothing should be listening there
+uri = "ws://127.0.0.1:38289" -- nothing should be listening there
 AP = require "lua-apclientpp"
 
 function on_socket_connected()
