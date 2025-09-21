@@ -13,6 +13,7 @@ function on_socket_connected()
 end
 
 function on_socket_error(reason)
+    print("on_socket_error")
     error("Test") -- return error ...
 end
 
@@ -21,6 +22,7 @@ function bad_traceback()
 end
 
 for i = 1, 4 do
+    print("starting pass " .. tostring(i))
     client = AP("", "", uri)
     client:set_socket_connected_handler(on_socket_connected)
     client:set_socket_error_handler(on_socket_error)
