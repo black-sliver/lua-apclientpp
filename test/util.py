@@ -18,7 +18,7 @@ __all__ = [
     "TimeoutLoop",
 ]
 
-lua_version = os.environ.get("LUA_VERSION", None)
+lua_version = os.environ.get("LUA_VERSION", "5.4")
 try:
     _orig_dlflags = sys.getdlopenflags()
     sys.setdlopenflags(258)
@@ -44,14 +44,22 @@ elif lua_version == "JIT2.1":
     from lupa.luajit21 import LuaError, LuaRuntime  # type: ignore[assignment]
     lua_exe = which("luajit2") or which("luajit")
     is_jit = True
-else:  # default to 5.4
-    from lupa.lua54 import LuaError, LuaRuntime
-    lua_exe = which("lua5.4")
+else:
+    raise RuntimeError("Unknown LUA version")
 
 try:
     sys.setdlopenflags(_orig_dlflags)  # noqa
 except (AttributeError, NameError):
     pass
+
+if lua_exe is None:
+    lua_exe = which("lua")
+    if lua_exe:
+        from subprocess import run
+
+        res = run([lua_exe, "-v"], capture_output=True)
+        if lua_version not in res.stdout.decode():
+            lua_exe = None  # wrong version
 
 try:
     from .server import APServer
