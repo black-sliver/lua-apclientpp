@@ -53,6 +53,15 @@ try:
 except (AttributeError, NameError):
     pass
 
+if lua_exe is None:
+    lua_exe = which("lua")
+    if lua_exe:
+        from subprocess import run
+
+        res = run([lua_exe, "-v"], capture_output=True)
+        if lua_version not in res.stdout.decode():
+            lua_exe = None  # wrong version
+
 try:
     from .server import APServer
 except ImportError:
