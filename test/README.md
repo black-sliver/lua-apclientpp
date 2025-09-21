@@ -14,6 +14,16 @@ pip install -r test/requirements.txt pytest pytest-xdist
 pytest -nauto
 ```
 
+### Windows
+
+On Windows, it seems like Lupa does not properly work for our use-case.
+There is a small subset of tests that work on windows listed in windows-tests.txt.
+
+Run with
+```sh
+pytest "@test/windows-tests.txt"
+```
+
 ## Coverage
 
 The lib can be built with coverage enabled.
