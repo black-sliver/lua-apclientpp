@@ -57,7 +57,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: lua-apclientpp-lua533r-vs2022-win32-dynamic
-          path: lua-apclientpp.dll
+          path: lua-apclientpp.*
 
       - name: Load lua51-vs2022-win32-dynamic
         uses: actions/download-artifact@v4
@@ -74,7 +74,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: lua-apclientpp-lua51-51-vs2022-win32-dynamic
-          path: lua-apclientpp.dll
+          path: lua-apclientpp.*
 
 
   license-copy-paste:
