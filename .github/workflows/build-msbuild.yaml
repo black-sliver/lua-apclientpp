@@ -2,14 +2,29 @@ name: Build MSBuild
 
 on:
   workflow_dispatch:
+    inputs:
+      configuration:
+        description: 'Debug or Release Build'
+        required: true
+        default: 'Release'
+        type: choice
+        options:
+          - Release
+          - Debug
   workflow_call:
+    inputs:
+      configuration:
+        description: 'Debug or Release Build'
+        required: true
+        default: 'Release'
+        type: string
 
 jobs:
   build-msbuild:
     # TODO: automated testing
     env:
       BUILD_PLATFORM: "x86"
-      BUILD_CONFIGURATION: Release
+      BUILD_CONFIGURATION: ${{ inputs.configuration }}
       OPENSSL_BUILD_PLATFORM: VC-WIN32
       ARCH: win32
       LUA52_VERSION: "5.2.4"

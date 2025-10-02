@@ -2,7 +2,22 @@ name: Build MSYS2
 
 on:
   workflow_dispatch:
+    inputs:
+      configuration:
+        description: 'Debug or Release Build'
+        required: true
+        default: 'Release'
+        type: choice
+        options:
+          - Release
+          - Debug
   workflow_call:
+    inputs:
+      configuration:
+        description: 'Debug or Release Build'
+        required: true
+        default: 'Release'
+        type: string
 
 jobs:
   build-msys2:
@@ -97,7 +112,7 @@ jobs:
       - name: Build ${{env.LUA_NAME}}-dynamic
         run: |
           rm -f *.dll
-          ./build_posix.sh ${{env.LUA_VERSION}}
+          ./build_posix.sh ${{env.LUA_VERSION}} ${{ inputs.configuration }}
 
       - name: Store ${{env.LUA_NAME}}-dynamic
         uses: actions/upload-artifact@v4
@@ -114,7 +129,7 @@ jobs:
       - name: Build ${{env.LUA_NAME}}-static
         run: |
           rm -f *.dll
-          ./build_posix.sh ${{env.LUA_VERSION}} static
+          ./build_posix.sh ${{env.LUA_VERSION}} static ${{ inputs.configuration }}
 
       - name: Store ${{env.LUA_NAME}}-static
         uses: actions/upload-artifact@v4
