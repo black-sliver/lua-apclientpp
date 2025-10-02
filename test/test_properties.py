@@ -193,7 +193,7 @@ class TestPropertiesNotConnected(ClientTestCase):
         self.assertEqual(invalid_id, self.call("get_item_id", "Nothing"))
 
     def test_state(self) -> None:
-        self.assertEqual(self.call("get_state"), self.client["State"]["SOCKET_CONNECTING"])
+        self.assertEqual(self.call("get_state"), self.client["State"]["DISCONNECTED"])
 
     def test_seed(self) -> None:
         self.assertEqual("", self.call("get_seed"))
