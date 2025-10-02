@@ -3,6 +3,7 @@
 
 source ./build_common.sh
 source ./extra_pkgconf.sh
+shopt -s nocasematch
 
 LIBS="$LIBS -pthread -lssl -lcrypto -lz"
 
@@ -20,7 +21,7 @@ else
     fi
 fi
 
-if [[ "$2" == "static" ]]; then
+if [[ "$2" == "static" ]] || [[ "$3" == "static" ]]; then
     # static build
     EXTRA_LIBS="-Wl,-Bstatic $EXTRA_LIBS_STATIC"
 else
@@ -28,7 +29,13 @@ else
     EXTRA_LIBS="-Wl,-Bdynamic $EXTRA_LIBS_DYNAMIC"
 fi
 
-CFLAGS="-Os -DNDEBUG -DAP_NO_SCHEMA -fvisibility=hidden -std=$STD -Wall -Wextra -Werror -Wno-deprecated-declarations $EXTRA_CFLAGS $CFLAGS"
+if [[ "$2" == "debug" ]] || [[ "$3" == "debug" ]]; then
+    CFLAGS="-Og -g -DAPCLIENT_DEBUG $CFLAGS"
+else
+    CFLAGS="-Os -DNDEBUG -DAP_NO_SCHEMA $CFLAGS"
+fi
+
+CFLAGS="$CFLAGS -fvisibility=hidden -std=$STD -Wall -Wextra -Werror -Wno-deprecated-declarations $EXTRA_CFLAGS"
 
 OUT="$FILENAME"
 
