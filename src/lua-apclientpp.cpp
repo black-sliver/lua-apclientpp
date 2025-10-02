@@ -798,10 +798,16 @@ static int apclient_new(lua_State *L)
     const char* game = luaL_checkstring(L, 2);
     const char* host = luaL_checkstring(L, 3);
 
-    LuaAPClient *self = new LuaAPClient(L, uuid, game, host);
-
     LuaAPClient **p = (LuaAPClient**)lua_newuserdata(L, sizeof(LuaAPClient*));
-    *p = self;
+
+    try {
+        LuaAPClient *self = new LuaAPClient(L, uuid, game, host);
+        *p = self;
+    } catch (const std::exception& ex) {
+        luaL_error(L, "Could not create instance");
+        return 0; // LCOV_EXCL_LINE // unreachable
+    }
+
     luaL_getmetatable(L, LuaAPClient::Lua_Name);
     lua_setmetatable(L, -2);
     lua_newtable(L);
