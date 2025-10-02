@@ -126,7 +126,7 @@
       <SDLCheck>true</SDLCheck>
       <PrecompiledHeader />
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
-      <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions) /std:c++17 /wd4996 /DNDEBUG</AdditionalOptions>
+      <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions) /std:c++17 /wd4996 /DNDEBUG /DAP_NO_SCHEMA</AdditionalOptions>
     </ClCompile>
     <Link>
       <TargetMachine>MachineX86</TargetMachine>
@@ -165,7 +165,7 @@
       <SDLCheck>true</SDLCheck>
       <PrecompiledHeader />
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
-      <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions) /std:c++17 /wd4996 /DNDEBUG</AdditionalOptions>
+      <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions) /std:c++17 /wd4996 /DNDEBUG /DAP_NO_SCHEMA</AdditionalOptions>
     </ClCompile>
     <Link>
       <TargetMachine>MachineX64</TargetMachine>
