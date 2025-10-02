@@ -46,4 +46,7 @@ if [ $? -ne 0 ]; then
     "$CXX" $CFLAGS $DEFINES $INCLUDE_DIRS -shared -o "$OUT" -fPIC src/lua-apclientpp.cpp $DYNAMIC_LIBS $EXTRA_LIBS $STATIC_LIBS -Wl,-Bdynamic $LIBS
     exit $?
 fi
-strip "$OUT"
+
+if [[ "$2" != "debug" ]] || [[ "$3" != "debug" ]]; then
+    strip "$OUT"
+fi
