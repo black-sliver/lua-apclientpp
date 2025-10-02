@@ -74,7 +74,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(ProjectDir)..\subprojects\json\include;$(ProjectDir)..\subprojects\valijson\include;$(ProjectDir)..\subprojects\wswrap\include;$(ProjectDir)..\subprojects\apclientpp;$(ProjectDir)..\subprojects\asio\include;$(ProjectDir)..\subprojects\websocketpp;$(ProjectDir)..\subprojects;$(ProjectDir)..\dep\lua53\include;$(ProjectDir)..\dep\dep\openssl\include;$(ProjectDir)..\dep\openssl\x86\include;$(ProjectDir)..\dep\zlib;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <IncludePath>$(ProjectDir)..\subprojects\json\include;$(ProjectDir)..\subprojects\valijson\include;$(ProjectDir)..\subprojects\wswrap\include;$(ProjectDir)..\subprojects\apclientpp;$(ProjectDir)..\subprojects\asio\include;$(ProjectDir)..\subprojects\websocketpp;$(ProjectDir)..\subprojects;$(ProjectDir)..\dep\lua53\include;$(ProjectDir)..\dep\openssl\include;$(ProjectDir)..\dep\openssl\x86\include;$(ProjectDir)..\dep\zlib;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
     <LibraryPath>$(ProjectDir)..\dep\lua53\bin;$(ProjectDir)..\dep\zlib\x86;$(ProjectDir)..\dep\openssl\x86;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -95,7 +95,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
@@ -105,7 +105,7 @@
       <SDLCheck>true</SDLCheck>
       <PrecompiledHeader />
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
-      <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions) /std:c++17 /wd4996</AdditionalOptions>
+      <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions) /std:c++17 /wd4996 /DAPCLIENT_DEBUG</AdditionalOptions>
     </ClCompile>
     <Link>
       <TargetMachine>MachineX86</TargetMachine>
@@ -146,7 +146,7 @@
       <SDLCheck>true</SDLCheck>
       <PrecompiledHeader />
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
-      <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions) /std:c++17 /wd4996</AdditionalOptions>
+      <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions) /std:c++17 /wd4996 /DAPCLIENT_DEBUG</AdditionalOptions>
     </ClCompile>
     <Link>
       <TargetMachine>MachineX64</TargetMachine>
