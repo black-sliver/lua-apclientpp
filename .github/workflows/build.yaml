@@ -2,6 +2,15 @@ name: Build All
 
 on:
   workflow_dispatch:
+    inputs:
+      configuration:
+        description: 'Debug or Release Build'
+        required: true
+        default: 'Release'
+        type: choice
+        options:
+          - Release
+          - Debug
   push:
     tags:
       - 'v*'
@@ -10,11 +19,13 @@ jobs:
 
   build-msys2:
     uses: ./.github/workflows/build-msys2.yaml
-
+    with:
+      configuration: ${{ inputs.configuration }}
 
   build-msbuild:
     uses: ./.github/workflows/build-msbuild.yaml
-
+    with:
+      configuration: ${{ inputs.configuration }}
 
   relink:
     needs: [build-msys2, build-msbuild]
