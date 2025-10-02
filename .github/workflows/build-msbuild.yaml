@@ -149,11 +149,16 @@ jobs:
           md ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua51
           move ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua-apclientpp-51-dynamic.dll ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua51\lua-apclientpp.dll
 
+      - name: Move Debug Symbols for Lua 5.1 Dynamic
+        if: inputs.configuration == 'Debug'
+        run: |
+          move ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua-apclientpp-51-dynamic.pdb ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua51\lua-apclientpp.pdb
+
       - name: Store Lua 5.1 Dynamic
         uses: actions/upload-artifact@v4
         with:
           name: lua-apclientpp-lua51-${{matrix.sln}}-${{env.ARCH}}-dynamic
-          path: ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua51\lua-apclientpp.dll
+          path: ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua51\*
           if-no-files-found: error
 
       - name: Build for Lua 5.2 Dynamic
@@ -162,11 +167,16 @@ jobs:
           md ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua52
           move ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua-apclientpp-52-dynamic.dll ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua52\lua-apclientpp.dll
 
+      - name: Move Debug Symbols for Lua 5.2 Dynamic
+        if: inputs.configuration == 'Debug'
+        run: |
+          move ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua-apclientpp-52-dynamic.pdb ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua52\lua-apclientpp.pdb
+
       - name: Store Lua 5.2 Dynamic
         uses: actions/upload-artifact@v4
         with:
           name: lua-apclientpp-lua52-${{matrix.sln}}-${{env.ARCH}}-dynamic
-          path: ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua52\lua-apclientpp.dll
+          path: ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua52\*
           if-no-files-found: error
 
       - name: Build for Lua 5.2 Static
@@ -175,11 +185,16 @@ jobs:
           md ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua52-static
           move ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua-apclientpp-52-static.dll ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua52-static\lua-apclientpp.dll
 
+      - name: Move Debug Symbols for Lua 5.2 Static
+        if: inputs.configuration == 'Debug'
+        run: |
+          move ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua-apclientpp-52-static.pdb ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua52-static\lua-apclientpp.pdb
+
       - name: Store Lua 5.2 Static
         uses: actions/upload-artifact@v4
         with:
           name: lua-apclientpp-lua52-${{matrix.sln}}-${{env.ARCH}}-static
-          path: ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua52-static\lua-apclientpp.dll
+          path: ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua52-static\*
           if-no-files-found: error
 
       - name: Build for Lua 5.3 Dynamic
@@ -188,11 +203,16 @@ jobs:
           md ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua53
           move ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua-apclientpp-53-dynamic.dll ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua53\lua-apclientpp.dll
 
+      - name: Move Debug Symbols for Lua 5.3 Dynamic
+        if: inputs.configuration == 'Debug'
+        run: |
+          move ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua-apclientpp-53-dynamic.pdb ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua53\lua-apclientpp.pdb
+
       - name: Store Lua 5.3 Dynamic
         uses: actions/upload-artifact@v4
         with:
           name: lua-apclientpp-lua53-${{matrix.sln}}-${{env.ARCH}}-dynamic
-          path: ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua53\lua-apclientpp.dll
+          path: ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua53\*
           if-no-files-found: error
 
       - name: Build for Lua 5.3 Static
@@ -201,11 +221,16 @@ jobs:
           md ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua53-static
           move ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua-apclientpp-53-static.dll ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua53-static\lua-apclientpp.dll
 
+      - name: Move Debug Symbols for Lua 5.3 Static
+        if: inputs.configuration == 'Debug'
+        run: |
+          move ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua-apclientpp-53-static.pdb ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua53-static\lua-apclientpp.pdb
+
       - name: Store Lua 5.3 Static
         uses: actions/upload-artifact@v4
         with:
           name: lua-apclientpp-lua53-${{matrix.sln}}-${{env.ARCH}}-static
-          path: ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua53-static\lua-apclientpp.dll
+          path: ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua53-static\*
           if-no-files-found: error
 
       - name: Build for Lua 5.4 Dynamic
@@ -214,11 +239,16 @@ jobs:
           md ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua54
           move ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua-apclientpp-54-dynamic.dll ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua54\lua-apclientpp.dll
 
+      - name: Move Debug Symbols for Lua 5.4 Dynamic
+        if: inputs.configuration == 'Debug'
+        run: |
+          move ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua-apclientpp-54-dynamic.pdb ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua54\lua-apclientpp.pdb
+
       - name: Store Lua 5.4 Dynamic
         uses: actions/upload-artifact@v4
         with:
           name: lua-apclientpp-lua54-${{matrix.sln}}-${{env.ARCH}}-dynamic
-          path: ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua54\lua-apclientpp.dll
+          path: ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua54\*
           if-no-files-found: error
 
       - name: Build for Lua 5.4 Static
@@ -227,9 +257,14 @@ jobs:
           md ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua54-static
           move ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua-apclientpp-54-static.dll ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua54-static\lua-apclientpp.dll
 
+      - name: Move Debug Symbols for Lua 5.4 Static
+        if: inputs.configuration == 'Debug'
+        run: |
+          move ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua-apclientpp-54-static.pdb ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua54-static\lua-apclientpp.pdb
+
       - name: Store Lua 5.4 Static
         uses: actions/upload-artifact@v4
         with:
           name: lua-apclientpp-lua54-${{matrix.sln}}-${{env.ARCH}}-static
-          path: ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua54-static\lua-apclientpp.dll
+          path: ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua54-static\*
           if-no-files-found: error
