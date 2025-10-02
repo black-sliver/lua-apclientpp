@@ -28,7 +28,7 @@ else
     EXTRA_LIBS="-Wl,-Bdynamic $EXTRA_LIBS_DYNAMIC"
 fi
 
-CFLAGS="-Os -DNDEBUG -fvisibility=hidden -std=$STD -Wall -Wextra -Werror -Wno-deprecated-declarations $EXTRA_CFLAGS $CFLAGS"
+CFLAGS="-Os -DNDEBUG -DAP_NO_SCHEMA -fvisibility=hidden -std=$STD -Wall -Wextra -Werror -Wno-deprecated-declarations $EXTRA_CFLAGS $CFLAGS"
 
 OUT="$FILENAME"
 
