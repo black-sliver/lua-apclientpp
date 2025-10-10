@@ -59,13 +59,7 @@ jobs:
           -r test/requirements-dev.txt
 
       - name: Generate Test Certs
-        run: |
-          openssl req -x509 -newkey ed25519 -days 1 \
-            -noenc -keyout trusted-key.pem -out trusted.pem -subj "/CN=localhost" \
-            -addext "subjectAltName=DNS:localhost,IP:127.0.0.1"
-          openssl req -x509 -newkey ed25519 -days 1 \
-            -noenc -keyout untrusted-key.pem -out untrusted.pem -subj "/CN=localhost" \
-            -addext "subjectAltName=DNS:localhost,IP:127.0.0.1"
+        run: ./test/make-certs.sh
 
       - name: Test (no sanitizers)
         if: "!contains(env.CFLAGS, '-fsanitize')"
