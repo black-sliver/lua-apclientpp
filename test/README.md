@@ -41,18 +41,13 @@ testing, not during development nor in production.
 
 ## Encryption tests
 
-To test encrypted connections, generate a trusted and an untrusted pair of PEM files.
-And set the SSL_CERT_FILE env var to the trusted cert.
+To test encrypted connections, generate a trusted and an untrusted pair of PEM files as shown in `make-certs.sh`
+and set the SSL_CERT_FILE env var to the trusted cert.
 
 ```sh
-openssl req -x509 -newkey ed25519 -days 1 \
-  -noenc -keyout trusted-key.pem -out trusted.pem -subj "/CN=localhost" \
-  -addext "subjectAltName=DNS:localhost,IP:127.0.0.1"
-
-openssl req -x509 -newkey ed25519 -days 1 \
-  -noenc -keyout untrusted-key.pem -out untrusted.pem -subj "/CN=localhost" \
-  -addext "subjectAltName=DNS:localhost,IP:127.0.0.1"
-
+# generate self-signed test certificates
+./test/make-certs.sh
+# run tests with test certificates
 SSL_CERT_FILE=trusted.pem pytest -nauto
 ```
 
