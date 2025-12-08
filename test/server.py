@@ -219,6 +219,7 @@ class APServer(WSServer):
             "version": {"major": 0, "minor": 6, "build": 3, "class": "Version"},
             "tags": ["Test"],
             "hint_cost": 50,
+            "games": sorted(set(self.player_games)),
         }]))
 
     def send_connected(self, conn: ServerConnection) -> None:
