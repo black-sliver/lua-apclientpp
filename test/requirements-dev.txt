@@ -1,5 +1,5 @@
 # additional requirements recommended during development and used in CI
-pytest==9.0.1
+pytest==9.0.2
 pytest-xdist==3.8.0
 gcovr==8.4
 mypy==1.19.0
