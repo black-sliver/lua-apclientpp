@@ -567,6 +567,12 @@ public:
         return parent->get_players();
     }
 
+    json get_permissions() const
+    {
+        const APClient* parent = this;
+        return parent->get_permissions();
+    }
+
     static int poll(lua_State *L)
     {
         LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
@@ -1108,6 +1114,30 @@ static int apclient_get_players(lua_State *L)
     return 1;
 }
 
+static int apclient_get_permissions(lua_State *L)
+{
+    LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
+    json_to_lua(L, self->get_permissions());
+    return 1;
+}
+
+static int apclient_get_permission(lua_State *L)
+{
+    LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
+    const char* key = luaL_checkstring(L, 2);
+    {
+        const APClient* parent = self;
+        const auto& perms = parent->get_permissions();
+        const auto it = perms.find(key);
+        if (it == perms.end()) {
+            lua_pushnil(L);
+        } else {
+            lua_pushinteger(L, static_cast<lua_Integer>(it->second));
+        }
+    }
+    return 1;
+}
+
 static int apclient_set_socket_connected_handler(lua_State *L)
 {
     LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
@@ -1545,6 +1575,8 @@ static int register_apclient(lua_State *L)
     SET_CFUNC(is_data_package_valid);
     SET_CFUNC(get_server_time);
     SET_CFUNC(get_players);
+    SET_CFUNC(get_permissions);
+    SET_CFUNC(get_permission);
 
     // handlers
     SET_CFUNC(set_socket_connected_handler);
@@ -1608,6 +1640,16 @@ static int register_apclient(lua_State *L)
         {"SLOT_CONNECTED", LuaAPClient::State::SLOT_CONNECTED},
     });
     lua_setfield(L, -2, "State");
+
+    json_to_lua(L, {
+        {"DISABLED", LuaAPClient::Permission::DISABLED},
+        {"ENABLED", LuaAPClient::Permission::ENABLED},
+        {"GOAL", LuaAPClient::Permission::GOAL},
+        {"FORCED", LuaAPClient::Permission::FORCED},
+        {"AUTO", LuaAPClient::Permission::AUTO},
+        {"AUTO_ENABLED", LuaAPClient::Permission::AUTO_ENABLED},
+    });
+    lua_setfield(L, -2, "Permission");
 
     // pseudo constant to emit empty json array
     LuaJson_EmptyArray().Lua_Push(L);

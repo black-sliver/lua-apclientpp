@@ -44,3 +44,13 @@ class TestEnums(APITestCase):
     def test_state(self) -> None:
         self.assert_is_uint_enum(self.apclient["State"])
         self.assert_equal_table(self.apclient["State"], self.api["State"])
+
+    def test_permission(self) -> None:
+        self.assert_is_uint_enum(self.apclient["Permission"])
+        self.assert_equal_table(self.apclient["Permission"], self.api["Permission"])
+
+    def test_permission_combinations(self) -> None:
+        self.assertEqual(self.apclient["Permission"]["AUTO"],
+                         self.apclient["Permission"]["FORCED"] + self.apclient["Permission"]["GOAL"])
+        self.assertEqual(self.apclient["Permission"]["AUTO_ENABLED"],
+                         self.apclient["Permission"]["AUTO"] + self.apclient["Permission"]["ENABLED"])

@@ -220,6 +220,11 @@ class APServer(WSServer):
             "tags": ["Test"],
             "hint_cost": 50,
             "games": sorted(set(self.player_games)),
+            "permissions": {
+                "release": 0,
+                "collect": 0,
+                "remaining": 0,
+            },
         }]))
 
     def send_connected(self, conn: ServerConnection) -> None:
@@ -294,12 +299,19 @@ class APServer(WSServer):
             "items": items,
         }]))
 
-    def send_room_update(self, conn: ServerConnection, checked_locations: Optional[List[int]] = None) -> None:
+    def send_room_update(
+            self,
+            conn: ServerConnection,
+            checked_locations: Optional[List[int]] = None,
+            permissions: Optional[Dict[str, int]] = None,
+    ) -> None:
         packet: Dict[str, Any] = {
             "cmd": "RoomUpdate",
         }
         if checked_locations is not None:
             packet["checked_locations"] = checked_locations
+        if permissions is not None:
+            packet["permissions"] = permissions
         conn.send(json.dumps([packet]))
 
     def send_location_info(self, conn: ServerConnection, items: List[Dict[str, Any]]) -> None:

@@ -237,6 +237,17 @@ class TestLocationChecked(E2ETestCase):
             self.poll()
 
 
+class TestPermissionUpdate(E2ETestCase):
+    def test_permission_update(self) -> None:
+        conn = self.server._connections[0].connection
+        self.server.send_room_update(conn, permissions={"release": 1})
+        done = False
+        for _ in TimeoutLoop(lambda: not done):
+            self.poll()
+            if self.call("get_permission", "release") == 1:
+                done = True
+
+
 class TestBadLocationChecked(E2ETestCase):
     def on_location_checked(self, locations: LuaTable) -> None:
         raise RuntimeError("OK")
