@@ -1655,6 +1655,18 @@ static int register_apclient(lua_State *L)
     LuaJson_EmptyArray().Lua_Push(L);
     lua_setfield(L, -2, "EMPTY_ARRAY");
 
+    // version constant
+    try {
+        std::string s;
+        for (const auto n: APCLIENTPP_VERSION_INITIALIZER) {
+            s += std::to_string(n);
+            s += ".";
+        }
+        s.pop_back();
+        lua_pushstring(L, s.c_str());
+        lua_setfield(L, -2, "_VERSION");
+    } catch (...) {}
+
     // calling the metatable should be the same as new for easy use,
     // so set a metatable for the metatable
     lua_newtable(L);
