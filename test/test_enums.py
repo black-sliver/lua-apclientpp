@@ -54,3 +54,7 @@ class TestEnums(APITestCase):
                          self.apclient["Permission"]["FORCED"] + self.apclient["Permission"]["GOAL"])
         self.assertEqual(self.apclient["Permission"]["AUTO_ENABLED"],
                          self.apclient["Permission"]["AUTO"] + self.apclient["Permission"]["ENABLED"])
+
+    def test_hint_status(self) -> None:
+        self.assert_is_uint_enum(self.apclient["HintStatus"])
+        self.assert_equal_table(self.apclient["HintStatus"], self.api["HintStatus"])

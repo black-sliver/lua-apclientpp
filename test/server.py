@@ -175,6 +175,20 @@ class APServer(WSServer):
                             })
                             self.print_json(conn, [{"text": "*insert hint here*"}], {})
                         self.send_location_info(conn, items)
+                    elif cmd == "UpdateHint":
+                        for arg in ("player", "location", "status"):
+                            if not isinstance(args[arg], int):
+                                raise ValueError(f"Invalid argument {arg} to UpdateHint")
+                        self.print_json(conn, [{"text": "*insert hint here*"}], {})
+                    elif cmd == "CreateHints":
+                        if not all(isinstance(location, int) for location in args["locations"]):
+                            raise ValueError(f"Invalid argument locations to CreateHints")
+                        if not len(args["locations"]):
+                            raise ValueError(f"Expected >0 locations for CreateHints")
+                        for arg in ("player", "status"):
+                            if not isinstance(args.get(arg, 0), int):
+                                raise ValueError(f"Invalid argument {arg} to CreateHints")
+                        self.print_json(conn, [{"text": "*insert hints here*"}], {})
                     elif cmd == "Say":
                         text = f"{name}: {args['text']}"
                         self.print_json(conn, [{"text": text}], {})
