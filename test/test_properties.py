@@ -142,11 +142,23 @@ class TestProperties(E2ETestCase):
         self.assertIn("collect", perms)
         self.assertIn("remaining", perms)
 
+    def test_permissions_bad_self(self) -> None:
+        with self.assertRaises(LuaError):
+            self.client["get_permissions"](self.lua.table())
+
     def test_permission_existing(self) -> None:
         self.assertEqual(0, self.call("get_permission", "release"))
 
     def test_permission_not_existing(self) -> None:
         self.assertEqual(None, self.call("get_permission", "nope"))
+
+    def test_permission_bad_arg(self) -> None:
+        with self.assertRaises(LuaError):
+            self.call("get_permission", self.lua.table())
+
+    def test_permission_bad_self(self) -> None:
+        with self.assertRaises(LuaError):
+            self.client["get_permission"](self.lua.table(), self.lua.table())
 
     def test_checked_locations(self) -> None:
         # FIXME: this is currently empty
