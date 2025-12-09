@@ -315,6 +315,108 @@ class TestLocationScoutNotConnected(NotConnectedTestCase):
         # TODO: test if polling afterwards actually does the scout
 
 
+class TestUpdateHint(E2ETestCase):
+    command_sent = False
+    done = False
+    location_id = 2**32
+
+    def on_print_json(self, data: LuaTable, cmd: LuaTable) -> None:
+        if self.command_sent:
+            self.done = True
+
+    def test_update_hint(self) -> None:
+        res = self.call("UpdateHint", 1, self.location_id, 30)
+        self.assertTrue(res)
+        self.command_sent = True
+        for _ in TimeoutLoop(lambda: not self.done):
+            self.poll()
+
+    def test_bad_self(self) -> None:
+        with self.assertRaises(LuaError):
+            self.client["UpdateHint"](self.lua.table())
+
+    def test_bad_player(self) -> None:
+        with self.assertRaises(LuaError):
+            self.call("UpdateHint", self.lua.table(), self.location_id, 30)
+
+    def test_bad_location(self) -> None:
+        with self.assertRaises(LuaError):
+            self.call("UpdateHint", 1, self.lua.table(), 30)
+
+    def test_bad_status(self) -> None:
+        with self.assertRaises(LuaError):
+            self.call("UpdateHint", 1, self.location_id, self.lua.table())
+
+
+class TestUpdateHintNotConnected(NotConnectedTestCase):
+    def test_call(self) -> None:
+        # This will queue up the hint update
+        res = self.call("UpdateHint", 1, 1, 1)
+        self.assertTrue(res)
+        # TODO: test if polling afterwards actually does the update
+
+
+class TestCreateHints(E2ETestCase):
+    command_sent = False
+    done = False
+    location_id = 2**32
+
+    def on_print_json(self, data: LuaTable, cmd: LuaTable) -> None:
+        if self.command_sent:
+            self.done = True
+
+    def test_create_hints(self) -> None:
+        res = self.call("CreateHints", self.lua.table(self.location_id), 1, 30)
+        self.assertTrue(res)
+        self.command_sent = True
+        for _ in TimeoutLoop(lambda: not self.done):
+            self.poll()
+
+    def test_create_hints_no_player(self) -> None:
+        res = self.call("CreateHints", self.lua.table(self.location_id), None, 30)
+        self.assertTrue(res)
+        self.command_sent = True
+        for _ in TimeoutLoop(lambda: not self.done):
+            self.poll()
+
+    def test_create_hints_no_status(self) -> None:
+        res = self.call("CreateHints", self.lua.table(self.location_id), 1)
+        self.assertTrue(res)
+        self.command_sent = True
+        for _ in TimeoutLoop(lambda: not self.done):
+            self.poll()
+
+    def test_create_no_player_no_status(self) -> None:
+        res = self.call("CreateHints", self.lua.table(self.location_id))
+        self.assertTrue(res)
+        self.command_sent = True
+        for _ in TimeoutLoop(lambda: not self.done):
+            self.poll()
+
+    def test_bad_self(self) -> None:
+        with self.assertRaises(LuaError):
+            self.client["CreateHints"](self.lua.table())
+
+    def test_bad_locations(self) -> None:
+        with self.assertRaises(LuaError):
+            self.call("CreateHints", 1, 1, 30)
+
+    def test_bad_player(self) -> None:
+        with self.assertRaises(LuaError):
+            self.call("CreateHints", self.lua.table(self.location_id), self.lua.table(), 30)
+
+    def test_bad_status(self) -> None:
+        with self.assertRaises(LuaError):
+            self.call("CreateHints", self.lua.table(self.location_id), 1, self.lua.table())
+
+
+class TestCreateHintsNotConnected(NotConnectedTestCase):
+    def test_call(self) -> None:
+        # NOTE: before we are connected, we don't know the server version -> False
+        res = self.call("CreateHints", self.lua.table(1), 1, 1)
+        self.assertFalse(res)
+
+
 class TestGet(E2ETestCase):
     done = False
     data: Dict[str, Any] = {

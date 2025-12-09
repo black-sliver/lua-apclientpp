@@ -1453,6 +1453,58 @@ static int apclient_LocationScouts(lua_State *L)
     return 0; // LCOV_EXCL_LINE // unreachable
 }
 
+static int apclient_UpdateHint(lua_State *L)
+{
+    LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
+    const int player = checkcint(L, 2);
+    const int64_t location = (lua_isinteger(L, 3)) ?
+        static_cast<int64_t>(lua_tointeger(L, 3)) :
+        static_cast<int64_t>(luaL_checknumber(L, 3));
+    const APClient::HintStatus status = static_cast<APClient::HintStatus>(checkcint(L, 4));
+
+    try {
+        lua_pushboolean(L, self->UpdateHint(player, location, status));
+        return 1;
+    } catch (const std::exception& ex) {
+        lua_pushstring(L, ex.what());
+    }
+    lua_error(L);
+    return 0; // LCOV_EXCL_LINE // unreachable
+}
+
+static int apclient_CreateHints(lua_State *L)
+{
+    LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
+    const bool hasPlayer = lua_gettop(L) >= 3 && !lua_isnil(L, 3);
+    const bool hasStatus = lua_gettop(L) >= 4 && !lua_isnil(L, 4);
+    const int player = hasPlayer ? checkcint(L, 3) : -1;
+    const APClient::HintStatus status = static_cast<APClient::HintStatus>(hasStatus ? checkcint(L, 4) : 0);
+
+    try {
+        std::list<int64_t> locations;
+        {
+            json j = lua_to_json(L, 2);
+            try {
+                locations = j.get<std::list<int64_t>>();
+            } catch (const std::exception&) {
+                if (!j.is_object() || !j.empty()) {
+                    throw BadArgumentException(2, "array of integer", "CreateHints");
+                }
+            }
+        }
+        if (hasStatus) {
+            lua_pushboolean(L, self->CreateHints(locations, player, status));
+        } else {
+            lua_pushboolean(L, self->CreateHints(locations, player));
+        }
+        return 1;
+    } catch (const std::exception& ex) {
+        lua_pushstring(L, ex.what());
+    }
+    lua_error(L);
+    return 0; // LCOV_EXCL_LINE // unreachable
+}
+
 static int apclient_Get(lua_State *L)
 {
     LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
@@ -1604,6 +1656,8 @@ static int register_apclient(lua_State *L)
     SET_CFUNC(StatusUpdate);
     SET_CFUNC(LocationChecks);
     SET_CFUNC(LocationScouts);
+    SET_CFUNC(UpdateHint);
+    SET_CFUNC(CreateHints);
     SET_CFUNC(Get);
     SET_CFUNC(SetNotify);
     SET_CFUNC(Set);
@@ -1650,6 +1704,15 @@ static int register_apclient(lua_State *L)
         {"AUTO_ENABLED", LuaAPClient::Permission::AUTO_ENABLED},
     });
     lua_setfield(L, -2, "Permission");
+
+    json_to_lua(L, {
+        {"HINT_UNSPECIFIED", LuaAPClient::HintStatus::HINT_UNSPECIFIED},
+        {"HINT_NO_PRIORITY", LuaAPClient::HintStatus::HINT_NO_PRIORITY},
+        {"HINT_AVOID", LuaAPClient::HintStatus::HINT_AVOID},
+        {"HINT_PRIORITY", LuaAPClient::HintStatus::HINT_PRIORITY},
+        {"HINT_FOUND", LuaAPClient::HintStatus::HINT_FOUND},
+    });
+    lua_setfield(L, -2, "HintStatus");
 
     // pseudo constant to emit empty json array
     LuaJson_EmptyArray().Lua_Push(L);

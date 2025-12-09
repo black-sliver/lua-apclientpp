@@ -261,6 +261,20 @@ function APClient:LocationChecks(locations) end
 ---@return boolean true if message was queued
 function APClient:LocationScouts(locations, create_as_hint) end
 
+---Sends UpdateHint to the server to update hint status/priority.
+---@param player integer owner of the location
+---@param location integer location ID to be hinted
+---@param status hintstatus status/priority of the hint
+---@return boolean true if message was queued
+function APClient:UpdateHint(player, location, status) end
+
+---Sends CreateHints to the server, if supported, to create hints with optional status/priority.
+---@param locations integer[] location IDs to be hinted
+---@param target_player integer? owner of the locations, or nil or -1 for current player
+---@param status hintstatus? status/priority of the hints, or nil for default (HINT_UNSPECIFIED)
+---@return boolean true if message was queued, false if unsupported
+function APClient:CreateHints(locations, target_player, status) end
+
 ---Query the server for keys in data storage. Server will asynchronously reply with Retrieved.
 ---@param keys string[] keys to query
 ---@param extra {[string]: any}? Additional data to send in the command. Will be included in Retrieved. 
@@ -324,6 +338,15 @@ APClient.Permission = {
     FORCED = 4,       -- Forces usage
     AUTO = 6,         -- Forces use after goal completion, only works for release and collect
     AUTO_ENABLED = 7, -- Forces use after goal completion, allows manual use any time
+}
+
+---@enum hintstatus
+APClient.HintStatus = {
+    HINT_UNSPECIFIED = 0,  -- The receiving player has not specified any status
+    HINT_NO_PRIORITY = 10, -- The receiving player has specified that the item is unneeded
+    HINT_AVOID = 20,       -- The receiving player has specified that the item is detrimental
+    HINT_PRIORITY = 30,    -- The receiving player has specified that the item is needed
+    HINT_FOUND = 40,       -- The location has been collected. Status cannot be changed once found.
 }
 
 ---@alias ItemsHandling integer
