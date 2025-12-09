@@ -115,6 +115,15 @@ function APClient:get_server_time() end
 ---@return NetworkPlayer[]
 function APClient:get_players() end
 
+---Get map of permissions.
+---@return {[string]: permission}
+function APClient:get_permissions() end
+
+---Get value of a permission or nil if unknown.
+---@param key string
+---@return permission?
+function APClient:get_permission(key) end
+
 
 -- Member variables --
 
@@ -301,6 +310,16 @@ APClient.State = {
     SOCKET_CONNECTED = 2,
     ROOM_INFO = 3,
     SLOT_CONNECTED = 4,
+}
+
+---@enum permission
+APClient.Permission = {
+    DISABLED = 0,     -- Completely disables access
+    ENABLED = 1,      -- Allows manual use
+    GOAL = 2,         -- Allows manual use after goal completion
+    FORCED = 4,       -- Forces usage
+    AUTO = 6,         -- Forces use after goal completion, only works for release and collect
+    AUTO_ENABLED = 7, -- Forces use after goal completion, allows manual use any time
 }
 
 ---@alias ItemsHandling integer

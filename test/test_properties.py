@@ -132,6 +132,22 @@ class TestProperties(E2ETestCase):
             self.assertIsInstance(v["alias"], str)
             self.assertIsInstance(v["name"], str)
 
+    def test_permissions(self) -> None:
+        perms = self.call("get_permissions")
+        for k, v in perms.items():
+            self.assertIsInstance(k, str)
+            self.assertIsInstance(v, int)
+        # mock server and real server will send "release", "collect" and "remaining"
+        self.assertIn("release", perms)
+        self.assertIn("collect", perms)
+        self.assertIn("remaining", perms)
+
+    def test_permission_existing(self) -> None:
+        self.assertEqual(0, self.call("get_permission", "release"))
+
+    def test_permission_not_existing(self) -> None:
+        self.assertEqual(None, self.call("get_permission", "nope"))
+
     def test_checked_locations(self) -> None:
         # FIXME: this is currently empty
         for k, v in self.client["checked_locations"].items():
@@ -223,6 +239,12 @@ class TestPropertiesNotConnected(ClientTestCase):
 
     def test_players(self) -> None:
         self.assertEqual(0, len(list(self.call("get_players").values())))
+
+    def test_permissions(self) -> None:
+        self.assertEqual(0, len(list(self.call("get_permissions").values())))
+
+    def test_permission(self) -> None:
+        self.assertEqual(None, self.call("get_permission", "release"))
 
     def test_checked_locations(self) -> None:
         checked_locations = self.client["checked_locations"]
