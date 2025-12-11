@@ -14,7 +14,7 @@ jobs:
       ARCH: win32
       LUA52_VERSION: "5.2.4"
       LUA53_VERSION: "5.3.6"
-      LUA54_VERSION: "5.4.7"
+      LUA54_VERSION: "5.4.8"
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
