@@ -25,3 +25,11 @@ updates:
       default-days: 3
       include:
         - "*"
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    cooldown:
+      default-days: 3
+      include:
+        - "*"
