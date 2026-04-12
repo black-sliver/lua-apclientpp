@@ -31,6 +31,10 @@ jobs:
     env:
       DEFAULT_LUA: 5.4
 
+    permissions:
+      id-token: write
+      attestations: write
+
     steps:
       - name: Checkout
         uses: actions/checkout@v6.0.2
@@ -100,12 +104,14 @@ jobs:
         run: |
           rm -f *.dll
           ./build_posix.sh ${{env.LUA_VERSION}}
+          mkdir -p built/dynamic
+          mv lua-apclientpp.dll built/dynamic/
 
       - name: Store ${{env.LUA_NAME}}-dynamic
         uses: actions/upload-artifact@v7.0.0
         with:
           name: lua-apclientpp-${{env.LUA_NAME}}-${{matrix.sys}}-dynamic
-          path: lua-apclientpp.dll
+          path: built/dynamic/lua-apclientpp.dll
 
       - name: Rename liblua.a -> lib${{env.LUA_NAME}}.a
         if: |
@@ -117,9 +123,16 @@ jobs:
         run: |
           rm -f *.dll
           ./build_posix.sh ${{env.LUA_VERSION}} static
+          mkdir -p built/static
+          mv lua-apclientpp.dll built/static/
 
       - name: Store ${{env.LUA_NAME}}-static
         uses: actions/upload-artifact@v7.0.0
         with:
           name: lua-apclientpp-${{env.LUA_NAME}}-${{matrix.sys}}-static
-          path: lua-apclientpp.dll
+          path: built/static/lua-apclientpp.dll
+
+      - name: Attest built DLLs
+        uses: actions/attest@v4.1.0
+        with:
+          subject-path: 'built/*/lua-apclientpp.dll'

@@ -28,6 +28,10 @@ jobs:
           - os: windows-2022
             sln: vs2022
 
+    permissions:
+      id-token: write
+      attestations: write
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v6.0.2
@@ -220,3 +224,8 @@ jobs:
           name: lua-apclientpp-lua54-${{matrix.sln}}-${{env.ARCH}}-static
           path: ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua54-static\lua-apclientpp.dll
           if-no-files-found: error
+
+      - name: Attest built DLLs
+        uses: actions/attest@v4.1.0
+        with:
+          subject-path: '${{matrix.sln}}/${{env.BUILD_CONFIGURATION}}/*/lua-apclientpp.dll'

@@ -11,16 +11,28 @@ permissions: {}
 jobs:
 
   build-msys2:
+    permissions:
+      id-token: write
+      attestations: write
+
     uses: ./.github/workflows/build-msys2.yaml
 
 
   build-msbuild:
+    permissions:
+      id-token: write
+      attestations: write
+
     uses: ./.github/workflows/build-msbuild.yaml
 
 
   relink:
     needs: [build-msys2, build-msbuild]
     runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      attestations: write
 
     steps:
       - name: Install python
@@ -50,12 +62,15 @@ jobs:
           mv lua-apclientpp.dll _lua-apclientpp.dll
           python -m machomachomangler.cmd.redll _lua-apclientpp.dll lua-apclientpp.dll lua53.dll Lua5.3.3r.dll
           python -m mingw_ldd lua-apclientpp.dll --dll-lookup-dirs . | grep lua
+          sha256sum _lua-apclientpp.dll lua-apclientpp.dll
+          mkdir -p relink/lua533r-vs2022-win32-dynamic
+          mv lua-apclientpp.dll relink/lua533r-vs2022-win32-dynamic/
 
       - name: Store lua533r-vs2022-win32-dynamic
         uses: actions/upload-artifact@v7.0.0
         with:
           name: lua-apclientpp-lua533r-vs2022-win32-dynamic
-          path: lua-apclientpp.dll
+          path: relink/lua533r-vs2022-win32-dynamic/lua-apclientpp.dll
 
       - name: Load lua51-vs2022-win32-dynamic
         uses: actions/download-artifact@v8.0.1
@@ -67,13 +82,20 @@ jobs:
           mv lua-apclientpp.dll _lua-apclientpp.dll
           python -m machomachomangler.cmd.redll _lua-apclientpp.dll lua-apclientpp.dll lua5.1.dll lua51.dll
           python -m mingw_ldd lua-apclientpp.dll --dll-lookup-dirs . | grep lua
+          sha256sum _lua-apclientpp.dll lua-apclientpp.dll
+          mkdir -p relink/lua51-51-vs2022-win32-dynamic
+          mv lua-apclientpp.dll relink/lua51-51-vs2022-win32-dynamic/
 
       - name: Store lua51-51-vs2022-win32-dynamic
         uses: actions/upload-artifact@v7.0.0
         with:
           name: lua-apclientpp-lua51-51-vs2022-win32-dynamic
-          path: lua-apclientpp.dll
+          path: relink/lua51-51-vs2022-win32-dynamic/lua-apclientpp.dll
 
+      - name: Attest relinked DLLs
+        uses: actions/attest@v4.1.0
+        with:
+          subject-path: 'relink/*/lua-apclientpp.dll'
 
   license-copy-paste:
     runs-on: ubuntu-latest
