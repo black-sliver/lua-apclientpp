@@ -3,7 +3,10 @@
 
 name: Release
 
-on: workflow_dispatch
+on: workflow_dispatch  # NOTE: build happens automatically on tag push, release is triggered manually
+
+permissions:
+  contents: write  # required to add to releases
 
 jobs:
 

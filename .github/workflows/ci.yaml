@@ -17,6 +17,8 @@ on:
       - '!**.yaml'
       - '.github/workflows/ci.yaml'
 
+permissions: {}
+
 jobs:
   test:
     strategy:
