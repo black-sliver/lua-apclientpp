@@ -12,11 +12,13 @@ updates:
       lupa:
         patterns:
           - "lupa"
+          - "types-lupa"
       other-python-packages:
         patterns:
           - "*"
         exclude-patterns:
           - "lupa"
+          - "types-lupa"
   - package-ecosystem: "pip"
     directory: "/.github"  # packages only used in CI (relink)
     schedule:
