@@ -84,7 +84,7 @@ jobs:
       - name: Build OpenSSL
         run: |
           cd dep
-          git clone -b openssl-3.5.4 --depth 1 https://github.com/openssl/openssl.git
+          git clone -b openssl-3.5.6 --depth 1 https://github.com/openssl/openssl.git
           cd openssl
           md ${{env.BUILD_PLATFORM}}
           cd ${{env.BUILD_PLATFORM}}
