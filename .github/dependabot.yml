@@ -4,6 +4,10 @@ updates:
     directory: "/test"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 3
+      include:
+        - "*"
     groups:
       python-packages:
         patterns:
@@ -12,3 +16,7 @@ updates:
     directory: "/.github"  # packages only used in CI (relink)
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 3
+      include:
+        - "*"
