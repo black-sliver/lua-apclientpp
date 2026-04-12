@@ -24,7 +24,7 @@ jobs:
 
     steps:
       - name: Install python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6.2.0
         with:
           python-version: '3.14'
 
@@ -40,7 +40,7 @@ jobs:
           pip install -r .github/requirements-relink.txt
 
       - name: Load lua53-vs2022-win32-dynamic
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8.0.1
         with:
           name: lua-apclientpp-lua53-vs2022-win32-dynamic
 
@@ -52,13 +52,13 @@ jobs:
           python -m mingw_ldd lua-apclientpp.dll --dll-lookup-dirs . | grep lua
 
       - name: Store lua533r-vs2022-win32-dynamic
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7.0.0
         with:
           name: lua-apclientpp-lua533r-vs2022-win32-dynamic
           path: lua-apclientpp.dll
 
       - name: Load lua51-vs2022-win32-dynamic
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8.0.1
         with:
           name: lua-apclientpp-lua51-vs2022-win32-dynamic
 
@@ -69,7 +69,7 @@ jobs:
           python -m mingw_ldd lua-apclientpp.dll --dll-lookup-dirs . | grep lua
 
       - name: Store lua51-51-vs2022-win32-dynamic
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7.0.0
         with:
           name: lua-apclientpp-lua51-51-vs2022-win32-dynamic
           path: lua-apclientpp.dll
@@ -80,7 +80,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6.0.2
         with:
           submodules: recursive
 
@@ -101,7 +101,7 @@ jobs:
           cat subprojects/wswrap/LICENSE >> lua-apclientpp-license.txt
 
       - name: Store
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7.0.0
         with:
           name: lua-apclientpp-license
           path: lua-apclientpp-license.txt

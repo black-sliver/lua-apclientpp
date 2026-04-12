@@ -33,7 +33,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6.0.2
         with:
           submodules: recursive
 
@@ -60,7 +60,7 @@ jobs:
 
       - name: Install MSYS ${{matrix.sys}} + gcc
         if: ${{ !startsWith(matrix.sys, 'clang') }}
-        uses: msys2/setup-msys2@v2
+        uses: msys2/setup-msys2@cafece8e6baf9247cf9b1bf95097b0b983cc558d  # v2.31.0
         with:
           msystem: ${{matrix.sys}}
           # update: true
@@ -68,7 +68,7 @@ jobs:
 
       - name: Install MSYS ${{matrix.sys}} + clang + gcc-wrapper
         if: ${{ startsWith(matrix.sys, 'clang') }}
-        uses: msys2/setup-msys2@v2
+        uses: msys2/setup-msys2@cafece8e6baf9247cf9b1bf95097b0b983cc558d  # v2.31.0
         with:
           msystem: ${{matrix.sys}}
           # update: true
@@ -102,7 +102,7 @@ jobs:
           ./build_posix.sh ${{env.LUA_VERSION}}
 
       - name: Store ${{env.LUA_NAME}}-dynamic
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7.0.0
         with:
           name: lua-apclientpp-${{env.LUA_NAME}}-${{matrix.sys}}-dynamic
           path: lua-apclientpp.dll
@@ -119,7 +119,7 @@ jobs:
           ./build_posix.sh ${{env.LUA_VERSION}} static
 
       - name: Store ${{env.LUA_NAME}}-static
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7.0.0
         with:
           name: lua-apclientpp-${{env.LUA_NAME}}-${{matrix.sys}}-static
           path: lua-apclientpp.dll
