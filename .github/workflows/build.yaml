@@ -28,9 +28,16 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: Checkout requirements file
+        uses: actions/checkout@v6.0.2
+        with:
+          sparse-checkout: |
+            .github/requirements-relink.txt
+          sparse-checkout-cone-mode: false
+
       - name: Install dependencies
         run: |
-          pip install --upgrade machomachomangler mingw_ldd
+          pip install -r .github/requirements-relink.txt
 
       - name: Load lua53-vs2022-win32-dynamic
         uses: actions/download-artifact@v4
