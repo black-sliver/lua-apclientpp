@@ -41,7 +41,7 @@ Changing it may require stripping the DLL, which is done for the automated build
 
 ```bash
 # strip lua-apclientpp.dll  # strip the build (i686-w64-mingw32-strip or whatever)
-pip install machomachomangler mingw_ldd
+pip install machomachomangler mingw_ldd  # or -r .github/requirements-relink.txt
 mv lua-apclientpp.dll _lua-apclientpp.dll # rename the original
 # replace lua53.dll and lua53.3r.dll with the original and correct names below
 python -m machomachomangler.cmd.redll _lua-apclientpp.dll lua-apclientpp.dll lua53.dll Lua5.3.3r.dll

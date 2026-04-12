@@ -1,0 +1,2 @@
+machomachomangler==0.0.1
+mingw_ldd==0.2.1
