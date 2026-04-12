@@ -9,9 +9,14 @@ updates:
       include:
         - "*"
     groups:
-      python-packages:
+      lupa:
+        patterns:
+          - "lupa"
+      other-python-packages:
         patterns:
           - "*"
+        exclude-patterns:
+          - "lupa"
   - package-ecosystem: "pip"
     directory: "/.github"  # packages only used in CI (relink)
     schedule:
