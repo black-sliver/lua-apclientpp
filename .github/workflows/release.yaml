@@ -40,13 +40,13 @@ jobs:
 
     steps:
       - name: Grab README
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6.0.2
         with:
           path: src
 
       - name: Download ${{ matrix.lua }} Artifacts
         id: download-artifact
-        uses: dawidd6/action-download-artifact@v3
+        uses: dawidd6/action-download-artifact@8a338493df3d275e4a7a63bcff3b8fe97e51a927  # v19
         with:
           workflow: build.yaml
           name: ${{ matrix.lua }}|license
@@ -66,7 +66,7 @@ jobs:
           7z a -mx=9 -ms=on ${{ matrix.lua }}.7z ${{ matrix.lua }}
 
       - name: Upload ${{ matrix.lua }} Bundle
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7.0.0
         with:
           name: ${{ matrix.lua }}
           path: ${{ matrix.lua }}.7z

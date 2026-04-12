@@ -30,7 +30,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6.0.2
         with:
           submodules: recursive
 
@@ -49,7 +49,7 @@ jobs:
           Start-Process -FilePath ./vs_BuildTools.exe -ArgumentList "--add", "Microsoft.VisualStudio.Component.VC.v141.x86.x64", "--add", "Microsoft.VisualStudio.Component.VC.v141.CLI.Support", "--quiet", "--norestart", "--force", "--wait" -Wait -PassThru
 
       - name: MSVC Dev Cmd 14.0
-        uses: ilammy/msvc-dev-cmd@v1
+        uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756  # v1.13.0
         if: |
           matrix.sln == 'vs2015'
         with:
@@ -57,7 +57,7 @@ jobs:
           toolset: '14.0'
 
       - name: MSVC Dev Cmd 14.1
-        uses: ilammy/msvc-dev-cmd@v1
+        uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756  # v1.13.0
         if: |
           matrix.sln == 'vs2017'
         with:
@@ -65,17 +65,17 @@ jobs:
           toolset: '14.1'
 
       - name: MSVC Dev Cmd (Default)
-        uses: ilammy/msvc-dev-cmd@v1
+        uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756  # v1.13.0
         if: |
           matrix.sln == 'vs2022'
         with:
           arch: ${{env.ARCH}}
 
       - name: Install NASM
-        uses: ilammy/setup-nasm@v1
+        uses: ilammy/setup-nasm@13cbeb366c45c4379d3478cdcbadd8295feb5028  # v1.5.1
 
       - name: Install Perl
-        uses: shogo82148/actions-setup-perl@v1
+        uses: shogo82148/actions-setup-perl@v1.40.0  # immutable release
 
       - name: Build OpenSSL
         run: |
@@ -128,7 +128,7 @@ jobs:
       - name: Add MSBuild to PATH
         if: |
           matrix.sln == 'vs2017'
-        uses: microsoft/setup-msbuild@v2
+        uses: microsoft/setup-msbuild@30375c66a4eea26614e0d39710365f22f8b0af57  # v3.0.0
 
       - name: Build for Lua 5.1 Dynamic
         run: |
@@ -137,7 +137,7 @@ jobs:
           move ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua-apclientpp-51-dynamic.dll ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua51\lua-apclientpp.dll
 
       - name: Store Lua 5.1 Dynamic
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7.0.0
         with:
           name: lua-apclientpp-lua51-${{matrix.sln}}-${{env.ARCH}}-dynamic
           path: ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua51\lua-apclientpp.dll
@@ -150,7 +150,7 @@ jobs:
           move ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua-apclientpp-52-dynamic.dll ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua52\lua-apclientpp.dll
 
       - name: Store Lua 5.2 Dynamic
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7.0.0
         with:
           name: lua-apclientpp-lua52-${{matrix.sln}}-${{env.ARCH}}-dynamic
           path: ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua52\lua-apclientpp.dll
@@ -163,7 +163,7 @@ jobs:
           move ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua-apclientpp-52-static.dll ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua52-static\lua-apclientpp.dll
 
       - name: Store Lua 5.2 Static
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7.0.0
         with:
           name: lua-apclientpp-lua52-${{matrix.sln}}-${{env.ARCH}}-static
           path: ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua52-static\lua-apclientpp.dll
@@ -176,7 +176,7 @@ jobs:
           move ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua-apclientpp-53-dynamic.dll ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua53\lua-apclientpp.dll
 
       - name: Store Lua 5.3 Dynamic
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7.0.0
         with:
           name: lua-apclientpp-lua53-${{matrix.sln}}-${{env.ARCH}}-dynamic
           path: ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua53\lua-apclientpp.dll
@@ -189,7 +189,7 @@ jobs:
           move ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua-apclientpp-53-static.dll ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua53-static\lua-apclientpp.dll
 
       - name: Store Lua 5.3 Static
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7.0.0
         with:
           name: lua-apclientpp-lua53-${{matrix.sln}}-${{env.ARCH}}-static
           path: ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua53-static\lua-apclientpp.dll
@@ -202,7 +202,7 @@ jobs:
           move ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua-apclientpp-54-dynamic.dll ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua54\lua-apclientpp.dll
 
       - name: Store Lua 5.4 Dynamic
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7.0.0
         with:
           name: lua-apclientpp-lua54-${{matrix.sln}}-${{env.ARCH}}-dynamic
           path: ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua54\lua-apclientpp.dll
@@ -215,7 +215,7 @@ jobs:
           move ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua-apclientpp-54-static.dll ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua54-static\lua-apclientpp.dll
 
       - name: Store Lua 5.4 Static
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7.0.0
         with:
           name: lua-apclientpp-lua54-${{matrix.sln}}-${{env.ARCH}}-static
           path: ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua54-static\lua-apclientpp.dll
