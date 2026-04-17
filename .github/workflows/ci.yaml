@@ -105,7 +105,7 @@ jobs:
           --json coverage-${{ matrix.lua }}.json
 
       - name: Upload Coverage Report
-        uses: actions/upload-artifact@v7.0.0
+        uses: actions/upload-artifact@v7.0.1
         with:
           name: 'coverage-${{ matrix.lua }}.json'
           path: 'coverage-${{ matrix.lua }}.json'
@@ -152,7 +152,7 @@ jobs:
           --html-details coverage.html
 
       - name: Upload HTML Report
-        uses: actions/upload-artifact@v7.0.0
+        uses: actions/upload-artifact@v7.0.1
         with:
           name: 'coverage'
           path: 'coverage.*'

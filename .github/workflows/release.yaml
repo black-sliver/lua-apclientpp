@@ -66,7 +66,7 @@ jobs:
           7z a -mx=9 -ms=on ${{ matrix.lua }}.7z ${{ matrix.lua }}
 
       - name: Upload ${{ matrix.lua }} Bundle
-        uses: actions/upload-artifact@v7.0.0
+        uses: actions/upload-artifact@v7.0.1
         with:
           name: ${{ matrix.lua }}
           path: ${{ matrix.lua }}.7z

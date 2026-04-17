@@ -67,7 +67,7 @@ jobs:
           mv lua-apclientpp.dll relink/lua533r-vs2022-win32-dynamic/
 
       - name: Store lua533r-vs2022-win32-dynamic
-        uses: actions/upload-artifact@v7.0.0
+        uses: actions/upload-artifact@v7.0.1
         with:
           name: lua-apclientpp-lua533r-vs2022-win32-dynamic
           path: relink/lua533r-vs2022-win32-dynamic/lua-apclientpp.dll
@@ -87,7 +87,7 @@ jobs:
           mv lua-apclientpp.dll relink/lua51-51-vs2022-win32-dynamic/
 
       - name: Store lua51-51-vs2022-win32-dynamic
-        uses: actions/upload-artifact@v7.0.0
+        uses: actions/upload-artifact@v7.0.1
         with:
           name: lua-apclientpp-lua51-51-vs2022-win32-dynamic
           path: relink/lua51-51-vs2022-win32-dynamic/lua-apclientpp.dll
@@ -123,7 +123,7 @@ jobs:
           cat subprojects/wswrap/LICENSE >> lua-apclientpp-license.txt
 
       - name: Store
-        uses: actions/upload-artifact@v7.0.0
+        uses: actions/upload-artifact@v7.0.1
         with:
           name: lua-apclientpp-license
           path: lua-apclientpp-license.txt

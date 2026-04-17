@@ -108,7 +108,7 @@ jobs:
           mv lua-apclientpp.dll built/dynamic/
 
       - name: Store ${{env.LUA_NAME}}-dynamic
-        uses: actions/upload-artifact@v7.0.0
+        uses: actions/upload-artifact@v7.0.1
         with:
           name: lua-apclientpp-${{env.LUA_NAME}}-${{matrix.sys}}-dynamic
           path: built/dynamic/lua-apclientpp.dll
@@ -127,7 +127,7 @@ jobs:
           mv lua-apclientpp.dll built/static/
 
       - name: Store ${{env.LUA_NAME}}-static
-        uses: actions/upload-artifact@v7.0.0
+        uses: actions/upload-artifact@v7.0.1
         with:
           name: lua-apclientpp-${{env.LUA_NAME}}-${{matrix.sys}}-static
           path: built/static/lua-apclientpp.dll
