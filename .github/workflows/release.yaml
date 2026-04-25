@@ -19,7 +19,7 @@ jobs:
 
       - name: Create Release
         if: ${{ github.ref_type == 'tag' }}
-        uses: softprops/action-gh-release@975c1b265e11dd76618af1c374e7981f9a6ff44a
+        uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda  # v3.0.0
         with:
           draft: true
           name: lua-apclientpp ${{ env.RELEASE_TAG }}
@@ -77,10 +77,11 @@ jobs:
 
       - name: Release ${{ matrix.lua }} Bundle
         if: ${{ github.ref_type == 'tag' }}
-        uses: softprops/action-gh-release@975c1b265e11dd76618af1c374e7981f9a6ff44a
+        uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda  # v3.0.0
         with:
           draft: true
           name: lua-apclientpp ${{ env.RELEASE_TAG }}
           files: ${{ matrix.lua }}.7z
+          fail_on_unmatched_files: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
