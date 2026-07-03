@@ -226,6 +226,6 @@ jobs:
           if-no-files-found: error
 
       - name: Attest built DLLs
-        uses: actions/attest@v4.1.0
+        uses: actions/attest@v4.1.1
         with:
           subject-path: '${{matrix.sln}}/${{env.BUILD_CONFIGURATION}}/*/lua-apclientpp.dll'
