@@ -133,6 +133,6 @@ jobs:
           path: built/static/lua-apclientpp.dll
 
       - name: Attest built DLLs
-        uses: actions/attest@v4.1.1
+        uses: actions/attest@v4.2.0
         with:
           subject-path: 'built/*/lua-apclientpp.dll'
