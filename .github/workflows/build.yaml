@@ -41,7 +41,7 @@ jobs:
           python-version: '3.14'
 
       - name: Checkout requirements file
-        uses: actions/checkout@v7.0.0
+        uses: actions/checkout@v7.0.1
         with:
           sparse-checkout: |
             .github/requirements-relink.txt
@@ -102,7 +102,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v7.0.0
+        uses: actions/checkout@v7.0.1
         with:
           submodules: recursive
 
