@@ -3,6 +3,11 @@ name: Build MSBuild
 on:
   workflow_dispatch:
   workflow_call:
+  pull_request:
+    paths:
+      - '.github/workflows/build-msbuild.yaml'
+    branches:
+      - 'main'
 
 permissions: {}
 
@@ -226,6 +231,7 @@ jobs:
           if-no-files-found: error
 
       - name: Attest built DLLs
+        if: GITHUB_EVENT_NAME != 'pull_request'
         uses: actions/attest@v4.2.0
         with:
           subject-path: '${{matrix.sln}}/${{env.BUILD_CONFIGURATION}}/*/lua-apclientpp.dll'
