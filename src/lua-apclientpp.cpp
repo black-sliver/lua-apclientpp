@@ -430,6 +430,8 @@ public:
             lua_pushcfunction(_L, error_handler);
             lua_rawgeti(_L, LUA_REGISTRYINDEX, print_json_cb.ref);
             json_to_lua(_L, command);
+            if (!lua_checkstack(_L, 2))
+                throw std::runtime_error("Stack overflow");
             lua_getfield(_L, -1, "data");
             lua_insert(_L, -2); // first arg is data, second is full command
             if (lua_pcall(_L, 2, 0, -4)) {
@@ -705,6 +707,9 @@ private:
     template <class T>
     void assign_set(const char* key, const std::set<T>& set, int table = -1)
     {
+        // ensure stack space
+        if (!lua_checkstack(_L, 3))
+            throw std::runtime_error("Stack overflow");
         // get table by name
         lua_getfield(_L, table, key);
         // assign values
@@ -728,7 +733,11 @@ private:
     template <class T>
     bool contains(const T& v, int table = -1)
     {
-        if (table < 0) table -= 2;
+        // ensure stack space
+        if (!lua_checkstack(_L, 3))
+            throw std::runtime_error("Stack overflow");
+        if (table < 0)
+            table -= 2;
         Lua(_L).Push(v); // push v
         lua_pushnil(_L); // push nil for first key
         while (lua_next(_L, table) != 0) {
@@ -747,6 +756,9 @@ private:
     template <class T>
     void add_list(const char* key, const std::list<T>& lst, int table = -1)
     {
+        // ensure stack space
+        if (!lua_checkstack(_L, 3))
+            throw std::runtime_error("Stack overflow");
         // get table by name
         lua_getfield(_L, table, key);
         // append items if they don't exist already
@@ -1718,6 +1730,9 @@ static int register_apclient(lua_State *L)
         {"HINT_FOUND", LuaAPClient::HintStatus::HINT_FOUND},
     });
     lua_setfield(L, -2, "HintStatus");
+
+    if (!lua_checkstack(L, 3))
+        return 0; // abort if stack is not OK
 
     // pseudo constant to emit empty json array
     LuaJson_EmptyArray().Lua_Push(L);
