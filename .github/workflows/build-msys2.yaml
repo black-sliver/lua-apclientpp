@@ -3,6 +3,11 @@ name: Build MSYS2
 on:
   workflow_dispatch:
   workflow_call:
+  pull_request:
+    paths:
+      - '.github/workflows/build-msys2.yaml'
+    branches:
+      - 'main'
 
 permissions: {}
 
@@ -133,6 +138,7 @@ jobs:
           path: built/static/lua-apclientpp.dll
 
       - name: Attest built DLLs
+        if: GITHUB_EVENT_NAME != 'pull_request'
         uses: actions/attest@v4.2.0
         with:
           subject-path: 'built/*/lua-apclientpp.dll'
