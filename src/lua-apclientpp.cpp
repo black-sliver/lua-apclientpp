@@ -842,8 +842,14 @@ static int apclient_del(lua_State *L)
 static int apclient_reset(lua_State *L)
 {
     LuaAPClient *self = LuaAPClient::luaL_checkthis(L, 1);
-    self->reset();
-    return 0;
+    try {
+        self->reset();
+        return 0;
+    } catch (const std::exception& ex) {
+        lua_pushstring(L, ex.what());
+    }
+    lua_error(L);
+    return 0; // LCOV_EXCL_LINE // unreachable
 }
 
 static int apclient_get_player_alias(lua_State *L)
