@@ -20,6 +20,21 @@ on:
 permissions: {}
 
 jobs:
+  shellcheck:
+    runs-on: ubuntu-26.04
+    steps:
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -y -qq
+          sudo apt-get install shellcheck
+      - name: Checkout code
+        uses: actions/checkout@v7.0.1
+        with:
+          submodules: recursive
+      - name: Run shellcheck
+        run: |
+          shellcheck *.sh
+
   test:
     strategy:
       matrix:
@@ -32,6 +47,7 @@ jobs:
           - 'ubuntu-24.04'
 
     runs-on: ${{ matrix.os }}
+    needs: shellcheck
     steps:
       - name: Install dependencies
         run: |
