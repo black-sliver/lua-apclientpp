@@ -1,3 +1,10 @@
+# This file sets some variables used by build scripts.
+# Use source or . to include it.
+#
+# shellcheck shell=sh
+# shellcheck disable=SC2034
+# SC2034: Variables are used by the file sourcing this.
+
 INCLUDE_DIRS="-I subprojects/json/include -I subprojects/valijson/include -I subprojects/wswrap/include -I subprojects/apclientpp -Isubprojects/asio/include -Isubprojects/websocketpp -Isubprojects"
 DEFINES="-DASIO_STANDALONE -DWSWRAP_SEND_EXCEPTIONS"
 NAME="lua-apclientpp"
@@ -28,9 +35,9 @@ fi
 echo "Detected OS: $OS_NAME"
 
 
-if [[ "$OS_NAME" == "windows" ]]; then
+if [ "$OS_NAME" = "windows" ]; then
     FILENAME="$NAME.dll"
-elif [[ "$OS_NAME" == "darwin" ]]; then
+elif [ "$OS_NAME" = "darwin" ]; then
     FILENAME="$NAME.dylib"
 else
     FILENAME="$NAME.so"
@@ -38,7 +45,7 @@ fi
 
 # guess the c compiler
 if [ -z "$CC" ]; then
-    if [[ ! -z "$CXX" ]]; then
+    if [ -n "$CXX" ]; then
         CC="$CXX"
     elif [ -x "$(which gcc)" ]; then
         CC="gcc"
@@ -50,7 +57,7 @@ if [ -z "$CC" ]; then
         CC="cc"
         CXX="cpp"
     fi
-elif [[ -z "$CXX" ]]; then
+elif [ -z "$CXX" ]; then
     echo "CC is set. Please also set CXX!"
     exit 1
 fi
