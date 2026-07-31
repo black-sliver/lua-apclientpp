@@ -25,6 +25,14 @@ sys.setdlopenflags(258)
 is_jit = False
 lua_exe: Optional[str] = None
 
+if not lua_version:
+    # try to detect default lua
+    import subprocess
+    default_lua_exe = which("lua")
+    if default_lua_exe:
+        res = subprocess.run([default_lua_exe, "-v"], capture_output=True, text=True)
+        lua_version = ".".join(res.stdout.split(" ")[1].split(".")[:2])
+
 if lua_version == "5.4":
     from lupa.lua54 import LuaError, LuaRuntime
     lua_exe = which("lua5.4")
