@@ -1,26 +1,30 @@
+#!/bin/sh
 # build helper for Linux
 # to specify a lua version, pass "luaXX" as first argument
+#
+# shellcheck disable=SC2181
+# SC2181: Using $? for readability.
 
-source ./build_common.sh
-source ./extra_pkgconf.sh
+. ./build_common.sh
+. ./extra_pkgconf.sh
 
 LIBS="$LIBS -pthread -lssl -lcrypto -lz"
 
 if [ -z "$CC_IS_CLANG" ]; then
-    if [[ "$OS_NAME" == "windows" ]]; then
+    if [ "$OS_NAME" = "windows" ]; then
         STATIC_LIBS="-Wl,-Bstatic $STATIC_LIBS -static-libstdc++" # always link libstdc++ static on windows
     else
         STATIC_LIBS="-Wl,-Bstatic $STATIC_LIBS"
     fi
 else
-    if [[ "$OS_NAME" == "linux" ]]; then
+    if [ "$OS_NAME" = "linux" ]; then
         STATIC_LIBS="-Wl,-Bstatic $STATIC_LIBS" # Linux clang likely uses system libstdc++
     else
         STATIC_LIBS="-Wl,-Bstatic $STATIC_LIBS -lc++" # always link libc++ static on non-linux
     fi
 fi
 
-if [[ "$2" == "static" ]]; then
+if [ "$2" = "static" ]; then
     # static build
     EXTRA_LIBS="-Wl,-Bstatic $EXTRA_LIBS_STATIC"
 else
@@ -33,9 +37,11 @@ CFLAGS="-Os -DNDEBUG -DAP_NO_SCHEMA -fvisibility=hidden -std=$STD -Wall -Wextra 
 OUT="$FILENAME"
 
 # prefer static openssl
+# shellcheck disable=SC2086 # variables need to be expanded
 "$CXX" $CFLAGS $DEFINES $INCLUDE_DIRS -shared -o "$OUT" -fPIC src/lua-apclientpp.cpp $DYNAMIC_LIBS $EXTRA_LIBS $STATIC_LIBS -Wl,-Bstatic $LIBS > /dev/null 2>&1
 if [ $? -ne 0 ]; then
     # try again with dynamic libssl
+    # shellcheck disable=SC2086 # variables need to be expanded
     "$CXX" $CFLAGS $DEFINES $INCLUDE_DIRS -shared -o "$OUT" -fPIC src/lua-apclientpp.cpp $DYNAMIC_LIBS $EXTRA_LIBS $STATIC_LIBS -Wl,-Bdynamic $LIBS
     exit $?
 fi

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # build helper for cross-compiling with mingw on Linux
 # to specify a lua version, pass "luaXX" as first argument
@@ -11,4 +11,4 @@ if [ -z "$STD" ]; then
     STD="c++1z"
 fi
 
-source ./build_posix.sh
+. ./build_posix.sh
