@@ -19,6 +19,7 @@
 #pragma GCC diagnostic ignored "-Wtemplate-id-cdtor"
 #pragma GCC diagnostic ignored "-Wnull-pointer-subtraction"
 #pragma GCC diagnostic ignored "-Wdeprecated-literal-operator"
+#pragma GCC diagnostic ignored "-Wunused-function"
 #ifdef _WIN32
 #pragma GCC diagnostic ignored "-Wcast-function-type"
 #endif
