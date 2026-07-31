@@ -13,7 +13,7 @@
 
 if [ "$LUA" = "lua" ]; then
     # try to get the version from the standard include
-    LUA="$(printf '#include <lua.h>\nLUA_VERSION\n' | $CC $(pkg-config --cflags lua) -E - | tail -n1 | sed 's/[\t "]//g' | tr '[:upper:]' '[:lower:]')"
+    LUA="$(printf '#include <lua.h>\nLUA_VERSION\n' | $CC $(pkg-config --cflags lua) -P -E - | tail -n1 | sed 's/[\t "]//g' | tr '[:upper:]' '[:lower:]')"
 fi
 
 # NOTE: we keep the '.' because MSYS requires it
