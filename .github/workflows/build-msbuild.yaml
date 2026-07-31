@@ -18,6 +18,7 @@ jobs:
       BUILD_PLATFORM: "x86"
       BUILD_CONFIGURATION: Release
       OPENSSL_BUILD_PLATFORM: VC-WIN32
+      OPENSSL_VERSION: "3.5.7"
       ARCH: win32
       LUA52_VERSION: "5.2.4"
       LUA53_VERSION: "5.3.6"
@@ -89,7 +90,7 @@ jobs:
       - name: Build OpenSSL
         run: |
           cd dep
-          git clone -b openssl-3.5.6 --depth 1 https://github.com/openssl/openssl.git
+          git clone -b 'openssl-${{env.OPENSSL_VERSION}}' --depth 1 https://github.com/openssl/openssl.git
           cd openssl
           md ${{env.BUILD_PLATFORM}}
           cd ${{env.BUILD_PLATFORM}}
