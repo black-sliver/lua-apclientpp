@@ -33,7 +33,9 @@ if not lua_version:
         res = subprocess.run([default_lua_exe, "-v"], capture_output=True, text=True)
         lua_version = ".".join(res.stdout.split(" ")[1].split(".")[:2])
 
-if lua_version == "5.4":
+if lua_version == "5.5":
+    raise ValueError("lua5.5 not supported in tests yet")
+elif lua_version == "5.4":
     from lupa.lua54 import LuaError, LuaRuntime
     lua_exe = which("lua5.4")
 elif lua_version == "5.3":
@@ -49,9 +51,15 @@ elif lua_version == "JIT2.1":
     from lupa.luajit21 import LuaError, LuaRuntime  # type: ignore[assignment]
     lua_exe = which("luajit2") or which("luajit")
     is_jit = True
-else:  # default to 5.4
-    from lupa.lua54 import LuaError, LuaRuntime
+elif not lua_version:
+    # if 5.4 is missing and 5.5 is available, assume default is 5.5
     lua_exe = which("lua5.4")
+    if not lua_exe and which("lua5.5"):
+        raise ValueError("lua5.5 not supported in tests yet")
+    # otherwise assume default is 5.4
+    from lupa.lua54 import LuaError, LuaRuntime
+else:
+    raise ValueError(f"Unsupported Lua version: {lua_version}")
 
 sys.setdlopenflags(_orig_dlflags)
 
