@@ -475,6 +475,23 @@ class TestGet(E2ETestCase):
         with self.assertRaises(LuaError):
             self.call("Get", self.lua.table(*self.data.keys()), 1)
 
+class TestGetTooDeep(E2ETestCase):
+    done = False
+
+    def on_retrieved(self, data: LuaTable, keys: LuaTable, command: LuaTable) -> None:
+        self.done = True
+
+    def test_get_too_deep(self) -> None:
+        too_deep = []
+        for _ in range(2000):
+            too_deep = [too_deep]
+        self.server.data_storage["a"] = too_deep
+        self.call("Get", self.lua.table("a"))
+        with self.assertRaises(TimeoutError):
+            for _ in TimeoutLoop(lambda: not self.done):
+                self.poll()
+        self.assertFalse(self.done)
+
 
 class TestGetNotConnected(NotConnectedTestCase):
     def test_call(self) -> None:
