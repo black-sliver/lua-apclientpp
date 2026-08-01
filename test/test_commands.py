@@ -708,6 +708,18 @@ class TestSet(E2ETestCase):
                 1,
             )
 
+    def test_set_recursive(self) -> None:
+        inner = self.lua.table()
+        outer = self.lua.table(text = inner)
+        inner["text"] = outer
+        with self.assertRaises(LuaError):
+            self.call(
+                "Set",
+                "a",
+                outer,
+                False,
+            )
+
 
 class TestSetNotConnected(NotConnectedTestCase):
     def test_call(self) -> None:
