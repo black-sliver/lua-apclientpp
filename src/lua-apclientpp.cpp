@@ -977,7 +977,7 @@ static int apclient_ConnectSlot(lua_State *L)
 
     try {
         std::list<std::string> tags;
-        APClient::Version version = {0, 0, 0};
+        APClient::Version version = {0, 6, 5};
 
         if (lua_gettop(L) >= 5) {
             try {
@@ -994,12 +994,9 @@ static int apclient_ConnectSlot(lua_State *L)
                 if (jversion.is_object()) {
                     version = APClient::Version::from_json(jversion);
                 } else if (jversion.is_array()) {
-                    if (jversion.size() > 0)
-                        version.ma = jversion[0].get<int>();
-                    if (jversion.size() > 1)
-                        version.mi = jversion[1].get<int>();
-                    if (jversion.size() > 2)
-                        version.build = jversion[2].get<int>();
+                    version.ma = (jversion.size() > 0) ? jversion[0].get<int>() : 0;
+                    version.mi = (jversion.size() > 1) ? jversion[1].get<int>() : 0;
+                    version.build = (jversion.size() > 2) ? jversion[2].get<int>() : 0;
                 }
             } catch (const std::exception&) {
                 throw BadArgumentException(6, "optional version table or array of integer", "ConnectSlot");
