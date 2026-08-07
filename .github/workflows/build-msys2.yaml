@@ -139,6 +139,6 @@ jobs:
 
       - name: Attest built DLLs
         if: github.event_name != 'pull_request'
-        uses: actions/attest@v4.2.0
+        uses: actions/attest@v4.2.2
         with:
           subject-path: 'built/*/lua-apclientpp.dll'
