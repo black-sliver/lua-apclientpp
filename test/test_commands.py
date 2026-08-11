@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional, cast
+from typing import Any, Dict, List, Optional, cast
 
 from .bases import E2ETestCase, NotConnectedTestCase
 from .util import LuaError, LuaTable, TimeoutLoop
@@ -482,7 +482,7 @@ class TestGetTooDeep(E2ETestCase):
         self.done = True
 
     def test_get_too_deep(self) -> None:
-        too_deep = []
+        too_deep: List[Any] = []
         for _ in range(2000):
             too_deep = [too_deep]
         self.server.data_storage["a"] = too_deep
