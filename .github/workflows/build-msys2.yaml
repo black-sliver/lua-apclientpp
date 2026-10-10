@@ -34,7 +34,7 @@ jobs:
         shell: msys2 {0}
 
     env:
-      DEFAULT_LUA: 5.4
+      DEFAULT_LUA: 5.5
 
     permissions:
       id-token: write
