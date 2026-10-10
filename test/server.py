@@ -54,6 +54,7 @@ class Connection:
     version: Dict[str, Any]
     items_handling: int
     status: int
+    requested_datapackage: bool
 
 
 class APServer(WSServer):
@@ -89,7 +90,7 @@ class APServer(WSServer):
         super().stop()
 
     def handler(self, conn: ServerConnection) -> None:
-        connection_data = Connection(conn, -1, [], {}, 0, 0)
+        connection_data = Connection(conn, -1, [], {}, 0, 0, False)
         self._connections.append(connection_data)
         try:
             name = "Player1"
@@ -126,14 +127,16 @@ class APServer(WSServer):
                             connection_data.tags = tags
                             connection_data.version = args["version"]
                             connection_data.items_handling = items_handling
+                            send_slot_data = args["slot_data"]
                             auth = True
-                            self.send_connected(conn)
+                            self.send_connected(conn, send_slot_data)
                             self.send_items(conn, 0, self.player_items[connection_data.slot - 1])
                     elif cmd == "GetDataPackage":
                         # FIXME: enable this check once apclientpp is fixed and send requested games
                         #for game in args["games"]:
                         #    if not isinstance(game, str):
                         #        raise ValueError("game must be a string")
+                        connection_data.requested_datapackage = True
                         self.send_datapackage(conn, [])
                     elif not auth:
                         raise RuntimeError("Command requires auth")
@@ -241,7 +244,7 @@ class APServer(WSServer):
             },
         }]))
 
-    def send_connected(self, conn: ServerConnection) -> None:
+    def send_connected(self, conn: ServerConnection, slot_data: bool) -> None:
         conn.send(json.dumps([{
             "cmd": "Connected",
             "team": 0, "slot": 1,
@@ -250,6 +253,7 @@ class APServer(WSServer):
             ],
             "missing_locations": [],
             "checked_locations": [],
+            "slot_data": {"test": "test"} if slot_data else {},
             "slot_info": {
                 "1": {
                     "name": "Player1",

@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, cast
+from typing import Any, Dict, List, Optional, cast
 from unittest import TestCase
 
 from .util import LuaAPClient, LuaRuntime, LuaTable, TimeoutLoop
@@ -98,8 +98,8 @@ class ClientTestCase(LuaTestCase):
     def on_set_reply(self, command: LuaTable) -> None:
         pass
 
-    def connect(self) -> None:
-        self.client = self.apclient(self.uuid, self.game, self.uri)
+    def connect(self, *args: Any) -> None:
+        self.client = self.apclient(self.uuid, self.game, self.uri, *args)
         self.call("set_socket_connected_handler", self.on_socket_connected)
         self.call("set_socket_error_handler", self.on_socket_error)
         self.call("set_socket_disconnected_handler", self.on_socket_disconnected)
@@ -143,6 +143,7 @@ class E2ETestCase(ClientTestCase):
     socket_connected = False
     got_room_info = False
     slot_connected = False
+    slot_data: Optional[LuaTable] = None
 
     def poll(self) -> None:
         self.server.check()
@@ -165,6 +166,7 @@ class E2ETestCase(ClientTestCase):
 
     def on_slot_connected(self, slot_data: LuaTable) -> None:
         print("on_slot_connected")
+        self.slot_data = slot_data
         self.slot_connected = True
 
     def _connect_slot(self) -> None:

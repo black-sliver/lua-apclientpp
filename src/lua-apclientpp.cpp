@@ -171,8 +171,9 @@ static int checkcint(lua_State *L, int arg)
 class LuaAPClient : public APClient
 {
 public:
-    LuaAPClient(lua_State *L, const std::string& uuid, const std::string& game, const std::string& uri = DEFAULT_URI)
-        : APClient(uuid, game, uri), _L(L)
+    LuaAPClient(lua_State *L, const std::string& uuid, const std::string& game, const std::string& uri = DEFAULT_URI,
+            const bool skip_get_datapackage = false)
+        : APClient(uuid, game, uri, "", nullptr, !skip_get_datapackage), _L(L)
     {
         // TODO: cert Store
 
@@ -815,11 +816,12 @@ static int apclient_new(lua_State *L)
     const char* uuid = luaL_checkstring(L, 1);
     const char* game = luaL_checkstring(L, 2);
     const char* host = luaL_checkstring(L, 3);
+    bool skip_get_datapackage = lua_toboolean(L, 4);
 
     auto p = static_cast<LuaAPClient**>(lua_newuserdata(L, sizeof(LuaAPClient*)));
 
     try {
-        LuaAPClient *self = new LuaAPClient(L, uuid, game, host);
+        LuaAPClient *self = new LuaAPClient(L, uuid, game, host, skip_get_datapackage);
         *p = self;
         luaL_getmetatable(L, LuaAPClient::Lua_Name);
         lua_setmetatable(L, -2);
@@ -974,10 +976,11 @@ static int apclient_ConnectSlot(lua_State *L)
     const char* slot = luaL_checkstring(L, 2);
     const char* password = luaL_checkstring(L, 3);
     int items_handling = checkcint(L, 4);
+    bool slot_data = !lua_toboolean(L, 7);
 
     try {
         std::list<std::string> tags;
-        APClient::Version version = {0, 6, 5};
+        APClient::Version version = APCLIENTPP_VERSION_INITIALIZER;
 
         if (lua_gettop(L) >= 5) {
             try {
@@ -1005,9 +1008,9 @@ static int apclient_ConnectSlot(lua_State *L)
 
         bool res;
         if (version.ma > 0 || version.mi > 0 || version.build > 0)
-            res = self->ConnectSlot(slot, password, items_handling, tags, version);
+            res = self->ConnectSlot(slot, password, items_handling, tags, version, slot_data);
         else
-            res = self->ConnectSlot(slot, password, items_handling, tags);
+            res = self->ConnectSlot(slot, password, items_handling, tags, APCLIENTPP_VERSION_INITIALIZER, slot_data);
 
         lua_pushboolean(L, res);
         return 1;
