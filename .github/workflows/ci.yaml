@@ -45,6 +45,9 @@ jobs:
           - 5.4
         os:
           - 'ubuntu-24.04'
+        include:
+          - lua: 5.5
+            os: 'ubuntu-26.04'
 
     runs-on: ${{ matrix.os }}
     needs: shellcheck
