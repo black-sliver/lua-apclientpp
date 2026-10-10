@@ -1047,7 +1047,8 @@ static int apclient_render_json(lua_State *L)
             // this is probably unreachable; if the content of a text node was somehow invalid, still return string
             lua_pushstring(L, "(Invalid chat message)");
             return 1;
-        }  // LCOV_EXCL_STOP
+        }
+        // LCOV_EXCL_STOP
     } catch (const std::exception& ex) {
         lua_pushstring(L, ex.what());
     }
@@ -1749,7 +1750,11 @@ static int register_apclient(lua_State *L)
         s.pop_back();
         lua_pushstring(L, s.c_str());
         lua_setfield(L, -2, "_VERSION");
-    } catch (...) {}
+    } catch (...) { // LCOV_EXCL_START
+        // unreachable: this can only fail for allocation of strings, but they all fit small string optimization
+        // if APCLIENTPP_VERSION_INITIALIZER was invalid, it would be fine for _VERSION to be missing
+    }
+    // LCOV_EXCL_STOP
 
     // calling the metatable should be the same as new for easy use,
     // so set a metatable for the metatable
