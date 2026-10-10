@@ -135,6 +135,9 @@ class TestStatusUpdate(E2ETestCase):
     def test_ready(self) -> None:
         self.set_status(self.client["ClientStatus"]["READY"])
 
+    def test_connected(self) -> None:
+        self.set_status(self.client["ClientStatus"]["CONNECTED"])
+
     def test_playing(self) -> None:
         self.set_status(self.client["ClientStatus"]["PLAYING"])
 
