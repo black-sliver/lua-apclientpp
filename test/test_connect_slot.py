@@ -69,6 +69,23 @@ class TestConnectVersionArray(E2ETestCase):
         self.assertEqual(v["build"], 3)
 
 
+class TestConnectEmptyVersion(E2ETestCase):
+    def _connect_slot(self) -> None:
+        res = self.call(
+            "ConnectSlot",
+            self.slot,
+            "",
+            self.items_handling,
+            self.lua.table("Test"),
+            self.lua.table(),
+        )
+        self.assertTrue(res)
+
+    def test_connect(self) -> None:
+        v = self.server._connections[0].version
+        self.assertTrue(v["major"] != 0 or v["minor"] != 0 or v["build"] != 0)
+
+
 class TestConnectVersionObject(E2ETestCase):
     def _connect_slot(self) -> None:
         res = self.call(
