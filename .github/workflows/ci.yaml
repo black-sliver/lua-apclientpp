@@ -3,19 +3,13 @@ name: CI
 
 on:
   push:
-    paths:
+    paths: &paths
       - '**'
-      - '!**.lua'
       - '!**.md'
       - '!**.yaml'
       - '.github/workflows/ci.yaml'
   pull_request:
-    paths:
-      - '**'
-      - '!**.lua'
-      - '!**.md'
-      - '!**.yaml'
-      - '.github/workflows/ci.yaml'
+    paths: *paths
 
 permissions: {}
 
