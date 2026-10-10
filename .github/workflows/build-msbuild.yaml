@@ -24,6 +24,7 @@ jobs:
       LUA52_VERSION: "5.2.4"
       LUA53_VERSION: "5.3.6"
       LUA54_VERSION: "5.4.9"
+      LUA55_VERSION: "5.5.1"
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -129,11 +130,19 @@ jobs:
           name: "lua54"
           version: "${{ env.LUA54_VERSION }}"
 
+      - name: Build Lua 5.5
+        id: build55
+        uses: black-sliver/lua-build@9a5cd4d6b10d1aa6d1e4b7ff6d6a1b6944278d3f
+        with:
+          name: "lua55"
+          version: "${{ env.LUA55_VERSION }}"
+
       - name: Move Lua Builds
         run: |
           move ${{ steps.build52.outputs.path }} dep/lua52
           move ${{ steps.build53.outputs.path }} dep/lua53
           move ${{ steps.build54.outputs.path }} dep/lua54
+          move ${{ steps.build55.outputs.path }} dep/lua55
           dir dep
 
       - name: Add MSBuild to PATH
@@ -230,6 +239,32 @@ jobs:
         with:
           name: lua-apclientpp-lua54-${{matrix.sln}}-${{env.ARCH}}-static
           path: ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua54-static\lua-apclientpp.dll
+          if-no-files-found: error
+
+      - name: Build for Lua 5.5 Dynamic
+        run: |
+          msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} ${{matrix.sln}}/lua-apclientpp-55-dynamic.sln /p:Platform=${{env.BUILD_PLATFORM}}
+          md ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua55
+          move ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua-apclientpp-55-dynamic.dll ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua55\lua-apclientpp.dll
+
+      - name: Store Lua 5.5 Dynamic
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: lua-apclientpp-lua55-${{matrix.sln}}-${{env.ARCH}}-dynamic
+          path: ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua55\lua-apclientpp.dll
+          if-no-files-found: error
+
+      - name: Build for Lua 5.5 Static
+        run: |
+          msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} ${{matrix.sln}}/lua-apclientpp-55-static.sln /p:Platform=${{env.BUILD_PLATFORM}}
+          md ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua55-static
+          move ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua-apclientpp-55-static.dll ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua55-static\lua-apclientpp.dll
+
+      - name: Store Lua 5.5 Static
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: lua-apclientpp-lua55-${{matrix.sln}}-${{env.ARCH}}-static
+          path: ${{matrix.sln}}\${{env.BUILD_CONFIGURATION}}\lua55-static\lua-apclientpp.dll
           if-no-files-found: error
 
       - name: Attest built DLLs
