@@ -1684,6 +1684,7 @@ static int register_apclient(lua_State *L)
     // enums
     json_to_lua(L, {
         {"UNKNOWN", LuaAPClient::ClientStatus::UNKNOWN},
+        {"CONNECTED", LuaAPClient::ClientStatus::CONNECTED},
         {"READY", LuaAPClient::ClientStatus::READY},
         {"PLAYING", LuaAPClient::ClientStatus::PLAYING},
         {"GOAL", LuaAPClient::ClientStatus::GOAL},

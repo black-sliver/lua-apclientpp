@@ -303,6 +303,7 @@ function APClient:Set(key, default, want_reply, operations, extra) end
 ---@enum clientstatus
 APClient.ClientStatus = {
     UNKNOWN = 0,
+    CONNECTED = 5,
     READY = 10,
     PLAYING = 20,
     GOAL = 30,
