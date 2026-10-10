@@ -11,7 +11,7 @@ APClient = {}
 
 ---Version string (ma.mi.re) of the apclientpp version used to build this lua-apclientpp.
 ---@type string
-APClient._VERSION = "0.6.4"
+APClient._VERSION = "0.6.6"
 
 
 -- Functions --
@@ -20,8 +20,9 @@ APClient._VERSION = "0.6.4"
 ---@param uuid string a string identifying connection or `""`
 ---@param game string name of the game this client will connect for
 ---@param host string URL or `host:port` to connect to
+---@param skip_get_datapackage boolean? optional, set to true to skip getting data package
 ---@return APClient
-function APClient.__call(uuid, game, host) end
+function APClient.__call(uuid, game, host, skip_get_datapackage) end
 
 
 -- Methods --
@@ -223,8 +224,9 @@ function APClient:Say(text) end
 ---@param items_handling ItemsHandling describes which items to receive from the server
 ---@param tags string[]? optional list of tags to use, e.g. `{"DeathLink"}`
 ---@param version integer[]? optional client version in the format of `{major, minor, build}`, e.g. `{0, 5, 0}`
+---@param skip_slot_data boolean? optional, set to true to skip getting slot data
 ---@return boolean true if connect was queued, false if state was invalid
-function APClient:ConnectSlot(name, password, items_handling, tags, version) end
+function APClient:ConnectSlot(name, password, items_handling, tags, version, skip_slot_data) end
 
 ---Update a connection.
 ---@param items_handling? ItemsHandling Unchanged if `nil`. See ConnectSlot.

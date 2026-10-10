@@ -87,6 +87,46 @@ class TestConnectVersionObject(E2ETestCase):
         self.assertEqual(v["minor"], 6)
         self.assertEqual(v["build"], 3)
 
+    def test_with_slot_data(self) -> None:
+        assert self.slot_data is not None
+        self.assertEqual(self.slot_data["test"], "test")
+
+
+class TestConnectSkipSlotData(E2ETestCase):
+    def _connect_slot(self) -> None:
+        res = self.call(
+            "ConnectSlot",
+            self.slot,
+            "",
+            self.items_handling,
+            self.lua.table("Test"),
+            self.lua.table(major=0, minor=6, build=6),
+            True,
+        )
+        self.assertTrue(res)
+
+    def test_no_slot_data(self) -> None:
+        if self.slot_data is not None:
+            self.assertEqual(self.slot_data["test"], None)
+
+
+class TestConnectWithSlotData(E2ETestCase):
+    def _connect_slot(self) -> None:
+        res = self.call(
+            "ConnectSlot",
+            self.slot,
+            "",
+            self.items_handling,
+            self.lua.table("Test"),
+            self.lua.table(major=0, minor=6, build=6),
+            False,  # explicit false
+        )
+        self.assertTrue(res)
+
+    def test_with_slot_data(self) -> None:
+        assert self.slot_data is not None
+        self.assertEqual(self.slot_data["test"], "test")
+
 
 class TestConnectInvalidVersion(Bases.FailedConnect):
     def _connect_slot(self) -> None:

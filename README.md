@@ -93,6 +93,10 @@ Due to limitations in Lua, some calls or callbacks may be different. Read below 
   ```
   In most case 1 or 2 "step" will be enough to close the APClient and avoid lag spikes.
 
+* `skip_get_datapackage` in APClient() instead of `autoGetDatapackage` (inverse) because absent is `nil`, which is falsy
+
+* `skip_slot_data` in ConnectSlot() instead of `slot_data` (inverse) because absent is `nil`, which is falsy
+
 ### Handling Connection Failures
 
 Same as with apclientpp, it will try to reconnect and in case of automatic protocol detection (SSL or plain), a socket
