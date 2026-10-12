@@ -53,6 +53,7 @@ jobs:
           export LUA_NUMBER=`echo ${{matrix.lua}} | sed 's/\.//'`
           echo "LUA_NAME=lua$LUA_NUMBER" >> $GITHUB_ENV
           echo "LUA_VERSION=lua${{matrix.lua}}" >> $GITHUB_ENV
+          echo "LUA_EXE=lua${{matrix.lua}}" >> $GITHUB_ENV
 
       - name: Set env (PKG, versioned lua)
         if: |
@@ -67,6 +68,14 @@ jobs:
         shell: bash
         run: |
           echo "LUA_PKG=lua:p" >> $GITHUB_ENV
+
+      - name: Set env (EXE, without version)
+        if: |
+          matrix.lua == env.DEFAULT_LUA ||
+          matrix.lua == '5.2'
+        shell: bash
+        run: |
+          echo "LUA_EXE=lua" >> $GITHUB_ENV
 
       - name: Install MSYS ${{matrix.sys}} + gcc
         if: ${{ !startsWith(matrix.sys, 'clang') }}
@@ -106,12 +115,17 @@ jobs:
           pkg-config --cflags --libs ${{env.LUA_VERSION}}  # test
           cd ..
 
+      - name: Check default Lua version
+        if: ${{ matrix.lua == env.DEFAULT_LUA }}
+        run: lua -v | grep -q 'Lua ${{ env.DEFAULT_LUA }}'
+
       - name: Build ${{env.LUA_NAME}}-dynamic
         run: |
           rm -f *.dll
           ./build_posix.sh ${{env.LUA_VERSION}}
           mkdir -p built/dynamic
           mv lua-apclientpp.dll built/dynamic/
+          sha256sum built/dynamic/*
 
       - name: Store ${{env.LUA_NAME}}-dynamic
         uses: actions/upload-artifact@v7.0.1
@@ -131,12 +145,33 @@ jobs:
           ./build_posix.sh ${{env.LUA_VERSION}} static
           mkdir -p built/static
           mv lua-apclientpp.dll built/static/
+          sha256sum built/static/*
 
       - name: Store ${{env.LUA_NAME}}-static
         uses: actions/upload-artifact@v7.0.1
         with:
           name: lua-apclientpp-${{env.LUA_NAME}}-${{matrix.sys}}-static
           path: built/static/lua-apclientpp.dll
+
+      # test after storing, so we can debug, but before attestation
+
+      - name: Log Lua version
+        run: ${{ env.LUA_EXE }} -v
+
+      - name: Basic test (dynamic)
+        run: |
+          cd built/dynamic
+          ${{ env.LUA_EXE }} ../../test/test_basic.lua
+
+      - name: Basic test (static)
+        if:
+          matrix.lua != '5.1' &&
+          matrix.lua != '5.2'  # final cleanup for 5.1 and 5.2 may crash if we have 2 copies of Lua loaded
+        run: |
+          cd built/static
+          ${{ env.LUA_EXE }} ../../test/test_basic.lua
+
+      # attest build if everything worked
 
       - name: Attest built DLLs
         if: github.event_name != 'pull_request'
