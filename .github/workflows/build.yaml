@@ -48,8 +48,10 @@ jobs:
           sparse-checkout-cone-mode: false
 
       - name: Install dependencies
-        run: |
-          python -m pip install -r .github/requirements-relink.txt
+        run: >
+          python -m pip install
+          --require-hashes
+          -r .github/requirements-relink.txt
 
       - name: Load lua53-vs2022-win32-dynamic
         uses: actions/download-artifact@v8.0.2
