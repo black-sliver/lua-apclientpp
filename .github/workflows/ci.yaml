@@ -67,6 +67,13 @@ jobs:
         run: |
           ./build_posix.sh lua${{ matrix.lua }}
 
+      - name: Update pip
+        # work around pip-bundled certifi problem; remove once we are sure the default pip is safe
+        run: >
+          pip install
+          --require-hashes
+          -r .github/requirements-pip.txt
+
       - name: Install test dependencies
         run: >
           pip install
