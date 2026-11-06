@@ -1,6 +1,6 @@
 # additional requirements recommended during development and used in CI
-pytest==9.1.1
+pytest==9.2.0
 pytest-xdist==3.8.0
-gcovr==8.6
-mypy==2.4.0
+gcovr==8.8
+mypy==2.4.1
 types-lupa==2.8.0.20260827
